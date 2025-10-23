@@ -1,12 +1,15 @@
+// src/slices/UserSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
 
 const initialState = {
-  users: [],
-  user: null, // lưu user đang xem / chỉnh sửa
+  users: [], // danh sách tất cả user
+  user: null, // user hiện tại (theo ID hoặc username)
 };
+
+// ----------------- THUNKS -----------------
 
 // GET ALL USERS
 export const getUsers = createAsyncThunk(
@@ -55,7 +58,6 @@ export const getUsers = createAsyncThunk(
       return json.data || json; // phòng trường hợp backend không bọc data
     } catch (error) {
       dispatch(setError(error.message));
-
       // cái này là set lỗi lên slice toàn cục, mình sẽ check và ném lỗi ra giao diện cho người dùng xem
       return rejectWithValue(error.message);
     } finally {
@@ -67,11 +69,55 @@ export const getUsers = createAsyncThunk(
 // GET USER BY ID
 export const getUserById = createAsyncThunk(
   "user/getUserById",
-  async (id, { dispatch, rejectWithValue }) => {
+  async (id, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/users/${id}`);
+      // Lấy token từ auth slice
+      const token = getState().auth.token;
+
+
+      const res = await fetch(`/api/users/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // gắn token
+        }
+      });
+
+      if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED);
+
+      const json = await res.json();
+      return json.data || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// GET USER BY USERNAME
+export const getUserByUsername = createAsyncThunk(
+  "user/getUserByUsername",
+  async (username, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      // Lấy token từ auth slice
+      const token = getState().auth.token;
+
+      console.log(token);
+      
+      const res = await fetch(`/api/users/username/${username}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
       if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED);
 
       const json = await res.json();
@@ -135,7 +181,7 @@ export const updateUser = createAsyncThunk(
   }
 );
 
-//  DELETE USER
+// DELETE USER
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
   async (id, { dispatch, rejectWithValue }) => {
@@ -162,7 +208,7 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
-//  SLICE
+// ----------------- SLICE -----------------
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -176,6 +222,9 @@ const userSlice = createSlice({
 
       // Lấy 1 user
       .addCase(getUserById.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
+      .addCase(getUserByUsername.fulfilled, (state, action) => {
         state.user = action.payload;
       })
 

@@ -7,6 +7,7 @@ import Navigation from "./Navigation"
 import SearchBar from "./SearchBar"
 import ThemeToggle from "./ThemeToggle.jsx"
 import NavigationLink from "./NavigationLink.jsx"
+import UserIcon from "./UserIcon.jsx"
 
 export default function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -31,9 +32,7 @@ export default function Header() {
             </button>
 
             {/* Account */}
-            <NavigationLink to="/user"> 
-              <CircleUser className="h-6 w-6" />
-            </NavigationLink>
+            <UserIcon />
 
             {/* Cart */}
             <NavigationLink to="/cart">
