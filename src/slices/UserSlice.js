@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
+import Errors from "../constants/errors";
 
 const initialState = {
   users: [],
@@ -15,7 +16,9 @@ export const getUsers = createAsyncThunk(
     dispatch(clearError());
     try {
       const res = await fetch("/api/users");
-      if (!res.ok) throw new Error("Không thể tải danh sách người dùng");
+
+      // cái này là báo lỗi ra console, user bình thường sẽ k bt cách xem
+      if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED); 
 
       const json = await res.json();
       /**
@@ -52,6 +55,8 @@ export const getUsers = createAsyncThunk(
       return json.data || json; // phòng trường hợp backend không bọc data
     } catch (error) {
       dispatch(setError(error.message));
+
+      // cái này là set lỗi lên slice toàn cục, mình sẽ check và ném lỗi ra giao diện cho người dùng xem
       return rejectWithValue(error.message);
     } finally {
       dispatch(stopLoading());
@@ -67,7 +72,7 @@ export const getUserById = createAsyncThunk(
     dispatch(clearError());
     try {
       const res = await fetch(`/api/users/${id}`);
-      if (!res.ok) throw new Error("Không thể tải thông tin người dùng");
+      if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED);
 
       const json = await res.json();
       return json.data || json;
@@ -92,7 +97,7 @@ export const createUser = createAsyncThunk(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),
       });
-      if (!res.ok) throw new Error("Không thể tạo người dùng mới");
+      if (!res.ok) throw new Error(Errors.USER_CREATE_FAILED);
 
       const json = await res.json();
       return json.data || json;
@@ -117,7 +122,7 @@ export const updateUser = createAsyncThunk(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
-      if (!res.ok) throw new Error("Không thể cập nhật người dùng");
+      if (!res.ok) throw new Error(Errors.USER_UPDATE_FAILED);
 
       const json = await res.json();
       return json.data || json;
@@ -138,7 +143,7 @@ export const deleteUser = createAsyncThunk(
     dispatch(clearError());
     try {
       const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Không thể xóa người dùng");
+      if (!res.ok) throw new Error(Errors.USER_DELETE_FAILED);
 
       let json;
       try {
