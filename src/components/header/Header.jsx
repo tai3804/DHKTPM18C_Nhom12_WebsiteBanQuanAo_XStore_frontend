@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { CircleUser } from "lucide-react"
 import { ShoppingCart, Search } from "lucide-react"
+
 
 import LogoMenu from "./LogoMenu"
 import Navigation from "./Navigation"

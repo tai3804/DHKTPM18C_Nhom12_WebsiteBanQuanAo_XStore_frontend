@@ -6,7 +6,7 @@ import Errors from "../constants/errors";
 
 const initialState = {
   users: [], // danh sách tất cả user
-  user: null, // user hiện tại (theo ID hoặc username)
+  editingUser: null, // user đang được admin thao tác quản lý (theo ID hoặc username)
 };
 
 // ----------------- THUNKS -----------------
@@ -14,11 +14,17 @@ const initialState = {
 // GET ALL USERS
 export const getUsers = createAsyncThunk(
   "user/getUsers",
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch("/api/users");
+      const token = getState().auth?.token;
+      const res = await fetch("/api/users", {
+          headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // gắn token ở đây
+        },
+      });
 
       // cái này là báo lỗi ra console, user bình thường sẽ k bt cách xem
       if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED); 
@@ -107,9 +113,6 @@ export const getUserByUsername = createAsyncThunk(
     try {
       // Lấy token từ auth slice
       const token = getState().auth.token;
-
-      console.log(token);
-      
       const res = await fetch(`/api/users/username/${username}`, {
         method: "GET",
         headers: {
@@ -184,11 +187,23 @@ export const updateUser = createAsyncThunk(
 // DELETE USER
 export const deleteUser = createAsyncThunk(
   "user/deleteUser",
-  async (id, { dispatch, rejectWithValue }) => {
+  async (id, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
+
+    const token = getState().auth.token
+
+    console.log(id);
+    console.log(token);
+    
     try {
-      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/users/${id}`, { 
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
       if (!res.ok) throw new Error(Errors.USER_DELETE_FAILED);
 
       let json;
@@ -217,15 +232,15 @@ const userSlice = createSlice({
     builder
       // Lấy danh sách
       .addCase(getUsers.fulfilled, (state, action) => {
-        state.users = action.payload;
+        state.users = action.payload.result;
       })
 
       // Lấy 1 user
       .addCase(getUserById.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.editingUser = action.payload;
       })
       .addCase(getUserByUsername.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.editingUser = action.payload;
       })
 
       // Tạo user

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 import { getUserByUsername } from "../slices/UserSlice";
 import { loginUser, setUser, setToken } from "../slices/AuthSlice";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -16,34 +17,8 @@ export default function LoginPage() {
 
 const handleLogin = async (e) => {
   e.preventDefault();
-
-  try {
-    const res = await dispatch(loginUser({ username, password }));
-
-    if (res.payload && res.payload.code === 200) {
-      const token = res.payload.result;
-      dispatch(setToken(token));
-
-      const decoded = jwtDecode(token);
-      const usernameFromToken = decoded.sub;
-
-      const userRes = await dispatch(getUserByUsername(usernameFromToken));
-      const user = userRes.payload.result;
-      dispatch(setUser(user));
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      console.log("Token:", token);
-      console.log("User:", user);
-
-      navigate("/");
-    } else {
-      console.log(res.payload?.message || "Login failed");
-    }
-  } catch (err) {
-    console.log("Error login:", err.message);
-  }
+  const res = await dispatch(loginUser({ username, password }));
+  if (res.payload.code == 200) navigate("/")
 };
 
 return (

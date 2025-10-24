@@ -1,14 +1,23 @@
 // src/slice/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
+
+
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import Messages from "../constants/successes";
 
+
+// ======== LẤY DỮ LIỆU TỪ LOCALSTORAGE (KHI APP RELOAD) =========
+const storedUser = JSON.parse(localStorage.getItem("user"));
+const storedToken = localStorage.getItem("token");
+
+// ======== INITIAL STATE =========
 const initialState = {
-  user: null,       // thông tin user hiện tại
-  token: null,      // token JWT
+  user: storedUser || null,
+  token: storedToken || null,
 };
-
 // LOGIN
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
@@ -106,6 +115,7 @@ const authSlice = createSlice({
     clearToken: (state) => {
       state.token = null;
     },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -114,19 +124,33 @@ const authSlice = createSlice({
         state.success = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.token = action.payload.result; // token trả về từ backend
-        // user vẫn null, bạn cần fetch thêm từ username decoded nếu muốn lưu user
+        const res = action.payload
+        console.log(res);
+        
+
+        if (res.code == 200) { // thanh cong
+          const token = res.result.token;
+          const user = res.result.user
+          state.token = token;
+          state.user = user
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+        } else {
+          toast.error(res.message)
+        }
+
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.user = null;
         state.token = null;
-        state.success = null;
       })
 
       // LOGOUT
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
+        localStorage.removeItem("user");
+        localStorage.removeItem("token"); 
       })
       .addCase(logoutUser.rejected, (state) => {
         state.success = null;
@@ -134,10 +158,10 @@ const authSlice = createSlice({
       
       // REGISTER
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.success = "REGISTER_SUCCESS";
+        toast.success(Messages.REGISTER_SUCCESSFULLY)
       })
       .addCase(registerUser.rejected, (state) => {
-        state.success = null;
+        toast.error(Errors.REGISTER_FAILED)
       })
 
   },

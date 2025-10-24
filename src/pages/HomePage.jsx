@@ -5,15 +5,7 @@ import { setUser } from "../slices/AuthSlice";
 
 export default function HomePage() {
   const dispath = useDispatch();
-  
   const { user } = useSelector(state => state.auth);
-
-  useEffect (() => {
-    dispath(setUser(localStorage.getItem("user")))
-    dispath(setUser(JSON.parse(localStorage.getItem("user"))))
-  }, [])
-
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
