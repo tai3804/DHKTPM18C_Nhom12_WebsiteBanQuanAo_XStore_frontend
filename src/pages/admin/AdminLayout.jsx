@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
-import Header from "./Header";
+import Header from "../../components/admin/Header";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getUsers } from "../../slices/UserSlice";
@@ -9,10 +9,11 @@ export default function AdminLayout() {
 
   useEffect(() => {
     dispath(getUsers());
-  })
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header />
+      <Header />
 
       <div className="flex flex-1">
         <aside className="bg-white border-r border-gray-200 w-36 flex flex-col">
@@ -59,7 +60,7 @@ export default function AdminLayout() {
         </aside>
 
         <main className="flex-1 bg-gray-50 p-8">
-          <Outlet /> 
+          <Outlet />
         </main>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react"
+import { Menu } from "lucide-react";
 
 export default function LogoMenu() {
   return (
@@ -9,9 +9,9 @@ export default function LogoMenu() {
       </button>
 
       {/* Logo */}
-      <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center font-bold text-primary">
-        CM
+      <div className="h-20 w-20  rounded-lg flex items-center justify-center font-bold text-primary">
+        <img src="../../../public/logo.png" alt="" />
       </div>
     </div>
-  )
+  );
 }

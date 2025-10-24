@@ -162,19 +162,30 @@ export const createUser = createAsyncThunk(
 // UPDATE USER
 export const updateUser = createAsyncThunk(
   "user/updateUser",
-  async ({ id, userData }, { dispatch, rejectWithValue }) => {
+  async ({ id, userData, token }, { dispatch, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
+
     try {
       const res = await fetch(`/api/users/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // thêm token
+        },
         body: JSON.stringify(userData),
       });
+
       if (!res.ok) throw new Error(Errors.USER_UPDATE_FAILED);
 
-      const json = await res.json();
-      return json.data || json;
+      let json;
+      try {
+        json = await res.json(); // có thể không có body
+      } catch {
+        json = { data: userData };
+      }
+
+      return json.data || userData;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -183,6 +194,7 @@ export const updateUser = createAsyncThunk(
     }
   }
 );
+
 
 // DELETE USER
 export const deleteUser = createAsyncThunk(

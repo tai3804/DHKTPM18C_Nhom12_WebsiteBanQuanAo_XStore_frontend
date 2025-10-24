@@ -158,7 +158,15 @@ const authSlice = createSlice({
       
       // REGISTER
       .addCase(registerUser.fulfilled, (state, action) => {
-        toast.success(Messages.REGISTER_SUCCESSFULLY)
+        const res = action.payload;
+    
+        if (res.code == 200) {
+          toast.success(res.message)
+
+        }
+        else {
+          toast.error(res.message)
+        }
       })
       .addCase(registerUser.rejected, (state) => {
         toast.error(Errors.REGISTER_FAILED)
