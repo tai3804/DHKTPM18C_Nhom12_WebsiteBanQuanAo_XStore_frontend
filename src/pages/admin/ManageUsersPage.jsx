@@ -1,32 +1,95 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUsers, deleteUser } from "../../slices/UserSlice";
+import { getUsers, deleteUser, createUser } from "../../slices/UserSlice";
 import { logoutUser } from "../../slices/AuthSlice";
 import Header from "../../components/header/Header";
+import { toast } from "react-toastify";
+import AddUserForm from "./AddUserForm";
 
 export default function ManageUsersPage() {
   const dispatch = useDispatch();
-  const { users } = useSelector((state) => state.user);
-  const { loading } = useSelector((state) => state.loading);
+  const { users, loading } = useSelector((state) => state.user);
   const { token, user } = useSelector((state) => state.auth);
 
-  // Fetch danh sách users khi component mount
-  useEffect(() => {
-    dispatch(getUsers(token));
-  }, [dispatch, token]);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    account: {
+      username: "",
+      password: "",
+      role: "CUSTOMER",
+    },
+    email: "",
+    firstName: "",
+    lastName: "",
+    dob: "",
+  });
 
-  const handleLogout = async () => {
+  useEffect(() => {
+    dispatch(getUsers());
+  }, [dispatch]);
+
+  const handleLogout = () => {
     dispatch(logoutUser());
   };
 
+  // ✅ Update các field bình thường
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ✅ Update các field trong account
+  const handleAccountChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      account: {
+        ...prev.account,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+
+    try {
+      await dispatch(createUser(formData)).unwrap();
+      toast.success("Tạo người dùng thành công!");
+      setShowForm(false);
+      setFormData({
+        account: { username: "", password: "", role: "CUSTOMER" },
+        email: "",
+        firstName: "",
+        lastName: "",
+        dob: "",
+      });
+      dispatch(getUsers());
+    } catch (err) {
+      toast.error("Không thể tạo người dùng: " + err);
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">
-          Customers Management
-        </h1>
-        <p className="text-gray-500 text-sm">Tổng quan Khách hàng hiện tại</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Customers Management
+          </h1>
+          <p className="text-gray-500 text-sm">Tổng quan Khách hàng hiện tại</p>
+        </div>
+
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 hover:cursor-pointer transition"
+        >
+          + Add User
+        </button>
       </div>
 
       {/* Danh sách users */}
@@ -42,6 +105,9 @@ export default function ManageUsersPage() {
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
                 First Name
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-gray-600">
+                Date of Birth
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
                 Email
@@ -83,6 +149,9 @@ export default function ManageUsersPage() {
                   <td className="px-4 py-3 text-gray-700">{u.lastName}</td>
                   <td className="px-4 py-3 text-gray-700">{u.firstName}</td>
                   <td className="px-4 py-3 text-gray-600">
+                    {u.dob ? new Date(u.dob).toLocaleDateString() : "empty"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
                     {u.email || "empty"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
@@ -92,23 +161,25 @@ export default function ManageUsersPage() {
                   <td className="px-4 py-3 text-gray-600">
                     {u.userType || "N/A"}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.city || "N/A"}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {u.city || "empty"}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${
-                        u.account.role === "ADMIN"
+                        u.account?.role === "ADMIN"
                           ? "bg-purple-100 text-purple-700"
                           : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {u.account.role}
+                      {u.account?.role || "N/A"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right space-x-2">
-                    {user.id != u.id && (
+                    {user?.id !== u.id && (
                       <button
                         onClick={() => dispatch(deleteUser(u.id))}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                        className="text-red-600 hover:text-red-800 text-sm hover:cursor-pointer"
                       >
                         Xóa
                       </button>
@@ -126,6 +197,17 @@ export default function ManageUsersPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal Form */}
+      {showForm && (
+        <AddUserForm
+          formData={formData}
+          handleChange={handleChange}
+          handleAccountChange={handleAccountChange}
+          handleCreateUser={handleCreateUser}
+          setShowForm={setShowForm}
+        />
+      )}
     </div>
   );
 }

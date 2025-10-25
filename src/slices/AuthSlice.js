@@ -40,6 +40,7 @@ export const loginUser = createAsyncThunk(
       return data;
     } catch (error) {
       dispatch(setError(error.message));
+      toast.error("Server not ready")
       return rejectWithValue(error.message);
     } finally {
       dispatch(stopLoading());
@@ -55,6 +56,7 @@ export const logoutUser = createAsyncThunk(
     dispatch(clearError());
     try {
       // Nếu API logout có thể gọi ở đây
+      toast.success(Messages.LOGOUT_SUCCESS);
       return true;
     } catch (error) {
       dispatch(setError(error.message));

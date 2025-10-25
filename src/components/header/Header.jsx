@@ -17,7 +17,7 @@ export default function Header() {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <header className="sticky w-full top-0 bg-background border-b border-border bg-white flex justify-between px-8 h-16 items-center">
+    <header className="sticky w-full top-0 bg-background border-b border-border bg-white flex justify-between px-8 h-16 items-center z-10">
       <LogoMenu />
 
       {/* Navigation links */}

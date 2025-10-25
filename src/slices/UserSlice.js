@@ -137,13 +137,17 @@ export const getUserByUsername = createAsyncThunk(
 // CREATE USER
 export const createUser = createAsyncThunk(
   "user/createUser",
-  async (newUser, { dispatch, rejectWithValue }) => {
+  async (newUser, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
+      const token = getState().auth.token;
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // gắn token
+        },
         body: JSON.stringify(newUser),
       });
       if (!res.ok) throw new Error(Errors.USER_CREATE_FAILED);

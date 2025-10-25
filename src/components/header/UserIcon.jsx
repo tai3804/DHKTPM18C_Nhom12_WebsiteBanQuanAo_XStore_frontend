@@ -23,12 +23,12 @@ export default function UserIcon() {
   }, []);
 
   const handleLogout = () => {
+    navigate("/login");
     // Xóa user + token
     dispatch(clearUser());
     dispatch(clearToken());
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    navigate("/login");
   };
 
   return (
