@@ -13,10 +13,11 @@ import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminLayout from "./pages/admin/AdminLayout";
+import AdminLayout from "./components/admin/AdminLayout";
 import DashboardPage from "./pages/admin/DashboardPage";
 import UsersPage from "./pages/admin/ManageUsersPage";
 import ProductsAdminPage from "./pages/admin/ManageProductsPage";
+import ManageProductTypesPage from "./pages/admin/ManageProductTypePage";
 
 export default function App() {
   return (
@@ -37,7 +38,7 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <ProtectedRoute>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsAdminPage />} />
+          <Route path="product-types" element={<ManageProductTypesPage />} />
         </Route>
       </Routes>
 

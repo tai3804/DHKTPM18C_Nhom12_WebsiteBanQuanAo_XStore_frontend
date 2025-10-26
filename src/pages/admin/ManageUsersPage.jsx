@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUsers, deleteUser, createUser } from "../../slices/UserSlice";
-import { logoutUser } from "../../slices/AuthSlice";
-import Header from "../../components/header/Header";
 import { toast } from "react-toastify";
-import AddUserForm from "./AddUserForm";
+import { Trash2 } from "lucide-react";
+import { getUsers, deleteUser, createUser } from "../../slices/UserSlice";
+import { Link } from "react-router-dom";
+import AddUserForm from "../../components/admin/AddUserForm";
+import FormInput from "../../components/admin/FormInput";
 
 export default function ManageUsersPage() {
   const dispatch = useDispatch();
   const { users, loading } = useSelector((state) => state.user);
-  const { token, user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,14 +24,6 @@ export default function ManageUsersPage() {
     lastName: "",
     dob: "",
   });
-
-  useEffect(() => {
-    dispatch(getUsers());
-  }, [dispatch]);
-
-  const handleLogout = () => {
-    dispatch(logoutUser());
-  };
 
   // ✅ Update các field bình thường
   const handleChange = (e) => {
@@ -69,30 +62,49 @@ export default function ManageUsersPage() {
       });
       dispatch(getUsers());
     } catch (err) {
-      toast.error("Không thể tạo người dùng: " + err);
+      toast.error(err);
     }
   };
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-6 relative">
+      {/* Breadcrumb */}
+      <div className="text-sm text-gray-500 mb-2 flex items-center gap-1">
+        <Link
+          to="/admin/dashboard"
+          className="hover:underline text-gray-600 cursor-pointer transition-colors"
+        >
+          Trang chủ
+        </Link>
+        <span>/</span>
+        <Link
+          to="/admin/users"
+          className="hover:underline text-gray-600 cursor-pointer transition-colors"
+        >
+          Người dùng
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Customers Management
+            Quản lý người dùng
           </h1>
-          <p className="text-gray-500 text-sm">Tổng quan Khách hàng hiện tại</p>
+          <p className="text-gray-500 text-sm">
+            Tổng quan các khách hàng hiện có
+          </p>
         </div>
 
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 hover:cursor-pointer transition"
+          className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 hover:cursor-pointer transition flex items-center gap-1"
         >
-          + Add User
+          + Thêm người dùng
         </button>
       </div>
 
-      {/* Danh sách users */}
+      {/* Bảng danh sách người dùng */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-max">
           <thead className="bg-gray-50 border-b border-gray-200">
@@ -101,31 +113,31 @@ export default function ManageUsersPage() {
                 ID
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                Last Name
+                Họ
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                First Name
+                Tên
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                Date of Birth
+                Ngày sinh
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
                 Email
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                Phone
+                SĐT
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                Point
+                Điểm
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                User Type
+                Loại người dùng
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                City
+                Thành phố
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                Role
+                Vai trò
               </th>
               <th className="px-4 py-3 text-sm font-semibold text-gray-600 text-right">
                 Hành động
@@ -143,26 +155,26 @@ export default function ManageUsersPage() {
               users.map((u) => (
                 <tr
                   key={u.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition"
+                  className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
                 >
                   <td className="px-4 py-3 text-gray-700">{u.id}</td>
                   <td className="px-4 py-3 text-gray-700">{u.lastName}</td>
                   <td className="px-4 py-3 text-gray-700">{u.firstName}</td>
                   <td className="px-4 py-3 text-gray-600">
-                    {u.dob ? new Date(u.dob).toLocaleDateString() : "empty"}
+                    {u.dob ? new Date(u.dob).toLocaleDateString() : "Trống"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {u.email || "empty"}
+                    {u.email || "Trống"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {u.phone || "empty"}
+                    {u.phone || "Trống"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">{u.point || 0}</td>
                   <td className="px-4 py-3 text-gray-600">
                     {u.userType || "N/A"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {u.city || "empty"}
+                    {u.city || "Trống"}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -179,9 +191,10 @@ export default function ManageUsersPage() {
                     {user?.id !== u.id && (
                       <button
                         onClick={() => dispatch(deleteUser(u.id))}
-                        className="text-red-600 hover:text-red-800 text-sm hover:cursor-pointer"
+                        className="text-red-600 hover:text-red-800 transition cursor-pointer"
+                        title="Xóa người dùng"
                       >
-                        Xóa
+                        <Trash2 size={18} />
                       </button>
                     )}
                   </td>
@@ -198,7 +211,7 @@ export default function ManageUsersPage() {
         </table>
       </div>
 
-      {/* Modal Form */}
+      {/* Modal Form thêm người dùng */}
       {showForm && (
         <AddUserForm
           formData={formData}

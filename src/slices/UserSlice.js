@@ -150,7 +150,12 @@ export const createUser = createAsyncThunk(
         },
         body: JSON.stringify(newUser),
       });
-      if (!res.ok) throw new Error(Errors.USER_CREATE_FAILED);
+      if (!res.ok) {
+        if (res.status === 409) {
+          throw new Error(Errors.USER_ALREADY_EXISTS);
+        }
+        throw new Error(Errors.USER_CREATE_FAILED);
+      }
 
       const json = await res.json();
       return json.data || json;

@@ -15,7 +15,7 @@ export default function Header() {
         </div>
       </div>
       <h1 className="text-xl font-semibold text-gray-800 tracking-tight">
-        Store Manager
+        XStore Admin Panel
       </h1>
 
       {/* Right: Icons */}

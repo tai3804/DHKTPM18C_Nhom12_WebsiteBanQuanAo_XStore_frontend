@@ -5,15 +5,6 @@ import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
 
 // Mở rộng đối tượng Errors để thêm các mã lỗi cho loại sản phẩm
-const ProductTypeErrors = {
-  ...Errors,
-  PRODUCT_TYPE_FETCH_FAILED: "Không thể tải danh sách loại sản phẩm",
-  PRODUCT_TYPE_FETCH_BY_ID_FAILED: "Không thể tải thông tin loại sản phẩm",
-  PRODUCT_TYPE_CREATE_FAILED: "Không thể tạo loại sản phẩm mới",
-  PRODUCT_TYPE_UPDATE_FAILED: "Không thể cập nhật loại sản phẩm",
-  PRODUCT_TYPE_DELETE_FAILED: "Không thể xóa loại sản phẩm",
-};
-
 const initialState = {
   productTypes: [], // danh sách tất cả loại sản phẩm
   productType: null, // loại sản phẩm hiện tại (theo ID)
@@ -30,7 +21,7 @@ export const getProductTypes = createAsyncThunk(
     try {
       const res = await fetch("/api/product-types");
 
-      if (!res.ok) throw new Error(ProductTypeErrors.PRODUCT_TYPE_FETCH_FAILED);
+      if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_FETCH_FAILED);
 
       const json = await res.json();
       return json.result || json;
@@ -52,7 +43,7 @@ export const getProductTypeById = createAsyncThunk(
     try {
       const res = await fetch(`/api/product-types/${id}`);
 
-      if (!res.ok) throw new Error(ProductTypeErrors.PRODUCT_TYPE_FETCH_BY_ID_FAILED);
+      if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_FETCH_BY_ID_FAILED);
 
       const json = await res.json();
       return json.result || json;
@@ -84,7 +75,7 @@ export const createProductType = createAsyncThunk(
         body: JSON.stringify(newProductType),
       });
       
-      if (!res.ok) throw new Error(ProductTypeErrors.PRODUCT_TYPE_CREATE_FAILED);
+      if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_CREATE_FAILED);
 
       const json = await res.json();
       return json.result || json;
@@ -116,7 +107,7 @@ export const updateProductType = createAsyncThunk(
         body: JSON.stringify(productTypeData),
       });
       
-      if (!res.ok) throw new Error(ProductTypeErrors.PRODUCT_TYPE_UPDATE_FAILED);
+      if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_UPDATE_FAILED);
 
       const json = await res.json();
       return json.result || json;
@@ -146,7 +137,7 @@ export const deleteProductType = createAsyncThunk(
         }
       });
       
-      if (!res.ok) throw new Error(ProductTypeErrors.PRODUCT_TYPE_DELETE_FAILED);
+      if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_DELETE_FAILED);
 
       let json;
       try {
@@ -170,7 +161,10 @@ const productTypeSlice = createSlice({
   name: "productType",
   initialState,
   reducers: {
-    clearProductTypeState: (state) => {
+    setProductTypes: (state, action) => {
+      state.productType = action.payload;
+    },
+    clearProductTypes: (state) => {
       state.productType = null;
     },
   },
@@ -213,5 +207,5 @@ const productTypeSlice = createSlice({
   },
 });
 
-export const { clearProductTypeState } = productTypeSlice.actions;
+export const { clearProductTypes, setProductTypes } = productTypeSlice.actions;
 export default productTypeSlice.reducer;

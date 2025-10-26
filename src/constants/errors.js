@@ -5,6 +5,7 @@ const Errors = {
   USER_CREATE_FAILED: "Không thể tạo người dùng mới",
   USER_UPDATE_FAILED: "Không thể cập nhật người dùng",
   USER_DELETE_FAILED: "Không thể xóa người dùng",
+  USER_ALREADY_EXISTS: "Người dùng đã tồn tại",
 
   // CART
   CART_FETCH_FAILED: "Failed to fetch cart.",
