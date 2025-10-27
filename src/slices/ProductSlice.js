@@ -14,11 +14,21 @@ const ProductErrors = {
   PRODUCT_DELETE_FAILED: "Không thể xóa sản phẩm",
 };
 
+
+// let storedProducts = [];
+// try {
+//   const data = localStorage.getItem("products");
+//   const parsed = JSON.parse(data);
+//   storedProducts = Array.isArray(parsed) ? parsed : [];
+// } catch (e) {
+//   storedProducts = [];
+// }
+
 const initialState = {
-  products: [], // danh sách tất cả sản phẩm
-  product: null, // sản phẩm hiện tại (theo ID)
-  productsByType: {}, // sản phẩm theo loại
+  products:  [], // luôn là mảng
+  product: null,
 };
+
 
 // ----------------- THUNKS -----------------
 
@@ -188,20 +198,50 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+export const searchProductsByName = createAsyncThunk(
+  "product/searchProductsByName",
+  async (keyword, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      // Nếu keyword rỗng, trả về tất cả sản phẩm
+      const url = keyword && keyword.trim() !== ""
+        ? `/api/products/search?q=${encodeURIComponent(keyword.trim())}`
+        : "/api/products";
+
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error(ProductErrors.PRODUCT_FETCH_FAILED);
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
 // ----------------- SLICE -----------------
 const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    clearProductState: (state) => {
+    clearProducts: (state) => {
       state.product = null;
     },
+    setProducts: (state, action) => {
+      state.products = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
       // Lấy danh sách sản phẩm
       .addCase(getProducts.fulfilled, (state, action) => {
         state.products = action.payload;
+        localStorage.setItem("products", JSON.stringify(action.payload));
       })
 
       // Lấy 1 sản phẩm
@@ -258,5 +298,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearProductState } = productSlice.actions;
+export const { clearProducts, setProducts } = productSlice.actions;
 export default productSlice.reducer;

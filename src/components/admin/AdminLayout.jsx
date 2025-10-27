@@ -28,8 +28,6 @@ export default function AdminLayout() {
     const fetchData = async () => {
       try {
         if (!users || users.length === 0) await dispatch(getUsers()).unwrap();
-        if (!products || products.length === 0)
-          await dispatch(getProducts()).unwrap();
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu admin:", err);
       }

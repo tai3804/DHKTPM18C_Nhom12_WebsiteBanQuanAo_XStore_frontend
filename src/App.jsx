@@ -18,8 +18,22 @@ import DashboardPage from "./pages/admin/DashboardPage";
 import UsersPage from "./pages/admin/ManageUsersPage";
 import ProductsAdminPage from "./pages/admin/ManageProductsPage";
 import ManageProductTypesPage from "./pages/admin/ManageProductTypePage";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getProducts, setProducts } from "./slices/ProductSlice";
 
 export default function App() {
+  const dispatch = useDispatch();
+
+  const products = useSelector((state) => state.product.products);
+
+  useEffect(() => {
+    const getDefaultItems = async () => {
+      dispatch(getProducts());
+    };
+    getDefaultItems();
+  }, []);
+
   return (
     <div>
       <Routes>
