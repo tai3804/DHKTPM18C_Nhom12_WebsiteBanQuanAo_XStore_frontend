@@ -73,19 +73,19 @@ export const logoutUser = createAsyncThunk(
 // ===== REGISTER =====
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async ({ firstName, lastName, dob, username, password }, { dispatch, rejectWithValue }) => {
+  async ({ firstName, lastName, dob, username, password, email }, { dispatch, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
       const res = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, dob, username, password }),
+        body: JSON.stringify({ firstName, lastName, dob, username, password, email: email || null }),
       });
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.message || Errors.REGISTER_FAILED);
+        throw new Error(errData.message || "Register failed");
       }
 
       const data = await res.json();

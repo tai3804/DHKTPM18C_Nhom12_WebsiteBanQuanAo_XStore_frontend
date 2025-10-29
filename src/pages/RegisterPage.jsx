@@ -38,10 +38,10 @@ export default function RegisterPage() {
         registerUser({
           firstName: form.firstName,
           lastName: form.lastName,
-          dob: form.dob,
+          dob: form.dob || null,
           username: form.username,
           password: form.password,
-          email: "",
+          email: form.email || null,
         })
       );
 
