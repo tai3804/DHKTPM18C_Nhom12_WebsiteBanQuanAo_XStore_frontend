@@ -7,6 +7,7 @@ import { clearUser, clearToken } from "../../slices/AuthSlice";
 
 export default function UserIcon() {
   const [open, setOpen] = useState(false);
+  const users = useSelector((state) => state.auth.user);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,49 +43,39 @@ export default function UserIcon() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="p-1 hover:bg-muted rounded-full transition-colors cursor-pointer"
-      >
-        <CircleUser className="h-6 w-6" />
-      </button>
+      {users != null ? (
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1 hover:bg-muted rounded-full transition-colors cursor-pointer"
+        >
+          <CircleUser className="h-6 w-6" />
+        </button>
+      ) : (
+        <button
+          onClick={() => handleNavigate("/login")}
+          className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+        >
+          Login
+        </button>
+      )}
 
       {/* Logic hiển thị dropdown */}
       {open && (
         <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-          {token ? (
-            // 1. Nếu CÓ token (đã đăng nhập)
-            <>
-              <button
-                onClick={() => handleNavigate("/user")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              >
-                Info
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 cursor-pointer"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            // 2. Nếu KHÔNG có token (chưa đăng nhập)
-            <>
-              <button
-                onClick={() => handleNavigate("/login")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => handleNavigate("/register")}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              >
-                Register
-              </button>
-            </>
-          )}
+          <>
+            <button
+              onClick={() => handleNavigate("/user")}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              Info
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500 cursor-pointer"
+            >
+              Logout
+            </button>
+          </>
         </div>
       )}
     </div>

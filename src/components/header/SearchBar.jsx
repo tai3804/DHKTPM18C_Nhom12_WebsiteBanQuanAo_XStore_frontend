@@ -36,12 +36,11 @@ export default function SearchBar() {
         />
 
         {/* Button search */}
-        <button
+        <input
           type="submit"
-          className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded-full shadow-md transition-colors duration-200"
-        >
-          Tìm kiếm
-        </button>
+          value="Search"
+          className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded-full shadow-md transition-colors duration-200 hover:cursor-pointer"
+        />
       </div>
     </form>
   );
