@@ -10,7 +10,7 @@ export default function LogoMenu() {
 
       {/* Logo */}
       <div className="h-20 w-20  rounded-lg flex items-center justify-center font-bold text-primary">
-        <img src="../../../public/logo.png" alt="" />
+        <img src="/logo.png" alt="" />
       </div>
     </div>
   );
