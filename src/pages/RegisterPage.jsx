@@ -13,6 +13,7 @@ export default function RegisterPage() {
     username: "",
     password: "",
     confirmPassword: "",
+    email: "",
   });
 
   const [error, setError] = useState("");
@@ -40,6 +41,7 @@ export default function RegisterPage() {
           dob: form.dob,
           username: form.username,
           password: form.password,
+          email: "",
         })
       );
 
@@ -52,6 +54,7 @@ export default function RegisterPage() {
           username: "",
           password: "",
           confirmPassword: "",
+          email: "",
         });
       } else {
         setError(res.payload?.message || "Register failed");
