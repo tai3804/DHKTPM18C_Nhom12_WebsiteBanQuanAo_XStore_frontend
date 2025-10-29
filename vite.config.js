@@ -8,7 +8,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // địa chỉ backend (Spring Boot)
+        // target: 'http://localhost:8080', // địa chỉ backend (Spring Boot)
+        target: 'https://x-store-6in2.onrender.com/',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''), // bỏ prefix /api nếu cần
