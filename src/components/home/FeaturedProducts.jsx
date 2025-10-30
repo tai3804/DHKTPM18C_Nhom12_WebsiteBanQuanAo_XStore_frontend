@@ -12,25 +12,35 @@ const ProductGrid = ({ products }) => (
         Những sản phẩm được yêu thích nhất tuần qua.
       </p>
     </div>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+
+    {products.length === 0 ? (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Đang tải sản phẩm...</p>
+      </div>
+    ) : (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    )}
   </section>
 );
-// Kết thúc component giả lập
 
 export default function FeaturedProducts({
-  products,
+  products = [], // ✅ Default value để tránh undefined
   onAddToCart,
   onToggleFavorite,
   onProductClick,
 }) {
+  // ✅ Kiểm tra products có tồn tại và là array
+  if (!Array.isArray(products)) {
+    return null;
+  }
+
   // Lấy một số sản phẩm để hiển thị (ví dụ 8 sản phẩm đầu)
   const featured = products.slice(0, 8);
 
-  // Nếu bạn đã có ProductGrid component riêng, hãy dùng nó ở đây
   return (
     <ProductGrid
       products={featured}

@@ -23,9 +23,14 @@ export default function Footer() {
                     <div className="space-y-4">
                         <h4 className="font-semibold text-gray-900">Liên Kết Nhanh</h4>
                         <div className="space-y-2 text-sm">
-                            {['Về Chúng Tôi', 'Bộ Sưu Tập', 'Blog Thời Trang', 'Liên Hệ'].map(link => (
-                                <a key={link} href="#" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                                    {link}
+                            {[
+                                { text: 'Về Chúng Tôi', href: '/contact' },
+                                { text: 'Bộ Sưu Tập', href: '/products' },
+                                { text: 'Blog Thời Trang', href: '/blog' },
+                                { text: 'Liên Hệ', href: '/contact' }
+                            ].map(link => (
+                                <a key={link.text} href={link.href} className="block text-gray-600 hover:text-blue-600 transition-colors">
+                                    {link.text}
                                 </a>
                             ))}
                         </div>
@@ -36,7 +41,7 @@ export default function Footer() {
                         <h4 className="font-semibold text-gray-900">Chăm Sóc Khách Hàng</h4>
                         <div className="space-y-2 text-sm">
                             {['Hướng Dẫn Mua Hàng', 'Chính Sách Đổi Trả', 'Câu Hỏi Thường Gặp', 'Chính Sách Bảo Mật'].map(link => (
-                                <a key={link} href="#" className="block text-gray-600 hover:text-blue-600 transition-colors">
+                                <a key={link} href="\#" className="block text-gray-600 hover:text-blue-600 transition-colors">
                                     {link}
                                 </a>
                             ))}
