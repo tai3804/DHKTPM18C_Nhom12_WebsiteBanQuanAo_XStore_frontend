@@ -20,7 +20,8 @@ import ProductsAdminPage from "./pages/admin/ManageProductsPage";
 import ManageProductTypesPage from "./pages/admin/ManageProductTypePage";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getProducts, setProducts } from "./slices/ProductSlice";
+import { getProducts } from "./slices/ProductSlice";
+import SendOtpPage from "./pages/SendOtpPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/send-otp" element={<SendOtpPage />} />
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route

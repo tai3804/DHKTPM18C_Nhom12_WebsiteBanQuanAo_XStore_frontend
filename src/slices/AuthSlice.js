@@ -99,6 +99,46 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+// ===== SEND REGISTER EMAIL OTP (POST) =====
+export const sendRegisterEmailOtp = createAsyncThunk(
+  "auth/sendRegisterEmailOtp",
+  async (email, { dispatch,getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    const token = getState().auth.token;
+     console.log("Token in sendRegisterEmailOtp:", token);
+    try {
+      const res = await fetch(`/api/otp/register`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+         },
+        body: JSON.stringify(email),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.code === 200) {
+        toast.success(data.message || "OTP đã được gửi đến email của bạn!");
+        return data;
+      } else {
+        toast.error(data.message || "Gửi OTP thất bại!");
+        throw new Error(data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      dispatch(setError(error.message));
+      console.log(email);
+      
+      toast.error("Không thể gửi OTP, vui lòng thử lại sau!");
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -175,6 +215,19 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state) => {
         toast.error(Errors.REGISTER_FAILED)
+      })
+
+      // SEND REGISTER EMAIL OTP
+      .addCase(sendRegisterEmailOtp.fulfilled, (state, action) => {
+        const res = action.payload;
+        if (res && res.code === 200) {
+          toast.success(res.message || "OTP đã được gửi tới email!");
+        } else {
+          toast.error(res?.message || "Gửi OTP thất bại!");
+        }
+      })
+      .addCase(sendRegisterEmailOtp.rejected, (state, action) => {
+        toast.error("Không thể gửi OTP, vui lòng thử lại sau!");
       })
 
   },
