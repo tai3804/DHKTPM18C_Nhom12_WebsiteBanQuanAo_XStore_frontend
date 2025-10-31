@@ -22,6 +22,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "./slices/ProductSlice";
 import SendOtpPage from "./pages/SendOtpPage";
+import FavouritePage from "./pages/FavouritePage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -31,6 +32,10 @@ export default function App() {
   useEffect(() => {
     const getDefaultItems = async () => {
       dispatch(getProducts());
+
+      if (user?.id) {
+        dispatch(getCartByUser(user.id));
+      }
     };
     getDefaultItems();
   }, []);
@@ -49,6 +54,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/send-otp" element={<SendOtpPage />} />
+        <Route path="/favourite" element={<FavouritePage />} />
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route

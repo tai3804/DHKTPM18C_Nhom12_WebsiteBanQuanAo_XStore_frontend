@@ -14,16 +14,6 @@ export default function HomePage() {
   const products = useSelector((state) => state.product.products) || [];
   const { user } = useSelector((state) => state.auth);
 
-  // ✅ Load products và cart khi component mount
-  useEffect(() => {
-    dispatch(getProducts());
-
-    // Load cart nếu user đã đăng nhập
-    if (user?.id) {
-      dispatch(getCartByUser(user.id));
-    }
-  }, [dispatch, user]);
-
   return (
     <div className="min-h-screen">
       <Header />

@@ -28,11 +28,11 @@ export default function HeroSection() {
           {/* Right Image */}
           <div className="relative hidden lg:block">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gray-200">
-              {/* <img
-                src="https://via.placeholder.com/600x450/cccccc/969696?text=Fashion+Banner"
+              <img
+                src="/slider.jpeg"
                 alt="Fashion banner"
                 className="w-full h-full object-cover"
-              /> */}
+              />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-white border border-gray-200 rounded-xl p-4 shadow-lg">
               <p className="text-sm font-medium text-gray-900">
