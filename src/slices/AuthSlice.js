@@ -7,6 +7,7 @@ import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
 import Messages from "../constants/successes";
+import { resetCart } from './CartSlice';
 
 
 // ======== LẤY DỮ LIỆU TỪ LOCALSTORAGE (KHI APP RELOAD) =========
@@ -27,9 +28,9 @@ export const loginUser = createAsyncThunk(
     try {
       const res = await fetch(`/api/auth/login`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json" 
-          
+        headers: {
+          "Content-Type": "application/json"
+
         },
         body: JSON.stringify({ username, password }),
       });
@@ -98,6 +99,18 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    // Clear token
+    localStorage.removeItem('token');
+
+    // ✅ Reset cart khi logout
+    dispatch(resetCart());
+
+    return null;
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -120,7 +133,7 @@ const authSlice = createSlice({
     clearToken: (state) => {
       state.token = null;
     },
-    
+
   },
   extraReducers: (builder) => {
     builder
@@ -131,7 +144,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         const res = action.payload
         console.log(res);
-        
+
 
         if (res.code == 200) { // thanh cong
           const token = res.result.token;
@@ -155,16 +168,16 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         localStorage.removeItem("user");
-        localStorage.removeItem("token"); 
+        localStorage.removeItem("token");
       })
       .addCase(logoutUser.rejected, (state) => {
         state.success = null;
       })
-      
+
       // REGISTER
       .addCase(registerUser.fulfilled, (state, action) => {
         const res = action.payload;
-    
+
         if (res.code == 200) {
           toast.success(res.message)
 

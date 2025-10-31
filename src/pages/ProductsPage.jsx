@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { getProducts } from '../slices/ProductSlice';
+import { getCartByUser } from '../slices/CartSlice';
 import Header from '../components/header/Header';
 import Footer from '../components/common/Footer';
 import ProductList from '../components/product/ProductList';
@@ -12,36 +13,32 @@ export default function ProductsPage() {
   const category = searchParams.get('category');
 
   const allProducts = useSelector((state) => state.product.products) || [];
+  const { user } = useSelector((state) => state.auth);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  // ✅ Load products khi mount
+  // ✅ Load products và cart
   useEffect(() => {
     dispatch(getProducts());
-  }, [dispatch]);
 
-  // ✅ Filter products khi allProducts hoặc category thay đổi
+    // Load cart nếu user đã đăng nhập
+    if (user?.id) {
+      dispatch(getCartByUser(user.id));
+    }
+  }, [dispatch, user]);
+
+  // Filter products khi allProducts hoặc category thay đổi
   useEffect(() => {
-    console.log('🔍 All Products:', allProducts);
-    console.log('🔍 Category:', category);
-
     if (!allProducts || allProducts.length === 0) {
       setFilteredProducts([]);
       return;
     }
 
     if (!category || category === 'all') {
-      // Hiển thị tất cả
-      console.log('✅ Showing all products');
       setFilteredProducts(allProducts);
     } else {
-      // Lọc theo type.name
-      const filtered = allProducts.filter(product => {
-        const match = product.type?.name === category;
-        console.log(`Product: ${product.name}, Type: ${product.type?.name}, Match: ${match}`);
-        return match;
-      });
-
-      console.log('✅ Filtered Products:', filtered);
+      const filtered = allProducts.filter(product =>
+        product.type?.name === category
+      );
       setFilteredProducts(filtered);
     }
   }, [allProducts, category]);
@@ -58,6 +55,21 @@ export default function ProductsPage() {
             Tìm thấy {filteredProducts.length} sản phẩm
           </p>
         </div>
+
+        {category && category !== 'all' && filteredProducts.length === 0 && allProducts.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p className="text-yellow-800">
+              Không tìm thấy sản phẩm cho danh mục "{category}".
+              <button
+                onClick={() => window.location.href = '/products'}
+                className="ml-2 text-blue-600 hover:underline"
+              >
+                Xem tất cả sản phẩm
+              </button>
+            </p>
+          </div>
+        )}
+
         <ProductList products={filteredProducts} />
       </main>
       <Footer />
