@@ -3,23 +3,23 @@ import { useSelector } from "react-redux";
 import Header from "../components/header/Header";
 import Footer from "../components/common/Footer";
 import ProductCard from "../components/product/ProductCard";
-import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 
-export default function SalePage() {
+export default function HotPage() {
   const allProducts = useSelector((state) => state.product.products) || [];
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
 
-  // Lấy sản phẩm sale (giả sử tất cả sản phẩm đều sale, hoặc có thể filter theo điều kiện)
-  const saleProducts = useMemo(() => {
+  // Lấy sản phẩm hot (giả sử tất cả sản phẩm đều hot, hoặc có thể filter theo điều kiện)
+  const hotProducts = useMemo(() => {
     return [...allProducts].sort((a, b) => b.id - a.id); // Sắp xếp theo ID giảm dần (mới nhất)
   }, [allProducts]);
 
   // Tính toán phân trang
-  const totalPages = Math.ceil(saleProducts.length / productsPerPage);
+  const totalPages = Math.ceil(hotProducts.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
   const endIndex = startIndex + productsPerPage;
-  const currentProducts = saleProducts.slice(startIndex, endIndex);
+  const currentProducts = hotProducts.slice(startIndex, endIndex);
 
   // Xử lý chuyển trang
   const goToPage = (page) => {
@@ -70,12 +70,12 @@ export default function SalePage() {
           <div className="container mx-auto max-w-6xl">
             {/* Title Section - Minimalist */}
             <div className="mb-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-4 bg-gradient-to-r from-green-700 via-green-600 to-green-700 bg-clip-text text-transparent">
-                Sale Collection
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-4 bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+                Hot Collection
               </h1>
               <p className="text-lg text-gray-600 font-light max-w-2xl">
-                Ưu đãi đặc biệt - Giảm giá khủng cho những sản phẩm thời trang
-                chọn lọc
+                Khám phá những sản phẩm được yêu thích nhất, xu hướng thời trang
+                mới nhất
               </p>
             </div>
 
@@ -88,9 +88,9 @@ export default function SalePage() {
           <div className="container mx-auto max-w-6xl">
             {currentProducts.length === 0 ? (
               <div className="text-center py-20">
-                <Tag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <Flame className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 text-lg font-light">
-                  Chưa có sản phẩm Sale nào
+                  Chưa có sản phẩm HOT nào
                 </p>
               </div>
             ) : (
@@ -166,8 +166,8 @@ export default function SalePage() {
                     {/* Page Info */}
                     <div className="text-xs text-gray-500 font-light">
                       Hiển thị {startIndex + 1} -{" "}
-                      {Math.min(endIndex, saleProducts.length)} của{" "}
-                      {saleProducts.length} sản phẩm
+                      {Math.min(endIndex, hotProducts.length)} của{" "}
+                      {hotProducts.length} sản phẩm
                     </div>
                   </div>
                 )}

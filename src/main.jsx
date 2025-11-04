@@ -8,11 +8,11 @@ import "./index.css";
 // import "./pathFetch.js";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </Provider>
-  </StrictMode>
+  // <StrictMode> - Tạm thời comment để tránh duplicate toast
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+  // </StrictMode>
 );

@@ -8,6 +8,8 @@ import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
 import Messages from "../constants/successes";
 import { resetCart } from './CartSlice';
+import { clearFavourites } from './FavouriteSlice';
+import { API_BASE_URL } from "../config/api";
 
 
 // ======== LẤY DỮ LIỆU TỪ LOCALSTORAGE (KHI APP RELOAD) =========
@@ -26,7 +28,7 @@ export const loginUser = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -78,7 +80,7 @@ export const registerUser = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/auth/register`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName, dob, username, password, email: email || null }),
@@ -108,6 +110,9 @@ export const logout = createAsyncThunk(
     // ✅ Reset cart khi logout
     dispatch(resetCart());
 
+    // ✅ Clear favourites khi logout
+    dispatch(clearFavourites());
+
     return null;
   }
 );
@@ -121,7 +126,7 @@ export const sendRegisterEmailOtp = createAsyncThunk(
     const token = getState().auth.token;
      console.log("Token in sendRegisterEmailOtp:", token);
     try {
-      const res = await fetch(`/api/otp/register`, {
+      const res = await fetch(`${API_BASE_URL}/api/otp/register`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -144,6 +149,34 @@ export const sendRegisterEmailOtp = createAsyncThunk(
       console.log(email);
       
       toast.error("Không thể gửi OTP, vui lòng thử lại sau!");
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// ===== VERIFY OTP =====
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async ({ contact, otp }, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/otp/verify-otp?contact=${encodeURIComponent(contact)}&otp=${otp}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.code === 200) {
+        return data;
+      } else {
+        throw new Error(data.message || "Xác thực OTP thất bại");
+      }
+    } catch (error) {
+      dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
       dispatch(stopLoading());
@@ -214,6 +247,14 @@ const authSlice = createSlice({
         state.success = null;
       })
 
+      // LOGOUT (new logout action)
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      })
+
       // REGISTER
       .addCase(registerUser.fulfilled, (state, action) => {
         const res = action.payload;
@@ -241,6 +282,19 @@ const authSlice = createSlice({
       })
       .addCase(sendRegisterEmailOtp.rejected, (state, action) => {
         toast.error("Không thể gửi OTP, vui lòng thử lại sau!");
+      })
+
+      // VERIFY OTP
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        const res = action.payload;
+        if (res && res.code === 200) {
+          toast.success(res.message || "Xác thực OTP thành công!");
+        } else {
+          toast.error(res?.message || "Xác thực OTP thất bại!");
+        }
+      })
+      .addCase(verifyOtp.rejected, (state, action) => {
+        toast.error("Xác thực OTP thất bại!");
       })
 
   },

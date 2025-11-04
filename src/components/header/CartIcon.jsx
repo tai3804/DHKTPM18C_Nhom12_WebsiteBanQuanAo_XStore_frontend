@@ -1,10 +1,9 @@
 import React from "react";
 import { ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export default function CartIcon() {
-  const navigate = useNavigate();
   const { cart } = useSelector((state) => state.cart);
 
   // Tính tổng số lượng sản phẩm trong giỏ
@@ -12,9 +11,15 @@ export default function CartIcon() {
     cart?.cartItems?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   return (
-    <button
-      onClick={() => navigate("/cart")}
-      className="relative p-2 hover:bg-gray-100 rounded-full transition hover:cursor-pointer"
+    <NavLink
+      to="/cart"
+      className={({ isActive }) =>
+        `relative p-2 rounded-full transition-all duration-200 ${
+          isActive
+            ? "bg-gray-200 text-gray-900 border border-gray-300 shadow-sm"
+            : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-transparent"
+        }`
+      }
     >
       <ShoppingCart className="h-6 w-6" />
       {totalItems > 0 && (
@@ -22,6 +27,6 @@ export default function CartIcon() {
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
-    </button>
+    </NavLink>
   );
 }

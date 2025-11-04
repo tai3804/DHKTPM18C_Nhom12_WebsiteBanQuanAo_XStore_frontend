@@ -4,6 +4,7 @@ import { Errors } from "../constants/errors";
 import { Successes } from "../constants/successes";
 import { clearError, setError } from "./ErrorSlice";
 import { startLoading, stopLoading } from "./LoadingSlice";
+import { API_BASE_URL } from "../config/api";
 
 // ✅ GET CART BY USER ID
 export const getCartByUser = createAsyncThunk(
@@ -14,7 +15,7 @@ export const getCartByUser = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/carts/user/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/carts/user/${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +52,7 @@ export const createCart = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch("/api/carts", {
+      const res = await fetch(`${API_BASE_URL}/api/carts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +88,7 @@ export const addToCart = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch("/api/cart-items", {
+      const res = await fetch(`${API_BASE_URL}/api/cart-items`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +103,8 @@ export const addToCart = createAsyncThunk(
         throw new Error(json.message || Errors.CART_ADD_FAILED);
       }
 
-      toast.success(Successes.CART_ADD_SUCCESS);
+      // Xóa toast từ đây để tránh duplicate với ProductDetailPage
+      // toast.success(Successes.CART_ADD_SUCCESS);
 
       // Lấy lại cart sau khi thêm sản phẩm
       const userId = getState().auth.user?.id;
@@ -130,7 +132,7 @@ export const updateCartItemQuantity = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/cart-items/${cartItemId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/cart-items/${cartItemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -173,7 +175,7 @@ export const removeFromCart = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/cart-items/${cartItemId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/cart-items/${cartItemId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -222,7 +224,7 @@ export const clearCart = createAsyncThunk(
 
       // Xóa từng cart item
       const deletePromises = cart.cartItems.map((item) =>
-        fetch(`/api/cart-items/${item.id}`, {
+        fetch(`${API_BASE_URL}/api/cart-items/${item.id}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",

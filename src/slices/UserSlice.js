@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   users: [], // danh sách tất cả user
@@ -19,7 +20,7 @@ export const getUsers = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth?.token;
-      const res = await fetch("/api/users", {
+      const res = await fetch(`${API_BASE_URL}/api/users`, {
           headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`, // gắn token ở đây
@@ -83,7 +84,7 @@ export const getUserById = createAsyncThunk(
       const token = getState().auth.token;
 
 
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +114,7 @@ export const getUserByUsername = createAsyncThunk(
     try {
       // Lấy token từ auth slice
       const token = getState().auth.token;
-      const res = await fetch(`/api/users/username/${username}`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/username/${username}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -142,7 +143,7 @@ export const createUser = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch("/api/users", {
+      const res = await fetch(`${API_BASE_URL}/api/users`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -176,7 +177,7 @@ export const updateUser = createAsyncThunk(
     dispatch(clearError());
 
     try {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -218,7 +219,7 @@ export const deleteUser = createAsyncThunk(
     console.log(token);
     
     try {
-      const res = await fetch(`/api/users/${id}`, { 
+      const res = await fetch(`${API_BASE_URL}/api/users/${id}`, { 
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

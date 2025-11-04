@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 // Mở rộng đối tượng Errors để thêm các mã lỗi cho loại sản phẩm
 const initialState = {
@@ -19,7 +20,7 @@ export const getProductTypes = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch("/api/product-types");
+      const res = await fetch(`${API_BASE_URL}/api/product-types`);
 
       if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_FETCH_FAILED);
 
@@ -41,7 +42,7 @@ export const getProductTypeById = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/product-types/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/product-types/${id}`);
 
       if (!res.ok) throw new Error(Errors.PRODUCT_TYPE_FETCH_BY_ID_FAILED);
 
@@ -66,7 +67,7 @@ export const createProductType = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch("/api/product-types", {
+      const res = await fetch(`${API_BASE_URL}/api/product-types`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -98,7 +99,7 @@ export const updateProductType = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`/api/product-types/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/product-types/${id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -130,7 +131,7 @@ export const deleteProductType = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`/api/product-types/${id}`, { 
+      const res = await fetch(`${API_BASE_URL}/api/product-types/${id}`, { 
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,
