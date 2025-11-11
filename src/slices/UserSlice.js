@@ -245,6 +245,42 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+export const changePassword = createAsyncThunk(
+  "user/changePassword",
+  async ({ oldPassword, newPassword }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      if (!token) {
+        throw new Error("User not authenticated");
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/users/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || Errors.USER_UPDATE_FAILED);
+      }
+
+      return data; // Sẽ chứa { code, message, result }
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
 // ----------------- SLICE -----------------
 const userSlice = createSlice({
   name: "user",
