@@ -36,6 +36,7 @@ import SendOtpPage from "./pages/SendOtpPage";
 import FavouritePage from "./pages/FavouritePage";
 import DebugPage from "./pages/DebugPage";
 import HotPage from "./pages/HotPage";
+import ManageStockPage from "./pages/admin/ManageStockPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -98,6 +99,7 @@ export default function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsAdminPage />} />
           <Route path="product-types" element={<ManageProductTypesPage />} />
+          <Route path="stocks" element={<ManageStockPage />} />
         </Route>
       </Routes>
 

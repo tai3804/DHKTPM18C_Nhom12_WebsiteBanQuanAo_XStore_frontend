@@ -20,7 +20,7 @@ export const getStocks = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -29,8 +29,10 @@ export const getStocks = createAsyncThunk(
       });
       if (!res.ok) throw new Error(Errors.STOCK_FETCH_FAILED);
       const json = await res.json();
-      return json.data || json;
+      console.log("getStocks - fetched stocks:", json);
+      return json.result || json;
     } catch (error) {
+      console.log("getStocks - error:", error);
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
@@ -47,7 +49,7 @@ export const createStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,7 +59,7 @@ export const createStock = createAsyncThunk(
       });
       if (!res.ok) throw new Error(Errors.STOCK_CREATE_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -74,7 +76,7 @@ export const updateStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +86,7 @@ export const updateStock = createAsyncThunk(
       });
       if (!res.ok) throw new Error(Errors.STOCK_UPDATE_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -102,7 +104,7 @@ export const deleteStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -128,7 +130,7 @@ export const getStockById = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +139,7 @@ export const getStockById = createAsyncThunk(
       });
       if (!res.ok) throw new Error(Errors.STOCK_FETCH_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -158,7 +160,7 @@ export const getStockItems = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/stocks/${stockId}/items`, {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${stockId}/items`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -167,7 +169,7 @@ export const getStockItems = createAsyncThunk(
       });
       if (!res.ok) throw new Error(Errors.STOCK_ITEM_FETCH_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -190,7 +192,7 @@ export const setItemQuantity = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `${API_BASE_URL}/stocks/${stockId}/items?productId=${productId}&quantity=${quantity}`,
+        `${API_BASE_URL}/api/stocks/${stockId}/items?productId=${productId}&quantity=${quantity}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -198,7 +200,7 @@ export const setItemQuantity = createAsyncThunk(
       );
       if (!res.ok) throw new Error(Errors.STOCK_ITEM_UPDATE_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -220,7 +222,7 @@ export const increaseItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `${API_BASE_URL}/stocks/${stockId}/items/increase?productId=${productId}&amount=${amount}`,
+        `${API_BASE_URL}/api/stocks/${stockId}/items/increase?productId=${productId}&amount=${amount}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -228,7 +230,7 @@ export const increaseItem = createAsyncThunk(
       );
       if (!res.ok) throw new Error(Errors.STOCK_ITEM_INCREASE_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -250,7 +252,7 @@ export const decreaseItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `${API_BASE_URL}/stocks/${stockId}/items/decrease?productId=${productId}&amount=${amount}`,
+        `${API_BASE_URL}/api/stocks/${stockId}/items/decrease?productId=${productId}&amount=${amount}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -258,7 +260,7 @@ export const decreaseItem = createAsyncThunk(
       );
       if (!res.ok) throw new Error(Errors.STOCK_ITEM_DECREASE_FAILED);
       const json = await res.json();
-      return json.data || json;
+      return json.result || json;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -278,7 +280,7 @@ export const deleteStockItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `${API_BASE_URL}/stocks/${stockId}/items?productId=${productId}`,
+        `${API_BASE_URL}/api/stocks/${stockId}/items?productId=${productId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
