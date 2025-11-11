@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* Dark mode styles */
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Toast Styles */
+.Toastify__toast {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  padding: 16px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.dark .Toastify__toast {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.Toastify__toast--success {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+.dark .Toastify__toast--success {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.Toastify__toast--error {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.dark .Toastify__toast--error {
+  background-color: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+.Toastify__toast--info {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.dark .Toastify__toast--info {
+  background-color: #1e3a8a !important;
+  color: #dbeafe !important;
+}
+
+.Toastify__progress-bar--success {
+  background: linear-gradient(to right, #10b981, #059669) !important;
+}
+
+.Toastify__progress-bar--error {
+  background: linear-gradient(to right, #ef4444, #dc2626) !important;
+}
+
+.Toastify__close-button {
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
