@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   discounts: [], // danh sách tất cả discount
@@ -19,7 +20,7 @@ export const getDiscounts = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch("/api/discounts", {
+      const res = await fetch(`http://localhost:8080/api/discounts`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -47,7 +48,7 @@ export const getDiscountById = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/discounts/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/discounts/${id}`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -75,7 +76,7 @@ export const createDiscount = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch("/api/discounts", {
+      const res = await fetch(`http://localhost:8080/api/discounts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +106,7 @@ export const updateDiscount = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/discounts/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/discounts/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -135,7 +136,7 @@ export const deleteDiscount = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/discounts/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/discounts/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,

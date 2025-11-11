@@ -6,14 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    proxy: {
-      '/api': {
-        // target: 'http://localhost:8080', // địa chỉ backend (Spring Boot)
-        target: 'https://x-store-6in2.onrender.com/',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, ''), // bỏ prefix /api nếu cần
-      },
-    },
+    port: 5173,
+    strictPort: true, // Báo lỗi nếu port 5173 đã được sử dụng thay vì tự động chuyển
   }
 })

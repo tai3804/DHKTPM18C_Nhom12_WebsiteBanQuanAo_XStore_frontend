@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   accounts: [],
@@ -15,7 +16,7 @@ export const getAccounts = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch("/api/accounts");
+      const res = await fetch(`${API_BASE_URL}/api/accounts`);
       if (!res.ok) throw new Error(Errors.ACCOUNT_FETCH_FAILED);
 
       const json = await res.json();
@@ -36,7 +37,7 @@ export const getAccountById = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/accounts/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/accounts/${id}`);
       if (!res.ok) throw new Error(Errors.ACCOUNT_FETCH_FAILED);
 
       const json = await res.json();
@@ -57,7 +58,7 @@ export const createAccount = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch("/api/accounts", {
+      const res = await fetch(`${API_BASE_URL}/api/accounts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAccount),
@@ -82,7 +83,7 @@ export const updateAccount = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/accounts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/accounts/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(accountData),
@@ -107,7 +108,7 @@ export const deleteAccount = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/accounts/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/api/accounts/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(Errors.ACCOUNT_DELETE_FAILED);
 
       let json;

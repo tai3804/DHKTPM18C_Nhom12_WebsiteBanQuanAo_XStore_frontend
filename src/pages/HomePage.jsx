@@ -1,47 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/header/Header";
 import HeroSection from "../components/home/HeroSection";
 import CategorySection from "../components/home/CategorySection";
-import FeaturedProducts from "../components/home/FeaturedProducts";
+import HotProducts from "../components/home/HotProducts";
+import SaleProducts from "../components/home/SaleProducts";
 import BenefitsSection from "../components/home/BenefitsSection";
 import Footer from "../components/common/Footer";
-// import { setUser } from "../slices/AuthSlice"; // lấy user
+import { getProducts } from "../slices/ProductSlice";
+import { getProductTypes } from "../slices/ProductTypeSlice";
+import { getCartByUser } from "../slices/CartSlice";
 
 export default function HomePage() {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // //them moi
-  // const { user } = useSelector(state => state.auth); // Lấy user
-  const products = useSelector((state) => state.product.products); // Lấy sản phẩm từ store
+  const products = useSelector((state) => state.product.products) || [];
+  const productTypes =
+    useSelector((state) => state.productType.productTypes) || [];
+  const { user } = useSelector((state) => state.auth);
 
+  // Load initial data
   useEffect(() => {
-    //fetch sản phẩm từ API ở đây
+    // Load product types for categories
+    dispatch(getProductTypes());
   }, [dispatch]);
 
-  //Hàm xử lý điều hướng từ CategorySection
-  const handleNavigate = (page) => {
-    console.log("Navigating to page:", page);
-    if (page === "products") {
-      navigate("/products");
-    } else if (page === "sale") {
-      navigate("/sale");
-    } else {
-      // Điều hướng đến trang danh mục cụ thể (ví dụ: /products?category=shirts)
-      navigate(`/products?category=${page}`);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-900">
+    <div className="min-h-screen bg-white">
       <Header />
-      <main className="flex-1">
-        <HeroSection />
-        <CategorySection onNavigate={handleNavigate} />
-        <FeaturedProducts products={products} />
-        <BenefitsSection />
-      </main>
+      <HeroSection />
+      <CategorySection productTypes={productTypes} />
+      <HotProducts products={products} />
+      <SaleProducts products={products} />
+      <BenefitsSection />
       <Footer />
     </div>
   );

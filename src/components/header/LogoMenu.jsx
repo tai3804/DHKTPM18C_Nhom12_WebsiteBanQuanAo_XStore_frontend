@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 export default function LogoMenu() {
   return (
@@ -9,9 +10,12 @@ export default function LogoMenu() {
       </button>
 
       {/* Logo */}
-      <div className="h-20 w-20  rounded-lg flex items-center justify-center font-bold text-primary">
+      <NavLink
+        className="h-20 w-20  rounded-lg flex items-center justify-center font-bold text-primary"
+        to={"/"}
+      >
         <img src="/logo.png" alt="" />
-      </div>
+      </NavLink>
     </div>
   );
 }

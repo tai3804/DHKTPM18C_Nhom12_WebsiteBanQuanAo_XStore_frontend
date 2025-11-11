@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 // Mở rộng đối tượng Errors để thêm các mã lỗi cho sản phẩm
 const ProductErrors = {
@@ -27,6 +28,9 @@ const ProductErrors = {
 const initialState = {
   products:  [], // luôn là mảng
   product: null,
+  productStocks: [], // stock items cho product hiện tại
+  productColors: [], // colors cho product hiện tại
+  productSizes: [], // sizes cho product hiện tại
 };
 
 
@@ -39,13 +43,20 @@ export const getProducts = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch(`http://localhost:8080/api/products`);
 
       if (!res.ok) throw new Error(ProductErrors.PRODUCT_FETCH_FAILED);
 
       const json = await res.json();
-      return json.result || json;
+      console.log("getProducts API response:", json);
+      
+      // Backend trả về ApiResponse với structure: { code, message, result }
+      if (json.result !== undefined) {
+        return json.result;
+      }
+      return json;
     } catch (error) {
+      console.error("getProducts error:", error);
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
@@ -61,13 +72,20 @@ export const getProductById = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/products/${id}`);
+      const res = await fetch(`http://localhost:8080/api/products/${id}`);
 
       if (!res.ok) throw new Error(ProductErrors.PRODUCT_FETCH_BY_ID_FAILED);
 
       const json = await res.json();
-      return json.result || json;
+      console.log("getProductById API response:", json);
+      
+      // Backend trả về ApiResponse với structure: { code, message, result }
+      if (json.result !== undefined) {
+        return json.result;
+      }
+      return json;
     } catch (error) {
+      console.error("getProductById error:", error);
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
     } finally {
@@ -83,7 +101,7 @@ export const getProductsByTypeId = createAsyncThunk(
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`/api/products/type/${typeId}`);
+      const res = await fetch(`http://localhost:8080/api/products/type/${typeId}`);
 
       if (!res.ok) throw new Error(ProductErrors.PRODUCT_FETCH_FAILED);
 
@@ -108,7 +126,7 @@ export const createProduct = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch("/api/products", {
+      const res = await fetch(`http://localhost:8080/api/products`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -140,7 +158,7 @@ export const updateProduct = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/products/${id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -172,7 +190,7 @@ export const deleteProduct = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`/api/products/${id}`, { 
+      const res = await fetch(`http://localhost:8080/api/products/${id}`, { 
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -224,6 +242,72 @@ export const searchProductsByName = createAsyncThunk(
   }
 );
 
+// GET PRODUCT STOCKS
+export const getProductStocks = createAsyncThunk(
+  "product/getProductStocks",
+  async (productId, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const res = await fetch(`http://localhost:8080/api/products/${productId}/stocks`);
+
+      if (!res.ok) throw new Error("Không thể tải thông tin kho hàng");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// GET PRODUCT COLORS
+export const getProductColors = createAsyncThunk(
+  "product/getProductColors",
+  async (productId, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const res = await fetch(`http://localhost:8080/api/products/${productId}/colors`);
+
+      if (!res.ok) throw new Error("Không thể tải thông tin màu sắc");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// GET PRODUCT SIZES
+export const getProductSizes = createAsyncThunk(
+  "product/getProductSizes",
+  async (productId, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const res = await fetch(`http://localhost:8080/api/products/${productId}/sizes`);
+
+      if (!res.ok) throw new Error("Không thể tải thông tin kích thước");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
 // ----------------- SLICE -----------------
 const productSlice = createSlice({
   name: "product",
@@ -231,6 +315,9 @@ const productSlice = createSlice({
   reducers: {
     clearProducts: (state) => {
       state.product = null;
+      state.productStocks = [];
+      state.productColors = [];
+      state.productSizes = [];
     },
     setProducts: (state, action) => {
       state.products = action.payload;
@@ -247,6 +334,21 @@ const productSlice = createSlice({
       // Lấy 1 sản phẩm
       .addCase(getProductById.fulfilled, (state, action) => {
         state.product = action.payload;
+      })
+
+      // Lấy stock items cho product
+      .addCase(getProductStocks.fulfilled, (state, action) => {
+        state.productStocks = action.payload;
+      })
+
+      // Lấy colors cho product
+      .addCase(getProductColors.fulfilled, (state, action) => {
+        state.productColors = action.payload;
+      })
+
+      // Lấy sizes cho product
+      .addCase(getProductSizes.fulfilled, (state, action) => {
+        state.productSizes = action.payload;
       })
 
       // Lấy sản phẩm theo loại

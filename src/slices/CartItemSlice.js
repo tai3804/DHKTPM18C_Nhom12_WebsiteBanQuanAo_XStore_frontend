@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   items: [],
@@ -17,7 +18,7 @@ export const addItemToCart = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/carts/${cartId}/items`, {
+      const res = await fetch(`http://localhost:8080/api/carts/${cartId}/items`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export const updateCartItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/carts/${cartId}/items/${itemId}`, {
+      const res = await fetch(`http://localhost:8080/api/carts/${cartId}/items/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +80,7 @@ export const removeCartItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
-      const res = await fetch(`/api/carts/${cartId}/items/${itemId}`, {
+      const res = await fetch(`http://localhost:8080/api/carts/${cartId}/items/${itemId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,

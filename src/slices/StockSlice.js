@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { startLoading, stopLoading } from "./LoadingSlice";
 import { setError, clearError } from "./ErrorSlice";
 import Errors from "../constants/errors";
+import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   stocks: [], // Danh sách tất cả kho
@@ -19,7 +20,7 @@ export const getStocks = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch("/stocks", {
+      const res = await fetch(`${API_BASE_URL}/stocks`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export const createStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch("/stocks", {
+      const res = await fetch(`${API_BASE_URL}/stocks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +74,7 @@ export const updateStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +102,7 @@ export const deleteStock = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -127,7 +128,7 @@ export const getStockById = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`/stocks/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/stocks/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -157,7 +158,7 @@ export const getStockItems = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`/stocks/${stockId}/items`, {
+      const res = await fetch(`${API_BASE_URL}/stocks/${stockId}/items`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -189,7 +190,7 @@ export const setItemQuantity = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `/stocks/${stockId}/items?productId=${productId}&quantity=${quantity}`,
+        `${API_BASE_URL}/stocks/${stockId}/items?productId=${productId}&quantity=${quantity}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -219,7 +220,7 @@ export const increaseItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `/stocks/${stockId}/items/increase?productId=${productId}&amount=${amount}`,
+        `${API_BASE_URL}/stocks/${stockId}/items/increase?productId=${productId}&amount=${amount}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -249,7 +250,7 @@ export const decreaseItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `/stocks/${stockId}/items/decrease?productId=${productId}&amount=${amount}`,
+        `${API_BASE_URL}/stocks/${stockId}/items/decrease?productId=${productId}&amount=${amount}`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -277,7 +278,7 @@ export const deleteStockItem = createAsyncThunk(
     try {
       const token = getState().auth.token;
       const res = await fetch(
-        `/stocks/${stockId}/items?productId=${productId}`,
+        `${API_BASE_URL}/stocks/${stockId}/items?productId=${productId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
