@@ -20,6 +20,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RefundPolicyPage from "./pages/RefundPolicyPage";
 import FAQPage from "./pages/FAQPage";
 import ShoppingGuidePage from "./pages/ShoppingGuidePage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -85,6 +86,7 @@ export default function App() {
         <Route path="/register-info" element={<RegisterInfoPage />} />
         <Route path="/favourite" element={<FavouritePage />} />
         <Route path="/debug" element={<DebugPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route
