@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
   Warehouse,
+  CreditCard 
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -213,6 +214,41 @@ export default function AdminLayout() {
               <Warehouse size={18} />
               {sidebarOpen && <span>Kho hàng</span>}
             </NavLink>
+
+            {/* Giảm giá */}
+            <NavLink
+              to="/admin/discounts"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <Tag size={18} />
+              {sidebarOpen && <span>Giảm giá</span>}
+            </NavLink>
+
+            {/* Đơn hàng */}
+            <NavLink
+              to="/admin/orders"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <CreditCard size={18} />
+              {sidebarOpen && <span>Đơn hàng</span>}
+            </NavLink>
+            
           </nav>
         </aside>
 

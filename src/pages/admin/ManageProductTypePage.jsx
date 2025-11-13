@@ -1,7 +1,7 @@
 // ManageProductTypesPage.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
@@ -266,7 +266,7 @@ export default function ManageProductTypesPage() {
                       className="text-blue-600 hover:text-blue-800 transition cursor-pointer"
                       title="Chỉnh sửa"
                     >
-                      <Edit3 size={18} />
+                      <Edit2 size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(type.id)}
