@@ -16,6 +16,7 @@ import {
   Grid,
   ChevronDown,
   ChevronUp,
+  Warehouse,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -197,6 +198,21 @@ export default function AdminLayout() {
                 </div>
               )}
             </div>
+
+            {/* Kho hàng */}
+            <NavLink
+              to="/admin/stocks"
+              className={({ isActive }) =>
+                `flex items-center  gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <Warehouse size={18} />
+              {sidebarOpen && <span>Kho hàng</span>}
+            </NavLink>
           </nav>
         </aside>
 

@@ -89,6 +89,15 @@ export default function UserIcon() {
             >
               Thông tin
             </button>
+
+            {/* Nút đổi mật khẩu */}
+            <button
+              onClick={() => handleNavigate("/reset-password")}
+              className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors cursor-pointer"
+            >
+              Đổi mật khẩu
+            </button>
+
             <button
               onClick={handleLogout}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer last:rounded-b-lg border-t ${

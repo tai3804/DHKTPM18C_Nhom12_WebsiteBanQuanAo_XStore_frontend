@@ -12,6 +12,7 @@ import productTypeReducer from "../slices/ProductTypeSlice"
 import discountReducer from '../slices/DiscountSlice'
 import favouriteReducer from '../slices/FavouriteSlice'
 import themeReducer from '../slices/ThemeSlice'
+import orderReducer from '../slices/OrderSlice'
 
 export const store = configureStore({
 
@@ -30,5 +31,6 @@ export const store = configureStore({
     discount: discountReducer,
     favourite: favouriteReducer,
     theme: themeReducer,
+    order: orderReducer,
   },
 })

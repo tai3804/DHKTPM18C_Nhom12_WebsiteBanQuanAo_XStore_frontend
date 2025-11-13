@@ -22,6 +22,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RefundPolicyPage from "./pages/RefundPolicyPage";
 import FAQPage from "./pages/FAQPage";
 import ShoppingGuidePage from "./pages/ShoppingGuidePage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -39,6 +40,7 @@ import SendOtpPage from "./pages/SendOtpPage";
 import FavouritePage from "./pages/FavouritePage";
 import DebugPage from "./pages/DebugPage";
 import HotPage from "./pages/HotPage";
+import ManageStockPage from "./pages/admin/ManageStockPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -112,6 +114,7 @@ export default function App() {
         <Route path="/register-info" element={<RegisterInfoPage />} />
         <Route path="/favourite" element={<FavouritePage />} />
         <Route path="/debug" element={<DebugPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route
@@ -126,6 +129,7 @@ export default function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsAdminPage />} />
           <Route path="product-types" element={<ManageProductTypesPage />} />
+          <Route path="stocks" element={<ManageStockPage />} />
         </Route>
       </Routes>
 

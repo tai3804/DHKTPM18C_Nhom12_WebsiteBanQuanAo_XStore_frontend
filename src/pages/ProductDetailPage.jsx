@@ -165,6 +165,7 @@ export default function ProductDetailPage() {
           cartId: cart?.id,
           productId: product.id,
           quantity: quantity,
+          stockId: selectedStock.stockId,
         })
       ).unwrap();
 
@@ -390,7 +391,7 @@ export default function ProductDetailPage() {
                       {Math.round(
                         ((product.originalPrice - product.price) /
                           product.originalPrice) *
-                          100
+                        100
                       )}
                       %
                     </span>
@@ -457,11 +458,10 @@ export default function ProductDetailPage() {
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
-                      className={`relative w-12 h-12 rounded-full border-2 transition-all ${
-                        selectedColor?.id === color.id
+                      className={`relative w-12 h-12 rounded-full border-2 transition-all ${selectedColor?.id === color.id
                           ? "border-blue-500 scale-110"
                           : "border-gray-300 hover:border-gray-400"
-                      }`}
+                        }`}
                       style={{ backgroundColor: color.hexCode }}
                       title={color.name}
                     >
@@ -564,11 +564,10 @@ export default function ProductDetailPage() {
               {/* Favourite Button */}
               <button
                 onClick={handleToggleFavourite}
-                className={`w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                  isFavourite
+                className={`w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${isFavourite
                     ? "bg-red-50 text-red-600 border-2 border-red-500 hover:bg-red-100"
                     : "bg-gray-50 text-gray-700 border-2 border-gray-300 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <Heart
                   className="h-5 w-5"
@@ -589,8 +588,8 @@ export default function ProductDetailPage() {
                 {isAddingToCart
                   ? "Đang thêm..."
                   : availableQuantity === 0
-                  ? "Hết hàng"
-                  : "Thêm vào giỏ hàng"}
+                    ? "Hết hàng"
+                    : "Thêm vào giỏ hàng"}
               </button>
 
               <button
@@ -605,8 +604,8 @@ export default function ProductDetailPage() {
                 {isBuying
                   ? "Đang mua..."
                   : availableQuantity === 0
-                  ? "Hết hàng"
-                  : "Mua ngay"}
+                    ? "Hết hàng"
+                    : "Mua ngay"}
               </button>
 
               <button
@@ -679,11 +678,10 @@ export default function ProductDetailPage() {
               <p>
                 <span className="font-semibold">Tình trạng:</span>
                 <span
-                  className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                    getAvailableQuantity() > 0
+                  className={`ml-2 px-2 py-1 rounded-full text-xs ${getAvailableQuantity() > 0
                       ? "bg-green-100 text-green-800"
                       : "bg-red-100 text-red-800"
-                  }`}
+                    }`}
                 >
                   {getAvailableQuantity() > 0 ? "Còn hàng" : "Hết hàng"}
                 </span>
@@ -727,9 +725,8 @@ export default function ProductDetailPage() {
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="font-medium text-gray-600">Trạng thái:</span>
               <span
-                className={`font-medium ${
-                  totalStock > 0 ? "text-green-600" : "text-red-600"
-                }`}
+                className={`font-medium ${totalStock > 0 ? "text-green-600" : "text-red-600"
+                  }`}
               >
                 {totalStock > 0 ? "Còn hàng" : "Hết hàng"}
               </span>
