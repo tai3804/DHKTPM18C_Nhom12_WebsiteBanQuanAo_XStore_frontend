@@ -82,11 +82,16 @@ export const createCart = createAsyncThunk(
 // ✅ ADD TO CART
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
-  async ({ cartId, productId, quantity = 1 }, { dispatch, getState, rejectWithValue }) => {
+  async ({ cartId, productId, quantity = 1, stockId }, { dispatch, getState, rejectWithValue }) => { // <-- Thêm stockId
     dispatch(startLoading());
     dispatch(clearError());
     try {
       const token = getState().auth.token;
+
+      // KIỂM TRA STOCKID
+      if (!stockId) {
+        throw new Error("Vui lòng chọn kho hàng");
+      }
 
       const res = await fetch(`${API_BASE_URL}/api/cart-items`, {
         method: "POST",
@@ -94,7 +99,7 @@ export const addToCart = createAsyncThunk(
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ cartId, productId, quantity }),
+        body: JSON.stringify({ cartId, productId, stockId, quantity }),
       });
 
       const json = await res.json();

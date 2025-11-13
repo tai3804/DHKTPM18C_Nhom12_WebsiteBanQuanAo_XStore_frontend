@@ -11,6 +11,7 @@ import productReducer from "../slices/ProductSlice"
 import productTypeReducer from "../slices/ProductTypeSlice"
 import discountReducer from '../slices/DiscountSlice'
 import favouriteReducer from '../slices/FavouriteSlice'
+import orderReducer from '../slices/OrderSlice'
 
 export const store = configureStore({
 
@@ -28,5 +29,6 @@ export const store = configureStore({
     productType: productTypeReducer,
     discount: discountReducer,
     favourite: favouriteReducer,
+    order: orderReducer,
   },
 })
