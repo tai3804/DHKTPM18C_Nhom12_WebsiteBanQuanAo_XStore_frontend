@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { X, ChevronDown, ChevronUp, ChevronLeft, Menu } from "lucide-react";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function ProductFilter({
   productTypes = [],
@@ -7,6 +9,7 @@ export default function ProductFilter({
   currentFilters = {},
   children,
 }) {
+  const themeMode = useSelector(selectThemeMode);
   const [isFilterVisible, setIsFilterVisible] = useState(true);
   const [selectedType, setSelectedType] = useState(currentFilters.type || "");
   const [priceRange, setPriceRange] = useState({
@@ -75,7 +78,11 @@ export default function ProductFilter({
         {/* Toggle Button - Small */}
         <button
           onClick={() => setIsFilterVisible(!isFilterVisible)}
-          className="h-10 w-10 flex items-center justify-center border border-gray-300 rounded-lg text-gray-800 hover:text-blue-600 hover:border-blue-500 hover:bg-blue-50 transition-all"
+          className={`h-10 w-10 flex items-center justify-center border rounded-lg transition-all ${
+            themeMode === "dark"
+              ? "border-gray-600 text-gray-300 hover:text-blue-400 hover:border-blue-400 hover:bg-gray-800"
+              : "border-gray-300 text-gray-800 hover:text-blue-600 hover:border-blue-500 hover:bg-blue-50"
+          }`}
           title={isFilterVisible ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
         >
           {isFilterVisible ? (
@@ -93,12 +100,28 @@ export default function ProductFilter({
               : "w-0 opacity-0 overflow-hidden"
           }`}
         >
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-4 space-y-4 h-fit sticky top-4">
+          <div
+            className={`rounded-lg border shadow-sm p-4 space-y-4 h-fit sticky top-4 transition-colors ${
+              themeMode === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-300"
+            }`}
+          >
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b">
-              <h3 className="font-bold text-gray-900 flex items-center gap-2">
+            <div
+              className={`flex items-center justify-between pb-3 border-b transition-colors ${
+                themeMode === "dark" ? "border-gray-700" : "border-gray-300"
+              }`}
+            >
+              <h3
+                className={`font-bold flex items-center gap-2 transition-colors ${
+                  themeMode === "dark" ? "text-white" : "text-gray-900"
+                }`}
+              >
                 <svg
-                  className="w-4 h-4"
+                  className={`w-4 h-4 transition-colors ${
+                    themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -113,7 +136,7 @@ export default function ProductFilter({
                 Bộ lọc
               </h3>
               {activeFiltersCount > 0 && (
-                <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5">
+                <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
                   {activeFiltersCount}
                 </span>
               )}
@@ -125,13 +148,25 @@ export default function ProductFilter({
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => setShowCategoryFilter(!showCategoryFilter)}
               >
-                <label className="text-sm font-semibold text-gray-900 cursor-pointer">
+                <label
+                  className={`text-sm font-semibold cursor-pointer transition-colors ${
+                    themeMode === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Danh mục
                 </label>
                 {showCategoryFilter ? (
-                  <ChevronUp className="h-4 w-4 text-gray-600" />
+                  <ChevronUp
+                    className={`h-4 w-4 transition-colors ${
+                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-600" />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-colors ${
+                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  />
                 )}
               </div>
 
@@ -139,7 +174,11 @@ export default function ProductFilter({
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 bg-white"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
+                    themeMode === "dark"
+                      ? "border-gray-600 bg-gray-700 text-white"
+                      : "border-gray-300 bg-white text-gray-900"
+                  }`}
                 >
                   <option value="">Tất cả</option>
                   {productTypes.map((type) => (
@@ -151,7 +190,11 @@ export default function ProductFilter({
               )}
             </div>
 
-            <div className="border-t"></div>
+            <div
+              className={`border-t transition-colors ${
+                themeMode === "dark" ? "border-gray-700" : "border-gray-300"
+              }`}
+            ></div>
 
             {/* Price Filter */}
             <div className="space-y-2">
@@ -159,13 +202,25 @@ export default function ProductFilter({
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => setShowPriceFilter(!showPriceFilter)}
               >
-                <label className="text-sm font-semibold text-gray-900 cursor-pointer">
+                <label
+                  className={`text-sm font-semibold cursor-pointer transition-colors ${
+                    themeMode === "dark" ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Khoảng giá
                 </label>
                 {showPriceFilter ? (
-                  <ChevronUp className="h-4 w-4 text-gray-600" />
+                  <ChevronUp
+                    className={`h-4 w-4 transition-colors ${
+                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-gray-600" />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-colors ${
+                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  />
                 )}
               </div>
 
@@ -179,7 +234,11 @@ export default function ProductFilter({
                       onChange={(e) =>
                         setPriceRange({ ...priceRange, min: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 bg-white"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
+                        themeMode === "dark"
+                          ? "border-gray-600 bg-gray-700 text-white"
+                          : "border-gray-300 bg-white text-gray-900"
+                      }`}
                     />
                     <input
                       type="number"
@@ -188,7 +247,11 @@ export default function ProductFilter({
                       onChange={(e) =>
                         setPriceRange({ ...priceRange, max: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 bg-white"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
+                        themeMode === "dark"
+                          ? "border-gray-600 bg-gray-700 text-white"
+                          : "border-gray-300 bg-white text-gray-900"
+                      }`}
                     />
                   </div>
 
@@ -198,7 +261,11 @@ export default function ProductFilter({
                       <button
                         key={index}
                         onClick={() => handleQuickPriceFilter(range)}
-                        className="w-full text-left text-xs px-3 py-1.5 hover:bg-gray-100 rounded transition text-gray-700"
+                        className={`w-full text-left text-xs px-3 py-1.5 rounded transition ${
+                          themeMode === "dark"
+                            ? "hover:bg-gray-700 text-gray-300"
+                            : "hover:bg-gray-100 text-gray-700"
+                        }`}
                       >
                         {range.label}
                       </button>
@@ -208,17 +275,29 @@ export default function ProductFilter({
               )}
             </div>
 
-            <div className="border-t"></div>
+            <div
+              className={`border-t transition-colors ${
+                themeMode === "dark" ? "border-gray-700" : "border-gray-300"
+              }`}
+            ></div>
 
             {/* Sort By */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-900">
+              <label
+                className={`text-sm font-semibold transition-colors ${
+                  themeMode === "dark" ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Sắp xếp
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 bg-white"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
+                  themeMode === "dark"
+                    ? "border-gray-600 bg-gray-700 text-white"
+                    : "border-gray-300 bg-white text-gray-900"
+                }`}
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -229,7 +308,11 @@ export default function ProductFilter({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-3 border-t space-y-2">
+            <div
+              className={`pt-3 border-t space-y-2 transition-colors ${
+                themeMode === "dark" ? "border-gray-700" : "border-gray-300"
+              }`}
+            >
               <button
                 onClick={handleApplyFilters}
                 className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm font-medium"
@@ -239,7 +322,11 @@ export default function ProductFilter({
               {activeFiltersCount > 0 && (
                 <button
                   onClick={handleResetFilters}
-                  className="w-full border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition text-sm font-medium"
+                  className={`w-full border px-4 py-2 rounded-md transition text-sm font-medium ${
+                    themeMode === "dark"
+                      ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
                   Xóa bộ lọc
                 </button>
@@ -253,14 +340,30 @@ export default function ProductFilter({
       <div className="flex-1 min-w-0">
         {/* Active Filters Display */}
         {activeFiltersCount > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <div
+            className={`border rounded-lg p-3 mb-4 transition-colors ${
+              themeMode === "dark"
+                ? "bg-gray-800 border-blue-700"
+                : "bg-blue-50 border-blue-200"
+            }`}
+          >
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-gray-700">
+                <span
+                  className={`text-sm font-medium transition-colors ${
+                    themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
                   Đang lọc:
                 </span>
                 {selectedType && (
-                  <span className="inline-flex items-center gap-1 bg-white border border-blue-300 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                  <span
+                    className={`inline-flex items-center gap-1 border px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      themeMode === "dark"
+                        ? "bg-gray-700 border-blue-600 text-blue-300"
+                        : "bg-white border-blue-300 text-blue-700"
+                    }`}
+                  >
                     {selectedType}
                     <button
                       onClick={() => {
@@ -272,14 +375,24 @@ export default function ProductFilter({
                           sortBy,
                         });
                       }}
-                      className="hover:bg-blue-100 rounded-full p-0.5"
+                      className={`rounded-full p-0.5 transition-colors ${
+                        themeMode === "dark"
+                          ? "hover:bg-gray-600"
+                          : "hover:bg-blue-100"
+                      }`}
                     >
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {(priceRange.min || priceRange.max) && (
-                  <span className="inline-flex items-center gap-1 bg-white border border-green-300 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+                  <span
+                    className={`inline-flex items-center gap-1 border px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      themeMode === "dark"
+                        ? "bg-gray-700 border-green-600 text-green-300"
+                        : "bg-white border-green-300 text-green-700"
+                    }`}
+                  >
                     {priceRange.min
                       ? `${parseInt(priceRange.min).toLocaleString()}đ`
                       : "0đ"}{" "}
@@ -297,14 +410,24 @@ export default function ProductFilter({
                           sortBy,
                         });
                       }}
-                      className="hover:bg-green-100 rounded-full p-0.5"
+                      className={`rounded-full p-0.5 transition-colors ${
+                        themeMode === "dark"
+                          ? "hover:bg-gray-600"
+                          : "hover:bg-green-100"
+                      }`}
                     >
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
                 {sortBy && (
-                  <span className="inline-flex items-center gap-1 bg-white border border-purple-300 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
+                  <span
+                    className={`inline-flex items-center gap-1 border px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      themeMode === "dark"
+                        ? "bg-gray-700 border-purple-600 text-purple-300"
+                        : "bg-white border-purple-300 text-purple-700"
+                    }`}
+                  >
                     {sortOptions.find((opt) => opt.value === sortBy)?.label}
                     <button
                       onClick={() => {
@@ -316,7 +439,11 @@ export default function ProductFilter({
                           sortBy: "",
                         });
                       }}
-                      className="hover:bg-purple-100 rounded-full p-0.5"
+                      className={`rounded-full p-0.5 transition-colors ${
+                        themeMode === "dark"
+                          ? "hover:bg-gray-600"
+                          : "hover:bg-purple-100"
+                      }`}
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -325,7 +452,11 @@ export default function ProductFilter({
               </div>
               <button
                 onClick={handleResetFilters}
-                className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
+                className={`text-xs font-medium flex items-center gap-1 transition-colors ${
+                  themeMode === "dark"
+                    ? "text-red-400 hover:text-red-300"
+                    : "text-red-600 hover:text-red-700"
+                }`}
               >
                 <X className="h-3 w-3" />
                 Xóa tất cả

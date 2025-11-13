@@ -7,12 +7,15 @@ import {
   toggleFavourite,
   getFavouritesByUser,
 } from "../../slices/FavouriteSlice";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 import { toast } from "react-toastify";
 import CartToast from "../common/CartToast";
+import { getImageUrl } from "../../utils/imageUrl";
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const themeMode = useSelector(selectThemeMode);
 
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
@@ -154,7 +157,9 @@ export default function ProductCard({ product }) {
 
   return (
     <div
-      className="relative group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+      className={`relative group rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer ${
+        themeMode === "dark" ? "bg-gray-800" : "bg-white"
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -170,9 +175,11 @@ export default function ProductCard({ product }) {
       {/* Favourite Icon */}
       <button
         onClick={handleToggleFavorite}
-        className={`absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all ${
-          isFavourite ? "text-red-500" : "text-gray-400 hover:text-red-500"
-        }`}
+        className={`absolute top-3 right-3 z-10 p-2 rounded-full shadow-md hover:shadow-lg transition-all ${
+          themeMode === "dark"
+            ? "bg-gray-700 text-gray-400"
+            : "bg-white text-gray-400"
+        } ${isFavourite ? "text-red-500" : "hover:text-red-500"}`}
         title={isFavourite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
       >
         <Heart
@@ -184,10 +191,16 @@ export default function ProductCard({ product }) {
       {/* Product Image */}
       <div
         onClick={handleProductClick}
-        className="relative aspect-square bg-gray-50 overflow-hidden"
+        className={`relative aspect-square overflow-hidden ${
+          themeMode === "dark" ? "bg-gray-700" : "bg-gray-50"
+        }`}
       >
         <img
-          src={product.image || "https://via.placeholder.com/400"}
+          src={
+            product.image
+              ? getImageUrl(product.image)
+              : "https://via.placeholder.com/400"
+          }
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -203,7 +216,11 @@ export default function ProductCard({ product }) {
           <button
             onClick={handleAddToCart}
             disabled={isAdding}
-            className="w-full bg-gray-900 text-white py-3 px-4 flex items-center justify-center gap-2 font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-600"
+            className={`w-full text-white py-3 px-4 flex items-center justify-center gap-2 font-medium transition-colors ${
+              themeMode === "dark"
+                ? "bg-gray-700 hover:bg-gray-600 disabled:bg-gray-600"
+                : "bg-gray-900 hover:bg-gray-800 disabled:bg-gray-600"
+            }`}
           >
             <ShoppingCart
               className={`h-5 w-5 ${isAdding ? "animate-bounce" : ""}`}
@@ -217,13 +234,21 @@ export default function ProductCard({ product }) {
       <div className="p-4" onClick={handleProductClick}>
         {/* Category */}
         {product.type?.name && (
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">
+          <p
+            className={`text-xs mb-1 uppercase tracking-wide transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
             {product.type.name}
           </p>
         )}
 
         {/* Product Name */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-12">
+        <h3
+          className={`font-semibold mb-2 line-clamp-2 min-h-12 transition-colors duration-300 ${
+            themeMode === "dark" ? "text-white" : "text-gray-900"
+          }`}
+        >
           {product.name}
         </h3>
 
@@ -240,22 +265,38 @@ export default function ProductCard({ product }) {
               </svg>
             ))}
             <svg
-              className="w-4 h-4 fill-current text-gray-300"
+              className={`w-4 h-4 fill-current ${
+                themeMode === "dark" ? "text-gray-600" : "text-gray-300"
+              }`}
               viewBox="0 0 20 20"
             >
               <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
             </svg>
           </div>
-          <span className="text-xs text-gray-500">(124)</span>
+          <span
+            className={`text-xs transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            (124)
+          </span>
         </div>
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-gray-900">
+          <span
+            className={`text-xl font-bold transition-colors duration-300 ${
+              themeMode === "dark" ? "text-white" : "text-gray-900"
+            }`}
+          >
             ${product.price?.toLocaleString("vi-VN")}
           </span>
           {product.originalPrice && product.originalPrice > product.price && (
-            <span className="text-sm text-gray-400 line-through">
+            <span
+              className={`text-sm line-through transition-colors duration-300 ${
+                themeMode === "dark" ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               ${product.originalPrice?.toLocaleString("vi-VN")}
             </span>
           )}

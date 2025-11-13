@@ -1,9 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Flame } from "lucide-react";
 import ProductCard from "../product/ProductCard";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function HotProducts({ products = [] }) {
+  const themeMode = useSelector(selectThemeMode);
   // Lấy 8 sản phẩm đầu tiên
   const hotProducts = products.slice(0, 8);
 
@@ -12,8 +15,16 @@ export default function HotProducts({ products = [] }) {
   }
 
   return (
-    <section className="container mx-auto px-4 py-16 bg-white">
-      <div className="bg-orange-50/60 p-6 rounded-3xl">
+    <section
+      className={`container mx-auto px-4 py-16 transition-colors duration-300 ${
+        themeMode === "dark" ? "bg-gray-900" : "bg-white"
+      }`}
+    >
+      <div
+        className={`p-6 rounded-3xl transition-colors duration-300 ${
+          themeMode === "dark" ? "bg-gray-800/60" : "bg-orange-50/60"
+        }`}
+      >
         <div className="text-center mb-12 bg-linear-to-r from-orange-500 via-red-500 to-pink-500 py-8 rounded-2xl shadow-lg">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Flame className="h-8 w-8 text-white animate-pulse" />

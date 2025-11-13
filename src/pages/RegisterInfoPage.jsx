@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { ChevronLeft } from "lucide-react";
 import { registerUser } from "../slices/AuthSlice";
+import { selectThemeMode } from "../slices/ThemeSlice";
 import { toast } from "react-toastify";
 
 export default function RegisterInfoPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const themeMode = useSelector(selectThemeMode);
 
   const [contact, setContact] = useState("");
   const [contactType, setContactType] = useState("");
@@ -114,12 +117,40 @@ export default function RegisterInfoPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-2 text-center">
-          Nhập thông tin tài khoản
-        </h1>
-        <p className="text-center text-gray-600 text-sm mb-6">
+    <div
+      className={`flex items-center justify-center min-h-screen py-8 transition-colors duration-300 ${
+        themeMode === "dark" ? "bg-gray-900" : "bg-gray-100"
+      }`}
+    >
+      <div
+        className={`p-8 rounded-lg shadow-lg w-full max-w-md transition-colors duration-300 ${
+          themeMode === "dark" ? "bg-gray-800" : "bg-white"
+        }`}
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={() => navigate(-1)}
+            className={`transition-colors duration-300 cursor-pointer ${
+              themeMode === "dark"
+                ? "text-gray-400 hover:text-gray-200"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <h1
+            className={`text-2xl font-bold transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-100" : "text-gray-900"
+            }`}
+          >
+            Nhập thông tin tài khoản
+          </h1>
+        </div>
+        <p
+          className={`text-center text-sm mb-6 transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           Xác thực: {contactType === "email" ? "📧" : "📱"} {contact}
         </p>
 
@@ -130,7 +161,11 @@ export default function RegisterInfoPage() {
             placeholder="Tên"
             value={form.firstName}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
@@ -140,7 +175,11 @@ export default function RegisterInfoPage() {
             placeholder="Họ"
             value={form.lastName}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
@@ -149,7 +188,11 @@ export default function RegisterInfoPage() {
             name="dob"
             value={form.dob}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
@@ -159,7 +202,11 @@ export default function RegisterInfoPage() {
             placeholder="Tên đăng nhập"
             value={form.username}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
@@ -169,7 +216,11 @@ export default function RegisterInfoPage() {
             placeholder="Mật khẩu"
             value={form.password}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
@@ -179,12 +230,22 @@ export default function RegisterInfoPage() {
             placeholder="Xác nhận mật khẩu"
             value={form.confirmPassword}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
+              themeMode === "dark"
+                ? "bg-gray-700 border-gray-600 text-gray-100"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
             required
           />
 
           {error && (
-            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            <div
+              className={`p-3 border rounded-lg text-sm transition-colors duration-300 ${
+                themeMode === "dark"
+                  ? "bg-red-900 border-red-700 text-red-200"
+                  : "bg-red-100 border-red-400 text-red-700"
+              }`}
+            >
               {error}
             </div>
           )}
@@ -192,7 +253,11 @@ export default function RegisterInfoPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className={`w-full text-white py-3 rounded-lg font-semibold transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+              themeMode === "dark"
+                ? "bg-blue-700 hover:bg-blue-600"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
           >
             {loading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
           </button>
@@ -201,7 +266,11 @@ export default function RegisterInfoPage() {
         <div className="mt-4 text-sm text-center">
           <button
             onClick={() => navigate("/send-otp")}
-            className="text-gray-500 hover:underline"
+            className={`transition-colors duration-300 hover:underline ${
+              themeMode === "dark"
+                ? "text-gray-400 hover:text-gray-200"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             ← Quay lại
           </button>

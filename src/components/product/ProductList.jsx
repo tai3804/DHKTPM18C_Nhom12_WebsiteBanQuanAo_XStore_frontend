@@ -1,12 +1,14 @@
-import React from 'react';
-import ProductCard from './ProductCard';
+import React from "react";
+import ProductCard from "./ProductCard";
 
 export default function ProductList({ products }) {
   // ✅ Kiểm tra products có phải là array không
   if (!Array.isArray(products)) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Không có sản phẩm nào</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Không có sản phẩm nào
+        </p>
       </div>
     );
   }
@@ -15,7 +17,9 @@ export default function ProductList({ products }) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Không tìm thấy sản phẩm nào</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Không tìm thấy sản phẩm nào
+        </p>
       </div>
     );
   }

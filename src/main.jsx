@@ -5,7 +5,6 @@ import { store } from "./store/store.ts";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
-// import "./pathFetch.js";
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode> - Tạm thời comment để tránh duplicate toast

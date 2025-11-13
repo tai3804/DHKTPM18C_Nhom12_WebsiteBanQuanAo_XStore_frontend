@@ -4,9 +4,11 @@ import Header from "../components/header/Header";
 import Footer from "../components/common/Footer";
 import ProductCard from "../components/product/ProductCard";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import { selectThemeMode } from "../slices/ThemeSlice";
 
 export default function SalePage() {
   const allProducts = useSelector((state) => state.product.products) || [];
+  const themeMode = useSelector(selectThemeMode);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
 
@@ -62,7 +64,13 @@ export default function SalePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+        themeMode === "dark"
+          ? "bg-gray-900 text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
       <Header />
       <main className="grow">
         {/* Hero Section with minimal design */}
@@ -70,16 +78,24 @@ export default function SalePage() {
           <div className="container mx-auto max-w-6xl">
             {/* Title Section - Minimalist */}
             <div className="mb-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-4 bg-gradient-to-r from-green-700 via-green-600 to-green-700 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif tracking-tight mb-4 bg-linear-to-r from-green-700 via-green-600 to-green-700 bg-clip-text text-transparent">
                 Sale Collection
               </h1>
-              <p className="text-lg text-gray-600 font-light max-w-2xl">
+              <p
+                className={`text-lg font-light max-w-2xl transition-colors ${
+                  themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 Ưu đãi đặc biệt - Giảm giá khủng cho những sản phẩm thời trang
                 chọn lọc
               </p>
             </div>
 
-            <div className="mb-12 border-b border-gray-200"></div>
+            <div
+              className={`mb-12 border-b transition-colors ${
+                themeMode === "dark" ? "border-gray-700" : "border-gray-200"
+              }`}
+            ></div>
           </div>
         </section>
 
@@ -88,8 +104,16 @@ export default function SalePage() {
           <div className="container mx-auto max-w-6xl">
             {currentProducts.length === 0 ? (
               <div className="text-center py-20">
-                <Tag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-light">
+                <Tag
+                  className={`h-16 w-16 mx-auto mb-4 transition-colors ${
+                    themeMode === "dark" ? "text-gray-600" : "text-gray-300"
+                  }`}
+                />
+                <p
+                  className={`text-lg font-light transition-colors ${
+                    themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   Chưa có sản phẩm Sale nào
                 </p>
               </div>
@@ -112,7 +136,11 @@ export default function SalePage() {
                         disabled={currentPage === 1}
                         className={`p-1 transition-all ${
                           currentPage === 1
-                            ? "text-gray-300 cursor-not-allowed"
+                            ? themeMode === "dark"
+                              ? "text-gray-600 cursor-not-allowed"
+                              : "text-gray-300 cursor-not-allowed"
+                            : themeMode === "dark"
+                            ? "text-gray-300 hover:bg-gray-800"
                             : "text-gray-900 hover:bg-gray-100"
                         }`}
                       >
@@ -126,7 +154,11 @@ export default function SalePage() {
                             return (
                               <span
                                 key={`ellipsis-${index}`}
-                                className="px-2 py-1 text-gray-400 font-light text-sm"
+                                className={`px-2 py-1 font-light text-sm transition-colors ${
+                                  themeMode === "dark"
+                                    ? "text-gray-600"
+                                    : "text-gray-400"
+                                }`}
                               >
                                 ...
                               </span>
@@ -139,7 +171,11 @@ export default function SalePage() {
                               onClick={() => goToPage(page)}
                               className={`min-w-8 h-8 text-sm font-light transition-all ${
                                 currentPage === page
-                                  ? "text-gray-900 border-b-2 border-gray-900"
+                                  ? themeMode === "dark"
+                                    ? "text-white border-b-2 border-white"
+                                    : "text-gray-900 border-b-2 border-gray-900"
+                                  : themeMode === "dark"
+                                  ? "text-gray-400 hover:text-gray-200"
                                   : "text-gray-500 hover:text-gray-900"
                               }`}
                             >
@@ -155,7 +191,11 @@ export default function SalePage() {
                         disabled={currentPage === totalPages}
                         className={`p-1 transition-all ${
                           currentPage === totalPages
-                            ? "text-gray-300 cursor-not-allowed"
+                            ? themeMode === "dark"
+                              ? "text-gray-600 cursor-not-allowed"
+                              : "text-gray-300 cursor-not-allowed"
+                            : themeMode === "dark"
+                            ? "text-gray-300 hover:bg-gray-800"
                             : "text-gray-900 hover:bg-gray-100"
                         }`}
                       >
@@ -164,7 +204,11 @@ export default function SalePage() {
                     </div>
 
                     {/* Page Info */}
-                    <div className="text-xs text-gray-500 font-light">
+                    <div
+                      className={`text-xs font-light transition-colors ${
+                        themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       Hiển thị {startIndex + 1} -{" "}
                       {Math.min(endIndex, saleProducts.length)} của{" "}
                       {saleProducts.length} sản phẩm

@@ -126,13 +126,19 @@ export const createProduct = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`${API_BASE_URL}/api/products`, {
+      // Nếu newProduct là FormData, gọi endpoint /api/products/upload
+      const isFormData = newProduct instanceof FormData;
+      const endpoint = isFormData ? "/api/products/upload" : "/api/products";
+      
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(newProduct),
+        headers: isFormData 
+          ? { "Authorization": `Bearer ${token}` }
+          : { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+        body: isFormData ? newProduct : JSON.stringify(newProduct),
       });
       
       if (!res.ok) throw new Error(ProductErrors.PRODUCT_CREATE_FAILED);
@@ -158,13 +164,19 @@ export const updateProduct = createAsyncThunk(
       // Lấy token từ auth slice
       const token = getState().auth.token;
       
-      const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+      // Nếu productData là FormData, gọi endpoint /api/products/{id}/upload
+      const isFormData = productData instanceof FormData;
+      const endpoint = isFormData ? `/api/products/${id}/upload` : `/api/products/${id}`;
+      
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(productData),
+        headers: isFormData 
+          ? { "Authorization": `Bearer ${token}` }
+          : { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+        body: isFormData ? productData : JSON.stringify(productData),
       });
       
       if (!res.ok) throw new Error(ProductErrors.PRODUCT_UPDATE_FAILED);

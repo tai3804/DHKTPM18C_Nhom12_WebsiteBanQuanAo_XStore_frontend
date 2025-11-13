@@ -13,6 +13,7 @@ import { addToCart } from "../slices/CartSlice";
 import { toggleFavourite, getFavouritesByUser } from "../slices/FavouriteSlice";
 import Header from "../components/header/Header";
 import Footer from "../components/common/Footer";
+import { getImageUrl } from "../utils/imageUrl";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -278,7 +279,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="flex items-center justify-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -290,16 +291,16 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
               Không tìm thấy sản phẩm
             </h1>
             <button
               onClick={() => navigate("/products")}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+              className="bg-blue-500 dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
             >
               Quay lại danh sách sản phẩm
             </button>
@@ -314,7 +315,7 @@ export default function ProductDetailPage() {
   const totalStock = getTotalStock();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
@@ -322,28 +323,34 @@ export default function ProductDetailPage() {
         <nav className="flex mb-6 text-sm">
           <button
             onClick={() => navigate("/")}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             Trang chủ
           </button>
-          <span className="mx-2 text-gray-400">/</span>
+          <span className="mx-2 text-gray-400 dark:text-gray-600">/</span>
           <button
             onClick={() => navigate("/products")}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             Sản phẩm
           </button>
-          <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-800 font-medium">{product.name}</span>
+          <span className="mx-2 text-gray-400 dark:text-gray-600">/</span>
+          <span className="text-gray-800 dark:text-white font-medium">
+            {product.name}
+          </span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Hình ảnh sản phẩm */}
           <div className="space-y-4">
             {/* Ảnh chính */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
               <img
-                src={product.image || "/placeholder-image.jpg"}
+                src={
+                  product.image
+                    ? getImageUrl(product.image)
+                    : "/placeholder-image.jpg"
+                }
                 alt={product.name}
                 className="w-full h-96 object-cover rounded-lg"
                 onError={(e) => {
@@ -354,12 +361,12 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Thông tin sản phẩm */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
             <div className="mb-4">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
                 {product.name}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 Danh mục:{" "}
                 <span className="font-medium">
                   {product.productType?.name || product.type?.name}
@@ -369,16 +376,16 @@ export default function ProductDetailPage() {
 
             {/* Giá */}
             <div className="mb-6">
-              <div className="text-3xl font-bold text-red-600 mb-2">
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-2">
                 {formatPrice(product.price)}
               </div>
               {product.originalPrice &&
                 product.originalPrice > product.price && (
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg text-gray-500 line-through">
+                    <span className="text-lg text-gray-500 dark:text-gray-400 line-through">
                       {formatPrice(product.originalPrice)}
                     </span>
-                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded-md text-sm font-medium">
+                    <span className="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1 rounded-md text-sm font-medium">
                       -
                       {Math.round(
                         ((product.originalPrice - product.price) /
@@ -393,7 +400,7 @@ export default function ProductDetailPage() {
 
             {/* Tổng số lượng trong kho */}
             <div className="mb-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-semibold">Tổng kho:</span> {totalStock}{" "}
                 sản phẩm
               </p>
@@ -402,7 +409,9 @@ export default function ProductDetailPage() {
             {/* Chọn kho */}
             {productStocks?.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Chọn kho:</h3>
+                <h3 className="text-lg font-semibold dark:text-white mb-3">
+                  Chọn kho:
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {productStocks.map((stock) => (
                     <button
@@ -411,10 +420,10 @@ export default function ProductDetailPage() {
                       disabled={stock.quantity === 0}
                       className={`px-4 py-2 border rounded-lg font-medium ${
                         selectedStock?.stockId === stock.stockId
-                          ? "bg-blue-500 text-white border-blue-500"
+                          ? "bg-blue-500 dark:bg-blue-700 text-white border-blue-500 dark:border-blue-700"
                           : stock.quantity === 0
-                          ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
-                          : "bg-white text-gray-700 border-gray-300 hover:border-blue-500"
+                          ? "bg-gray-100 dark:bg-gray-700 text-gray-400 border-gray-300 dark:border-gray-600 cursor-not-allowed"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400"
                       }`}
                     >
                       <div className="text-center">
@@ -429,7 +438,7 @@ export default function ProductDetailPage() {
                   ))}
                 </div>
                 {selectedStock && (
-                  <p className="text-sm font-medium mt-2 text-green-600">
+                  <p className="text-sm font-medium mt-2 text-green-600 dark:text-green-400">
                     Kho: {selectedStock.stockName} - Còn lại:{" "}
                     {availableQuantity} sản phẩm
                   </p>
@@ -440,7 +449,9 @@ export default function ProductDetailPage() {
             {/* Chọn màu sắc */}
             {productColors?.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Chọn màu sắc:</h3>
+                <h3 className="text-lg font-semibold dark:text-white mb-3">
+                  Chọn màu sắc:
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {productColors.map((color) => (
                     <button

@@ -115,19 +115,19 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Header />
       <main className="grow">
         {/* FAQ Content */}
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h1 className="text-3xl font-light tracking-wide text-gray-900 mb-10 text-center">
+            <h1 className="text-3xl font-light tracking-wide text-gray-900 dark:text-gray-100 mb-10 text-center">
               CÂU HỎI THƯỜNG GẶP
             </h1>
             <div className="space-y-10">
               {faqs.map((category, categoryIndex) => (
                 <div key={categoryIndex}>
-                  <h2 className="text-2xl font-medium text-gray-900 mb-6 tracking-wide">
+                  <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-6 tracking-wide">
                     {category.category}
                   </h2>
                   <div className="space-y-4">
@@ -137,26 +137,26 @@ export default function FAQPage() {
                       return (
                         <div
                           key={questionIndex}
-                          className="border border-gray-200 rounded-sm overflow-hidden"
+                          className="border border-gray-200 dark:border-gray-700 rounded-sm overflow-hidden"
                         >
                           <button
                             onClick={() =>
                               toggleFAQ(categoryIndex, questionIndex)
                             }
-                            className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left"
+                            className="w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                           >
-                            <span className="font-medium text-gray-900 pr-4">
+                            <span className="font-medium text-gray-900 dark:text-gray-100 pr-4">
                               {faq.question}
                             </span>
                             {isOpen ? (
-                              <ChevronUp className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                              <ChevronUp className="h-5 w-5 text-gray-500 dark:text-gray-400 shrink-0" />
                             ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                              <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400 shrink-0" />
                             )}
                           </button>
                           {isOpen && (
-                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                              <p className="text-gray-600 font-light leading-relaxed">
+                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+                              <p className="text-gray-600 dark:text-gray-300 font-light leading-relaxed">
                                 {faq.answer}
                               </p>
                             </div>
@@ -170,23 +170,23 @@ export default function FAQPage() {
             </div>
 
             {/* Contact Section */}
-            <div className="mt-16 p-8 bg-gray-50 rounded-sm text-center">
-              <h3 className="text-xl font-medium text-gray-900 mb-3 tracking-wide">
+            <div className="mt-16 p-8 bg-gray-50 dark:bg-gray-800 rounded-sm text-center">
+              <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-3 tracking-wide">
                 Không tìm thấy câu trả lời?
               </h3>
-              <p className="text-gray-600 font-light mb-6">
+              <p className="text-gray-600 dark:text-gray-400 font-light mb-6">
                 Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="/contact"
-                  className="px-8 py-3 bg-gray-900 text-white font-light tracking-wide hover:bg-gray-800 transition-colors"
+                  className="px-8 py-3 bg-gray-900 dark:bg-gray-700 text-white font-light tracking-wide hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
                 >
                   Liên Hệ Ngay
                 </a>
                 <a
                   href="tel:1900xxxx"
-                  className="px-8 py-3 border border-gray-900 text-gray-900 font-light tracking-wide hover:bg-gray-900 hover:text-white transition-colors"
+                  className="px-8 py-3 border border-gray-900 dark:border-gray-600 text-gray-900 dark:text-gray-100 font-light tracking-wide hover:bg-gray-900 dark:hover:bg-gray-700 hover:text-white dark:hover:text-white transition-colors"
                 >
                   Gọi Hotline: 1900 xxxx
                 </a>

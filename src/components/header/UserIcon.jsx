@@ -4,10 +4,12 @@ import { CircleUser } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearUser, clearToken } from "../../slices/AuthSlice";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function UserIcon() {
   const [open, setOpen] = useState(false);
   const users = useSelector((state) => state.auth.user);
+  const themeMode = useSelector(selectThemeMode);
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,14 +48,22 @@ export default function UserIcon() {
       {users != null ? (
         <button
           onClick={() => setOpen(!open)}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+          className={`flex justify-center items-center p-2 rounded-full transition-all duration-200 cursor-pointer ${
+            themeMode === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-100"
+          }`}
         >
-          <CircleUser className="h-6 w-6 text-gray-700 hover:text-gray-900" />
+          <CircleUser
+            className={`h-6 w-6 transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+            }`}
+          />
         </button>
       ) : (
         <button
           onClick={() => handleNavigate("/login")}
-          className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+          className={`p-2 text-sm font-medium rounded-lg transition-colors duration-300 cursor-pointer ${
+            themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+          }`}
         >
           Đăng nhập
         </button>
@@ -61,17 +71,31 @@ export default function UserIcon() {
 
       {/* Logic hiển thị dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <div
+          className={`absolute right-0 mt-2 w-40 rounded-lg shadow-lg z-50 transition-colors ${
+            themeMode === "dark"
+              ? "bg-gray-800 border border-gray-700"
+              : "bg-white border border-gray-200"
+          }`}
+        >
           <>
             <button
               onClick={() => handleNavigate("/user")}
-              className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors cursor-pointer first:rounded-t-lg"
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer first:rounded-t-lg ${
+                themeMode === "dark"
+                  ? "text-gray-300 hover:bg-gray-700 hover:text-blue-400"
+                  : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+              }`}
             >
               Thông tin
             </button>
             <button
               onClick={handleLogout}
-              className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer last:rounded-b-lg border-t border-gray-100"
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer last:rounded-b-lg border-t ${
+                themeMode === "dark"
+                  ? "text-red-400 hover:bg-gray-700 border-gray-700"
+                  : "text-red-600 hover:bg-red-50 border-gray-100"
+              }`}
             >
               Đăng xuất
             </button>

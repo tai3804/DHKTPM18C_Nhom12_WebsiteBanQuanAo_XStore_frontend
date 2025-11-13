@@ -1,6 +1,8 @@
 import React, { useRef } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 import FormInput from "./FormInput";
 import FormSelect from "./FormSelect";
@@ -13,6 +15,7 @@ export default function AddUserForm({
   setShowForm,
 }) {
   const modalRef = useRef(null);
+  const themeMode = useSelector(selectThemeMode);
 
   const handleClickOutside = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target)) {
@@ -43,18 +46,30 @@ export default function AddUserForm({
     >
       <div
         ref={modalRef}
-        className="bg-white w-[460px] max-w-full p-8 rounded-2xl shadow-xl border border-gray-100 relative animate-fadeIn"
+        className={`w-[460px] max-w-full p-8 rounded-2xl shadow-xl border relative animate-fadeIn transition-colors duration-300 ${
+          themeMode === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-100"
+        }`}
       >
         {/* Nút đóng */}
         <button
           type="button"
           onClick={() => setShowForm(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition cursor-pointer"
+          className={`absolute top-4 right-4 transition cursor-pointer ${
+            themeMode === "dark"
+              ? "text-gray-500 hover:text-gray-300"
+              : "text-gray-400 hover:text-gray-700"
+          }`}
         >
           <X size={22} />
         </button>
 
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+        <h2
+          className={`text-2xl font-bold mb-6 text-center transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-100" : "text-gray-800"
+          }`}
+        >
           Tạo người dùng mới
         </h2>
 
@@ -143,7 +158,11 @@ export default function AddUserForm({
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-5 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+              className={`px-5 py-2 rounded-lg border transition cursor-pointer ${
+                themeMode === "dark"
+                  ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-100"
+              }`}
             >
               Hủy
             </button>

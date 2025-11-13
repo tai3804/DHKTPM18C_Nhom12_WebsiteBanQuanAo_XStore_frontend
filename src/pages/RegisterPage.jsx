@@ -11,9 +11,11 @@ export default function RegisterPage() {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
-        <p className="text-center text-gray-600">Đang chuyển hướng...</p>
+    <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <p className="text-center text-gray-600 dark:text-gray-300">
+          Đang chuyển hướng...
+        </p>
       </div>
     </div>
   );

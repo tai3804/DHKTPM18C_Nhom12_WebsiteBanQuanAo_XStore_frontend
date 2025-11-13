@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/HomePage";
 import Contact from "./pages/ContactPage";
 import Cart from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import SalePage from "./pages/SalePage";
 import ProductsPage from "./pages/ProductsPage";
 import UserPage from "./pages/UserPage";
@@ -29,6 +31,7 @@ import ProductsAdminPage from "./pages/admin/ManageProductsPage";
 import ManageProductTypesPage from "./pages/admin/ManageProductTypePage";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { selectThemeMode } from "./slices/ThemeSlice";
 import { getProducts } from "./slices/ProductSlice";
 import { getCartByUser } from "./slices/CartSlice";
 import { getFavouritesByUser } from "./slices/FavouriteSlice";
@@ -42,6 +45,17 @@ export default function App() {
 
   const products = useSelector((state) => state.product.products);
   const user = useSelector((state) => state.auth.user);
+  const themeMode = useSelector(selectThemeMode);
+
+  // Initialize theme on mount
+  useEffect(() => {
+    console.log("App.jsx - Initial theme mode:", themeMode);
+    if (themeMode === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
 
   useEffect(() => {
     const getDefaultItems = async () => {
@@ -58,6 +72,18 @@ export default function App() {
     getDefaultItems();
   }, [dispatch, user]);
 
+  // Apply theme class to <html> based on Redux state
+  useEffect(() => {
+    console.log("App.jsx - Theme mode changed to:", themeMode);
+    if (themeMode === "dark") {
+      document.documentElement.classList.add("dark");
+      console.log("Added dark class");
+    } else {
+      document.documentElement.classList.remove("dark");
+      console.log("Removed dark class");
+    }
+  }, [themeMode]);
+
   return (
     <div>
       <Routes>
@@ -66,6 +92,8 @@ export default function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -112,7 +140,7 @@ export default function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme={themeMode === "dark" ? "dark" : "light"}
         style={{ top: "80px" }}
         toastStyle={{
           borderRadius: "8px",

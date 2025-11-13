@@ -8,9 +8,12 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useSelector } from "react-redux";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 import { API_BASE_URL } from "../../config/api";
 
 export default function Dashboard() {
+  const themeMode = useSelector(selectThemeMode);
   const [stats, setStats] = useState({
     users: 120,
     products: 58,
@@ -35,8 +38,18 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-        <p className="text-gray-500 text-sm">
+        <h1
+          className={`text-2xl font-bold transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-100" : "text-gray-800"
+          }`}
+        >
+          Dashboard Overview
+        </h1>
+        <p
+          className={`text-sm transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
           Tổng quan hệ thống của bạn hôm nay
         </p>
       </div>
@@ -58,17 +71,38 @@ export default function Dashboard() {
       </div>
 
       {/* Biểu đồ doanh thu */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold mb-4 text-gray-700">
+      <div
+        className={`p-6 rounded-xl shadow-sm border transition-colors duration-300 ${
+          themeMode === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-100"
+        }`}
+      >
+        <h2
+          className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+            themeMode === "dark" ? "text-white" : "text-gray-700"
+          }`}
+        >
           Doanh thu 5 tháng gần đây
         </h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-            <XAxis dataKey="month" />
-            <YAxis />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={themeMode === "dark" ? "#4b5563" : "#e5e7eb"}
+            />
+            <XAxis
+              dataKey="month"
+              stroke={themeMode === "dark" ? "#9ca3af" : "#9ca3af"}
+            />
+            <YAxis stroke={themeMode === "dark" ? "#9ca3af" : "#9ca3af"} />
             <Tooltip
               formatter={(value) => `${value.toLocaleString("vi-VN")}₫`}
+              contentStyle={{
+                backgroundColor: themeMode === "dark" ? "#1f2937" : "#ffffff",
+                borderColor: themeMode === "dark" ? "#4b5563" : "#e5e7eb",
+                color: themeMode === "dark" ? "#fff" : "#000",
+              }}
             />
             <Bar dataKey="revenue" fill="#4F46E5" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -79,9 +113,22 @@ export default function Dashboard() {
 }
 
 function StatCard({ label, value, color }) {
+  const themeMode = useSelector(selectThemeMode);
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-start">
-      <span className="text-sm text-gray-500">{label}</span>
+    <div
+      className={`p-4 rounded-xl shadow-sm border transition-colors duration-300 flex flex-col items-start ${
+        themeMode === "dark"
+          ? "bg-gray-800 border-gray-700"
+          : "bg-white border-gray-100"
+      }`}
+    >
+      <span
+        className={`text-sm transition-colors duration-300 ${
+          themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
+        {label}
+      </span>
       <span
         className={`text-2xl font-bold mt-1 ${color} bg-clip-text text-transparent`}
       >

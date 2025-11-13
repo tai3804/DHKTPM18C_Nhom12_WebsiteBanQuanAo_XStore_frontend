@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getCartByUser } from "../slices/CartSlice";
 import { getProductTypes } from "../slices/ProductTypeSlice";
+import { selectThemeMode } from "../slices/ThemeSlice";
 import Header from "../components/header/Header";
 import Footer from "../components/common/Footer";
 import ProductList from "../components/product/ProductList";
@@ -14,6 +15,7 @@ export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get("category");
   const searchQuery = searchParams.get("search");
+  const themeMode = useSelector(selectThemeMode);
 
   const allProducts = useSelector((state) => state.product.products) || [];
   const productTypes =
@@ -171,17 +173,31 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+        themeMode === "dark"
+          ? "bg-gray-900 text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
       <Header />
       <main className="grow container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1
+            className={`text-3xl font-bold mb-2 transition-colors ${
+              themeMode === "dark" ? "text-gray-100" : "text-gray-900"
+            }`}
+          >
             {searchQuery
               ? `Kết quả tìm kiếm: "${searchQuery}"`
               : filters.type || "Tất cả sản phẩm"}
           </h1>
-          <p className="text-gray-600">
+          <p
+            className={`transition-colors ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Tìm thấy{" "}
             <span className="font-semibold">{filteredProducts.length}</span> sản
             phẩm
@@ -196,13 +212,27 @@ export default function ProductsPage() {
         >
           {/* No Results Message */}
           {filteredProducts.length === 0 && allProducts.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6 text-center">
-              <p className="text-yellow-800 mb-2">
+            <div
+              className={`border rounded-lg p-6 mb-6 text-center transition-colors ${
+                themeMode === "dark"
+                  ? "bg-yellow-900/30 border-yellow-800"
+                  : "bg-yellow-50 border-yellow-200"
+              }`}
+            >
+              <p
+                className={`mb-2 transition-colors ${
+                  themeMode === "dark" ? "text-yellow-300" : "text-yellow-800"
+                }`}
+              >
                 Không tìm thấy sản phẩm phù hợp với bộ lọc của bạn.
               </p>
               <button
                 onClick={() => handleFilterChange({})}
-                className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                className={`font-medium hover:underline transition-colors ${
+                  themeMode === "dark"
+                    ? "text-blue-400 hover:text-blue-300"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
                 Xóa tất cả bộ lọc
               </button>
@@ -222,7 +252,11 @@ export default function ProductsPage() {
                   disabled={currentPage === 1}
                   className={`flex items-center gap-1 px-4 py-2 rounded-lg border font-medium transition-all ${
                     currentPage === 1
-                      ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                      ? themeMode === "dark"
+                        ? "border-gray-700 text-gray-500 cursor-not-allowed"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                      : themeMode === "dark"
+                      ? "border-gray-700 text-gray-300 hover:bg-blue-900/30 hover:border-blue-500 hover:text-blue-400"
                       : "border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
                   }`}
                 >
@@ -237,7 +271,11 @@ export default function ProductsPage() {
                       return (
                         <span
                           key={`ellipsis-${index}`}
-                          className="px-3 py-2 text-gray-400"
+                          className={`px-3 py-2 transition-colors ${
+                            themeMode === "dark"
+                              ? "text-gray-500"
+                              : "text-gray-400"
+                          }`}
                         >
                           ...
                         </span>
@@ -251,6 +289,8 @@ export default function ProductsPage() {
                         className={`min-w-10 h-10 rounded-lg border font-medium transition-all ${
                           currentPage === page
                             ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                            : themeMode === "dark"
+                            ? "border-gray-700 text-gray-300 hover:bg-blue-900/30 hover:border-blue-500 hover:text-blue-400"
                             : "border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
                         }`}
                       >
@@ -266,7 +306,11 @@ export default function ProductsPage() {
                   disabled={currentPage === totalPages}
                   className={`flex items-center gap-1 px-4 py-2 rounded-lg border font-medium transition-all ${
                     currentPage === totalPages
-                      ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                      ? themeMode === "dark"
+                        ? "border-gray-700 text-gray-500 cursor-not-allowed"
+                        : "border-gray-200 text-gray-400 cursor-not-allowed"
+                      : themeMode === "dark"
+                      ? "border-gray-700 text-gray-300 hover:bg-blue-900/30 hover:border-blue-500 hover:text-blue-400"
                       : "border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
                   }`}
                 >
@@ -276,7 +320,11 @@ export default function ProductsPage() {
               </div>
 
               {/* Page Info */}
-              <div className="mt-4 text-center text-sm text-gray-600">
+              <div
+                className={`mt-4 text-center text-sm transition-colors ${
+                  themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 Trang {currentPage} / {totalPages} (Hiển thị {startIndex + 1} -{" "}
                 {Math.min(endIndex, filteredProducts.length)} trong{" "}
                 {filteredProducts.length} sản phẩm)

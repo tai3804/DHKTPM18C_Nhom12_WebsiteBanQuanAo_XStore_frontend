@@ -12,7 +12,6 @@ export default function Navigation() {
       <NavigationLink to="/products">Sản phẩm</NavigationLink>
       <NavigationLink to="/hot">Hot</NavigationLink>
       <NavigationLink to="/sale">Giảm giá</NavigationLink>
-      <NavigationLink to="/contact">Chúng tôi</NavigationLink>
       <NavigationLink to="/favourite">
         <span className="relative flex items-center">
           Yêu thích

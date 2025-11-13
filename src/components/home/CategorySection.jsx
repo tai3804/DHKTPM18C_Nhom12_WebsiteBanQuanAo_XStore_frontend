@@ -1,10 +1,13 @@
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { ShoppingBag, Shirt, Tag, Grid3x3 } from "lucide-react";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function CategorySection({ productTypes = [] }) {
   const navigate = useNavigate();
+  const themeMode = useSelector(selectThemeMode);
 
   // Map icon cho các loại sản phẩm
   const getCategoryIcon = (typeName) => {
@@ -36,10 +39,6 @@ export default function CategorySection({ productTypes = [] }) {
         desc: "Xem toàn bộ sản phẩm",
         productType: "all",
         id: "all",
-        bgClass: "bg-white",
-        borderClass: "border-gray-200 hover:border-blue-500",
-        textClass: "text-gray-900",
-        descClass: "text-gray-700",
       },
       {
         name: "HOT",
@@ -47,10 +46,6 @@ export default function CategorySection({ productTypes = [] }) {
         desc: "Sản phẩm HOT nhất",
         productType: "hot",
         id: "hot",
-        bgClass: "bg-white",
-        borderClass: "border-gray-200 hover:border-orange-500",
-        textClass: "text-orange-600",
-        descClass: "text-orange-500",
         animate: true,
       },
       {
@@ -59,10 +54,6 @@ export default function CategorySection({ productTypes = [] }) {
         desc: "Ưu đãi đặc biệt",
         productType: "sale",
         id: "sale",
-        bgClass: "bg-white",
-        borderClass: "border-gray-200 hover:border-green-500",
-        textClass: "text-green-600",
-        descClass: "text-green-500",
       },
       ...dynamicCategories,
     ];
@@ -82,12 +73,24 @@ export default function CategorySection({ productTypes = [] }) {
   };
 
   return (
-    <section className="container mx-auto px-4 py-16 bg-white">
+    <section
+      className={`container mx-auto px-4 py-16 transition-colors duration-300 ${
+        themeMode === "dark" ? "bg-gray-900" : "bg-white"
+      }`}
+    >
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4 text-gray-900">
+        <h2
+          className={`text-3xl font-bold mb-4 transition-colors duration-300 ${
+            themeMode === "dark" ? "text-white" : "text-gray-900"
+          }`}
+        >
           Mua Sắm Theo Danh Mục
         </h2>
-        <p className="text-gray-700 max-w-2xl mx-auto">
+        <p
+          className={`max-w-2xl mx-auto transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-400" : "text-gray-700"
+          }`}
+        >
           Khám phá các loại trang phục và phụ kiện theo phong cách của bạn.
         </p>
       </div>
@@ -104,16 +107,23 @@ export default function CategorySection({ productTypes = [] }) {
           >
             <div
               className={`rounded-lg p-6 text-center transition-all duration-300 border aspect-square flex flex-col justify-center items-center ${
-                category.bgClass || "bg-white hover:bg-gray-50"
-              } ${
-                category.borderClass ||
-                "border-gray-200 hover:border-blue-500 hover:shadow-lg"
+                category.productType === "hot"
+                  ? themeMode === "dark"
+                    ? "bg-gray-800 border-gray-700 hover:border-orange-400 hover:bg-gray-700"
+                    : "bg-white border-gray-200 hover:border-orange-500 hover:bg-gray-50"
+                  : category.productType === "sale"
+                  ? themeMode === "dark"
+                    ? "bg-gray-800 border-gray-700 hover:border-green-400 hover:bg-gray-700"
+                    : "bg-white border-gray-200 hover:border-green-500 hover:bg-gray-50"
+                  : themeMode === "dark"
+                  ? "bg-gray-800 border-gray-700 hover:border-blue-400 hover:bg-gray-700"
+                  : "bg-white border-gray-200 hover:border-blue-500 hover:bg-gray-50"
               } ${
                 category.productType === "hot" ||
                 category.productType === "sale" ||
                 category.productType === "all"
                   ? "hover:shadow-xl"
-                  : ""
+                  : "hover:shadow-lg"
               }`}
             >
               <div
@@ -126,15 +136,35 @@ export default function CategorySection({ productTypes = [] }) {
                 {category.icon}
               </div>
               <h3
-                className={`font-semibold text-sm md:text-base mb-1 ${
-                  category.textClass || "text-gray-900"
+                className={`font-semibold text-sm md:text-base mb-1 transition-colors duration-300 ${
+                  category.productType === "hot"
+                    ? themeMode === "dark"
+                      ? "text-orange-400"
+                      : "text-orange-600"
+                    : category.productType === "sale"
+                    ? themeMode === "dark"
+                      ? "text-green-400"
+                      : "text-green-600"
+                    : themeMode === "dark"
+                    ? "text-white"
+                    : "text-gray-900"
                 }`}
               >
                 {category.name}
               </h3>
               <p
-                className={`text-xs line-clamp-2 ${
-                  category.descClass || "text-gray-700"
+                className={`text-xs line-clamp-2 transition-colors duration-300 ${
+                  category.productType === "hot"
+                    ? themeMode === "dark"
+                      ? "text-orange-300"
+                      : "text-orange-500"
+                    : category.productType === "sale"
+                    ? themeMode === "dark"
+                      ? "text-green-300"
+                      : "text-green-500"
+                    : themeMode === "dark"
+                    ? "text-gray-400"
+                    : "text-gray-700"
                 }`}
               >
                 {category.desc}

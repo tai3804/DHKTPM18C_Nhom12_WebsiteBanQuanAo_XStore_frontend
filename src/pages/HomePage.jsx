@@ -10,6 +10,7 @@ import Footer from "../components/common/Footer";
 import { getProducts } from "../slices/ProductSlice";
 import { getProductTypes } from "../slices/ProductTypeSlice";
 import { getCartByUser } from "../slices/CartSlice";
+import { selectThemeMode } from "../slices/ThemeSlice";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -17,15 +18,24 @@ export default function HomePage() {
   const productTypes =
     useSelector((state) => state.productType.productTypes) || [];
   const { user } = useSelector((state) => state.auth);
+  const themeMode = useSelector(selectThemeMode);
 
   // Load initial data
   useEffect(() => {
     // Load product types for categories
     dispatch(getProductTypes());
+    // Load products
+    dispatch(getProducts());
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        themeMode === "dark"
+          ? "bg-gray-900 text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
       <Header />
       <HeroSection />
       <CategorySection productTypes={productTypes} />

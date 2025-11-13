@@ -1,39 +1,35 @@
 import { Sun, Moon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { selectThemeMode, toggleTheme } from "../../slices/ThemeSlice";
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(() => {
-    // Lấy theme từ localStorage hoặc mặc định là light
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
-  });
+  const dispatch = useDispatch();
+  const mode = useSelector(selectThemeMode);
+  const isDark = mode === "dark";
 
-  useEffect(() => {
-    // Cập nhật class cho html element
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
+  const handleToggle = () => {
+    console.log("ThemeToggle - Current mode:", mode);
+    console.log("ThemeToggle - Dispatching toggle");
+    dispatch(toggleTheme());
+    console.log(
+      "ThemeToggle - After dispatch, new mode should be:",
+      !isDark ? "dark" : "light"
+    );
   };
 
   return (
     <button
-      onClick={toggleTheme}
-      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all duration-200"
+      onClick={handleToggle}
+      className={`p-2 rounded-full transition-all duration-200 ${
+        isDark ? "hover:bg-gray-800" : "hover:bg-gray-100"
+      }`}
       aria-label="Toggle theme"
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
-        <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+        <Moon className="h-5 w-5 text-gray-300 hover:text-white transition-colors" />
       ) : (
-        <Sun className="h-5 w-5 text-amber-500" />
+        <Sun className="h-5 w-5 text-amber-500 hover:text-amber-600 transition-colors" />
       )}
     </button>
   );
