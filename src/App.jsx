@@ -22,7 +22,6 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import RefundPolicyPage from "./pages/RefundPolicyPage";
 import FAQPage from "./pages/FAQPage";
 import ShoppingGuidePage from "./pages/ShoppingGuidePage";
-import CheckoutPage from "./pages/CheckoutPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -95,7 +94,10 @@ export default function App() {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+        <Route
+          path="/order-confirmation/:orderId"
+          element={<OrderConfirmationPage />}
+        />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
