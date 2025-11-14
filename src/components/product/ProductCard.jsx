@@ -20,6 +20,7 @@ export default function ProductCard({ product }) {
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const { favourites } = useSelector((state) => state.favourite);
+  const { selectedStock } = useSelector((state) => state.stock);
   const loading = useSelector((state) => state.loading.isLoading);
   const [isAdding, setIsAdding] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
@@ -85,6 +86,7 @@ export default function ProductCard({ product }) {
       // ✅ Thêm sản phẩm vào cart
       const cartId = currentCart.id;
       const productId = product.id;
+      const stockId = selectedStock?.id || 1; // Use selected stock from header
 
       if (cartId && productId) {
         const result = await dispatch(
@@ -92,6 +94,7 @@ export default function ProductCard({ product }) {
             cartId,
             productId,
             quantity: 1,
+            stockId,
           })
         );
 

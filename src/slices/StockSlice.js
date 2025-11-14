@@ -8,6 +8,7 @@ const initialState = {
   stocks: [], // Danh sách tất cả kho
   stock: null, // Kho hiện tại (chi tiết)
   stockItems: [], // Danh sách sản phẩm trong kho hiện tại
+  selectedStock: null, // Kho được chọn trong header
 };
 
 //THUNKS
@@ -302,7 +303,14 @@ export const deleteStockItem = createAsyncThunk(
 const stockSlice = createSlice({
   name: "stock",
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedStock: (state, action) => {
+      state.selectedStock = action.payload;
+    },
+    clearSelectedStock: (state) => {
+      state.selectedStock = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // ----------------- STOCK -----------------
@@ -372,4 +380,5 @@ const stockSlice = createSlice({
   },
 });
 
+export const { setSelectedStock, clearSelectedStock } = stockSlice.actions;
 export default stockSlice.reducer;
