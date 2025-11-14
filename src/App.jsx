@@ -42,6 +42,8 @@ import HotPage from "./pages/HotPage";
 import ManageStockPage from "./pages/admin/ManageStockPage";
 import ManageDiscountsPage from "./pages/admin/ManageDiscountsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+
 export default function App() {
   const dispatch = useDispatch();
 
@@ -118,6 +120,7 @@ export default function App() {
         <Route path="/favourite" element={<FavouritePage />} />
         <Route path="/debug" element={<DebugPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route

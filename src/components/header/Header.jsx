@@ -7,6 +7,7 @@ import LogoMenu from "./LogoMenu";
 import Navigation from "./Navigation";
 import SearchBar from "./SearchBar";
 import UserIcon from "./UserIcon.jsx";
+import StockSelector from "./StockSelector.jsx";
 import { NavLink } from "react-router-dom";
 import CartIcon from "./CartIcon.jsx";
 import NotiIcon from "./NotiIcon.jsx";
@@ -76,6 +77,9 @@ export default function Header() {
         >
           <UserIcon />
         </div>
+
+        {/* Stock Selector */}
+        <StockSelector />
 
         {/* Theme toggle placed between User and Manage */}
         <ThemeToggle />
