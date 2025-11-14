@@ -40,6 +40,8 @@ import FavouritePage from "./pages/FavouritePage";
 import DebugPage from "./pages/DebugPage";
 import HotPage from "./pages/HotPage";
 import ManageStockPage from "./pages/admin/ManageStockPage";
+import ManageDiscountsPage from "./pages/admin/ManageDiscountsPage";
+import ManageOrdersPage from "./pages/admin/ManageOrdersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 export default function App() {
@@ -134,6 +136,8 @@ export default function App() {
           <Route path="products" element={<ProductsAdminPage />} />
           <Route path="product-types" element={<ManageProductTypesPage />} />
           <Route path="stocks" element={<ManageStockPage />} />
+          <Route path="discounts" element={<ManageDiscountsPage />} />
+          <Route path="orders" element={<ManageOrdersPage />} />
         </Route>
       </Routes>
 
