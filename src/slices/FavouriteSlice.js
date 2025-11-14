@@ -105,9 +105,66 @@ export const removeFromFavourites = createAsyncThunk(
   }
 );
 
-// TOGGLE FAVOURITE (ADD or REMOVE)
-export const toggleFavourite = createAsyncThunk(
-  "favourite/toggleFavourite",
+// ADD TO FAVOURITES (without loading for instant UI)
+export const addToFavouritesInstant = createAsyncThunk(
+  "favourite/addToFavouritesInstant",
+  async ({ userId, productId }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      
+      const res = await fetch(`${API_BASE_URL}/api/favourites`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId, productId }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Không thể thêm vào yêu thích");
+      }
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// REMOVE FROM FAVOURITES (without loading for instant UI)
+export const removeFromFavouritesInstant = createAsyncThunk(
+  "favourite/removeFromFavouritesInstant",
+  async ({ userId, productId }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      
+      const res = await fetch(`${API_BASE_URL}/api/favourites/${userId}/${productId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Không thể xóa khỏi yêu thích");
+
+      const json = await res.json();
+      return { userId, productId };
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// TOGGLE FAVOURITE (ADD or REMOVE) - Instant version without loading
+export const toggleFavouriteInstant = createAsyncThunk(
+  "favourite/toggleFavouriteInstant",
   async ({ userId, productId }, { dispatch, getState, rejectWithValue }) => {
     try {
       const state = getState();
@@ -117,11 +174,11 @@ export const toggleFavourite = createAsyncThunk(
 
       if (isFavourite) {
         // Remove from favourites
-        const result = await dispatch(removeFromFavourites({ userId, productId }));
+        const result = await dispatch(removeFromFavouritesInstant({ userId, productId }));
         return { action: "remove", result: result.payload };
       } else {
         // Add to favourites
-        const result = await dispatch(addToFavourites({ userId, productId }));
+        const result = await dispatch(addToFavouritesInstant({ userId, productId }));
         return { action: "add", result: result.payload };
       }
     } catch (error) {
@@ -152,6 +209,19 @@ const favouriteSlice = createSlice({
 
       // Remove from favourites
       .addCase(removeFromFavourites.fulfilled, (state, action) => {
+        const { userId, productId } = action.payload;
+        state.favourites = state.favourites.filter(
+          (fav) => fav.product?.id !== productId
+        );
+      })
+
+      // Add to favourites (instant)
+      .addCase(addToFavouritesInstant.fulfilled, (state, action) => {
+        state.favourites.push(action.payload);
+      })
+
+      // Remove from favourites (instant)
+      .addCase(removeFromFavouritesInstant.fulfilled, (state, action) => {
         const { userId, productId } = action.payload;
         state.favourites = state.favourites.filter(
           (fav) => fav.product?.id !== productId

@@ -28,9 +28,10 @@ const ProductErrors = {
 const initialState = {
   products:  [], // luôn là mảng
   product: null,
-  productStocks: [], // stock items cho product hiện tại
-  productColors: [], // colors cho product hiện tại
-  productSizes: [], // sizes cho product hiện tại
+  productInfo: [], // thông tin biến thể (color + size + quantity) cho product hiện tại
+  productColors: [], // danh sách màu unique từ productInfo
+  productSizes: [], // danh sách size unique từ productInfo
+  allProductVariants: {}, // { productId: { colors: [], sizes: [] } } - lưu tất cả variants
 };
 
 
@@ -254,16 +255,80 @@ export const searchProductsByName = createAsyncThunk(
   }
 );
 
-// GET PRODUCT STOCKS
-export const getProductStocks = createAsyncThunk(
-  "product/getProductStocks",
+// GET ALL PRODUCT VARIANTS (colors and sizes for all products)
+export const getAllProductVariants = createAsyncThunk(
+  "product/getAllProductVariants",
+  async (_, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      // Lấy danh sách sản phẩm hiện tại từ state
+      const products = getState().product.products;
+      
+      if (!products || products.length === 0) {
+        return {};
+      }
+
+      const variants = {};
+      
+      // Load variants cho từng sản phẩm
+      for (const product of products) {
+        try {
+          const data = await fetch(`${API_BASE_URL}/api/products/${product.id}/info`);
+          if (data.ok) {
+            const infoData = await data.json();
+            const infos = infoData.result || infoData;
+
+            if (infos && infos.length > 0) {
+              const uniqueColors = [];
+              const uniqueSizes = new Set();
+
+              infos.forEach((info) => {
+                if (!uniqueColors.find((c) => c.name === info.colorName)) {
+                  uniqueColors.push({
+                    name: info.colorName,
+                    hexCode: info.colorHexCode,
+                  });
+                }
+                uniqueSizes.add(info.sizeName);
+              });
+
+              variants[product.id] = {
+                colors: uniqueColors.slice(0, 3), // tối đa 3 màu
+                sizes: Array.from(uniqueSizes).slice(0, 3), // tối đa 3 kích thước
+              };
+            } else {
+              variants[product.id] = { colors: [], sizes: [] };
+            }
+          } else {
+            variants[product.id] = { colors: [], sizes: [] };
+          }
+        } catch (error) {
+          console.warn(`Error loading variants for product ${product.id}:`, error);
+          variants[product.id] = { colors: [], sizes: [] };
+        }
+      }
+
+      return variants;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// GET PRODUCT INFO (biến thể: color + size + quantity)
+export const getProductInfo = createAsyncThunk(
+  "product/getProductInfo",
   async (productId, { dispatch, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/stocks`);
+      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/info`);
 
-      if (!res.ok) throw new Error("Không thể tải thông tin kho hàng");
+      if (!res.ok) throw new Error("Không thể tải thông tin biến thể sản phẩm");
 
       const json = await res.json();
       return json.result || json;
@@ -276,7 +341,7 @@ export const getProductStocks = createAsyncThunk(
   }
 );
 
-// GET PRODUCT COLORS
+// GET PRODUCT COLORS (từ product info)
 export const getProductColors = createAsyncThunk(
   "product/getProductColors",
   async (productId, { dispatch, rejectWithValue }) => {
@@ -288,7 +353,16 @@ export const getProductColors = createAsyncThunk(
       if (!res.ok) throw new Error("Không thể tải thông tin màu sắc");
 
       const json = await res.json();
-      return json.result || json;
+      const colorsData = json.result || json;
+      
+      // Transform data to match frontend expectations
+      const transformedColors = colorsData.map((color, index) => ({
+        id: index + 1, // Generate fake id
+        name: color.name,
+        hexCode: color.hexCode
+      }));
+      
+      return transformedColors;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -298,7 +372,7 @@ export const getProductColors = createAsyncThunk(
   }
 );
 
-// GET PRODUCT SIZES
+// GET PRODUCT SIZES (từ product info)
 export const getProductSizes = createAsyncThunk(
   "product/getProductSizes",
   async (productId, { dispatch, rejectWithValue }) => {
@@ -310,7 +384,164 @@ export const getProductSizes = createAsyncThunk(
       if (!res.ok) throw new Error("Không thể tải thông tin kích thước");
 
       const json = await res.json();
+      const sizesData = json.result || json;
+      
+      // Transform data to match frontend expectations
+      const transformedSizes = sizesData.map((sizeName, index) => ({
+        id: index + 1, // Generate fake id
+        name: sizeName,
+        description: sizeName // Use name as description for now
+      }));
+      
+      return transformedSizes;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// CREATE PRODUCT INFO
+export const createProductInfo = createAsyncThunk(
+  "product/createProductInfo",
+  async ({ productId, productInfo }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/info`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(productInfo),
+      });
+
+      if (!res.ok) throw new Error("Không thể tạo biến thể sản phẩm");
+
+      const json = await res.json();
       return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// CREATE MULTIPLE PRODUCT INFO
+export const createMultipleProductInfo = createAsyncThunk(
+  "product/createMultipleProductInfo",
+  async ({ productId, productInfoList }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/info/batch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(productInfoList),
+      });
+
+      if (!res.ok) throw new Error("Không thể tạo biến thể sản phẩm");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// UPDATE PRODUCT INFO
+export const updateProductInfo = createAsyncThunk(
+  "product/updateProductInfo",
+  async ({ id, productInfo }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(`${API_BASE_URL}/api/products/info/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(productInfo),
+      });
+
+      if (!res.ok) throw new Error("Không thể cập nhật biến thể sản phẩm");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// UPDATE PRODUCT INFO QUANTITY
+export const updateProductInfoQuantity = createAsyncThunk(
+  "product/updateProductInfoQuantity",
+  async ({ id, quantity }, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(
+        `${API_BASE_URL}/api/products/info/${id}/quantity?quantity=${quantity}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Không thể cập nhật số lượng");
+
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
+// DELETE PRODUCT INFO
+export const deleteProductInfo = createAsyncThunk(
+  "product/deleteProductInfo",
+  async (id, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(`${API_BASE_URL}/api/products/info/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Không thể xóa biến thể sản phẩm");
+
+      return id;
     } catch (error) {
       dispatch(setError(error.message));
       return rejectWithValue(error.message);
@@ -325,9 +556,9 @@ const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    clearProducts: (state) => {
+    clearProductDetail: (state) => {
       state.product = null;
-      state.productStocks = [];
+      state.productInfo = [];
       state.productColors = [];
       state.productSizes = [];
     },
@@ -348,9 +579,9 @@ const productSlice = createSlice({
         state.product = action.payload;
       })
 
-      // Lấy stock items cho product
-      .addCase(getProductStocks.fulfilled, (state, action) => {
-        state.productStocks = action.payload;
+      // Lấy tất cả product variants
+      .addCase(getAllProductVariants.fulfilled, (state, action) => {
+        state.allProductVariants = action.payload;
       })
 
       // Lấy colors cho product
@@ -363,6 +594,37 @@ const productSlice = createSlice({
         state.productSizes = action.payload;
       })
 
+      // Tạo product info
+      .addCase(createProductInfo.fulfilled, (state, action) => {
+        state.productInfo.push(action.payload);
+      })
+
+      // Tạo nhiều product info
+      .addCase(createMultipleProductInfo.fulfilled, (state, action) => {
+        state.productInfo = action.payload;
+      })
+
+      // Cập nhật product info
+      .addCase(updateProductInfo.fulfilled, (state, action) => {
+        const index = state.productInfo.findIndex((info) => info.id === action.payload.id);
+        if (index !== -1) {
+          state.productInfo[index] = action.payload;
+        }
+      })
+
+      // Cập nhật quantity của product info
+      .addCase(updateProductInfoQuantity.fulfilled, (state, action) => {
+        const index = state.productInfo.findIndex((info) => info.id === action.payload.id);
+        if (index !== -1) {
+          state.productInfo[index] = action.payload;
+        }
+      })
+
+      // Xóa product info
+      .addCase(deleteProductInfo.fulfilled, (state, action) => {
+        state.productInfo = state.productInfo.filter((info) => info.id !== action.payload);
+      })
+
       // Lấy sản phẩm theo loại
       .addCase(getProductsByTypeId.fulfilled, (state, action) => {
         const { typeId, products } = action.payload;
@@ -373,6 +635,8 @@ const productSlice = createSlice({
       .addCase(createProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
         state.product = action.payload;
+        // Thêm variant rỗng cho sản phẩm mới
+        state.allProductVariants[action.payload.id] = { colors: [], sizes: [] };
       })
 
       // Cập nhật sản phẩm
@@ -391,6 +655,9 @@ const productSlice = createSlice({
             state.productsByType[typeId][typeIndex] = action.payload;
           }
         }
+
+        // Cập nhật allProductVariants - tạm thời để trống, sẽ được load lại từ ManageProductsPage
+        state.allProductVariants[action.payload.id] = { colors: [], sizes: [] };
       })
 
       // Xóa sản phẩm
@@ -403,6 +670,9 @@ const productSlice = createSlice({
             (p) => p.id !== action.payload
           );
         }
+        
+        // Xóa khỏi allProductVariants
+        delete state.allProductVariants[action.payload];
         
         // Nếu sản phẩm đang được chọn là sản phẩm vừa bị xóa
         if (state.product && state.product.id === action.payload) {

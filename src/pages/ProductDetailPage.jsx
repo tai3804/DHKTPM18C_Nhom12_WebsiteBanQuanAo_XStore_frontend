@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import {
-  getProductById,
-  getProductColors,
-  getProductSizes,
-} from "../slices/ProductSlice";
+import { getProductById } from "../slices/ProductSlice";
 import { addToCart, createCart } from "../slices/CartSlice";
-import { toggleFavourite, getFavouritesByUser } from "../slices/FavouriteSlice";
+import {
+  toggleFavouriteInstant as toggleFavourite,
+  getFavouritesByUser,
+} from "../slices/FavouriteSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
 import Header from "../components/header/Header";
 import Footer from "../components/common/Footer";
@@ -27,15 +26,24 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { product, productColors, productSizes } = useSelector(
-    (state) => state.product
-  );
+  const { product } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const { favourites } = useSelector((state) => state.favourite);
   const loading = useSelector((state) => state.loading.isLoading);
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
+  const { selectedStock } = useSelector((state) => state.stock);
+
+  const infos = product?.productInfos || [];
+  const colors = useMemo(
+    () => [...new Set(infos.map((i) => i.colorName).filter(Boolean))],
+    [infos]
+  );
+  const sizes = useMemo(
+    () => [...new Set(infos.map((i) => i.sizeName).filter(Boolean))],
+    [infos]
+  );
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -46,11 +54,26 @@ export default function ProductDetailPage() {
   const [isBuying, setIsBuying] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
 
+  // selected variant info
+  const selectedInfo = useMemo(() => {
+    return infos.find((inf) => {
+      if (selectedColor && selectedSize)
+        return inf.colorName === selectedColor && inf.sizeName === selectedSize;
+      if (selectedColor) return inf.colorName === selectedColor;
+      if (selectedSize) return inf.sizeName === selectedSize;
+      return false;
+    });
+  }, [infos, selectedColor, selectedSize]);
+
+  // Available quantity: hiển thị số lượng của variant nếu đã chọn, else tổng
+  const availableInSelectedStock = useMemo(() => {
+    if (selectedInfo) return selectedInfo.quantity ?? 0;
+    return infos.reduce((sum, inf) => sum + (inf.quantity ?? 0), 0);
+  }, [selectedInfo, infos]);
+
   useEffect(() => {
     if (id) {
       dispatch(getProductById(id));
-      dispatch(getProductColors(id));
-      dispatch(getProductSizes(id));
     }
   }, [dispatch, id]);
 
@@ -81,17 +104,17 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     // Auto-select first color when colors are loaded
-    if (productColors?.length > 0) {
-      setSelectedColor(productColors[0]);
+    if (colors?.length > 0) {
+      setSelectedColor(colors[0]);
     }
-  }, [productColors]);
+  }, [colors]);
 
   useEffect(() => {
     // Auto-select first size when sizes are loaded
-    if (productSizes?.length > 0) {
-      setSelectedSize(productSizes[0]);
+    if (sizes?.length > 0) {
+      setSelectedSize(sizes[0]);
     }
-  }, [productSizes]);
+  }, [sizes]);
 
   // Update main image when color changes
   useEffect(() => {
@@ -99,6 +122,11 @@ export default function ProductDetailPage() {
       setSelectedImage(0); // Reset to main image for new color
     }
   }, [selectedColor]);
+
+  // Ensure quantity không vượt quá available
+  useEffect(() => {
+    setQuantity((q) => Math.max(1, Math.min(q, availableInSelectedStock || 1)));
+  }, [availableInSelectedStock]);
 
   const handleAddToCart = async () => {
     // Prevent multiple calls
@@ -111,21 +139,38 @@ export default function ProductDetailPage() {
       return;
     }
 
+    // Check if stock is selected
+    if (!selectedStock) {
+      toast.error("Vui lòng chọn kho!");
+      return;
+    }
+
     // Check if color is selected (only if product has colors)
-    if (productColors?.length > 0 && !selectedColor) {
+    if (colors?.length > 0 && !selectedColor) {
       toast.error("Vui lòng chọn màu sắc!");
       return;
     }
 
     // Check if size is selected (only if product has sizes)
-    if (productSizes?.length > 0 && !selectedSize) {
+    if (sizes?.length > 0 && !selectedSize) {
       toast.error("Vui lòng chọn kích thước!");
+      return;
+    }
+
+    // Check if variant is selected if product has variants
+    if ((colors.length > 0 || sizes.length > 0) && !selectedInfo) {
+      toast.error("Vui lòng chọn màu và kích thước!");
       return;
     }
 
     // Check quantity validation
     if (quantity <= 0) {
       toast.error("Số lượng phải lớn hơn 0!");
+      return;
+    }
+
+    if (quantity > availableInSelectedStock) {
+      toast.error("Số lượng vượt quá tồn kho!");
       return;
     }
 
@@ -153,6 +198,9 @@ export default function ProductDetailPage() {
           cartId: currentCart?.id,
           productId: product.id,
           quantity: quantity,
+          stockId: selectedStock?.id,
+          color: selectedInfo?.colorName,
+          size: selectedInfo?.sizeName,
         })
       ).unwrap();
 
@@ -176,8 +224,25 @@ export default function ProductDetailPage() {
       return;
     }
 
+    // Check if stock is selected
+    if (!selectedStock) {
+      toast.error("Vui lòng chọn kho!");
+      return;
+    }
+
     if (quantity <= 0) {
       toast.error("Số lượng phải lớn hơn 0!");
+      return;
+    }
+
+    if (quantity > availableInSelectedStock) {
+      toast.error("Số lượng vượt quá tồn kho!");
+      return;
+    }
+
+    // Check if variant is selected if product has variants
+    if ((colors.length > 0 || sizes.length > 0) && !selectedInfo) {
+      toast.error("Vui lòng chọn màu và kích thước!");
       return;
     }
 
@@ -205,6 +270,9 @@ export default function ProductDetailPage() {
           cartId: currentCart?.id,
           productId: product.id,
           quantity: quantity,
+          stockId: selectedStock?.id,
+          color: selectedInfo?.colorName,
+          size: selectedInfo?.sizeName,
         })
       ).unwrap();
 
@@ -226,7 +294,10 @@ export default function ProductDetailPage() {
   };
 
   const handleQuantityChange = (newQuantity) => {
-    const validQuantity = Math.max(1, newQuantity);
+    const validQuantity = Math.max(
+      1,
+      Math.min(newQuantity, availableInSelectedStock || 1)
+    );
     setQuantity(validQuantity);
   };
 
@@ -390,22 +461,35 @@ export default function ProductDetailPage() {
 
             {/* Chọn màu sắc */}
             <ProductColorSelector
-              productColors={productColors}
+              productColors={colors}
               selectedColor={selectedColor}
               onSelectColor={setSelectedColor}
             />
 
             {/* Chọn kích thước */}
             <ProductSizeSelector
-              productSizes={productSizes}
+              productSizes={sizes}
               selectedSize={selectedSize}
               onSelectSize={setSelectedSize}
             />
+
+            {/* Hiển thị số lượng còn lại */}
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                isDark ? "bg-gray-700" : "bg-gray-50"
+              }`}
+            >
+              <p className={`${isDark ? "text-white" : "text-gray-800"}`}>
+                Số lượng còn lại:{" "}
+                <strong>{availableInSelectedStock ?? 0}</strong>
+              </p>
+            </div>
 
             {/* Chọn số lượng */}
             <ProductQuantitySelector
               quantity={quantity}
               onQuantityChange={handleQuantityChange}
+              maxQuantity={availableInSelectedStock || 1}
             />
 
             {/* Nút thêm vào giỏ hàng và mua ngay */}

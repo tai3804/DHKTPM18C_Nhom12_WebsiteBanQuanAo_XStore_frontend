@@ -10,7 +10,9 @@ export default function ProductColorSelector({
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
 
-  if (!productColors?.length) return null;
+  if (!productColors?.length) {
+    return null;
+  }
 
   return (
     <div
@@ -26,22 +28,26 @@ export default function ProductColorSelector({
       <div className="flex flex-wrap gap-3">
         {productColors.map((color) => (
           <button
-            key={color.id}
+            key={color}
             onClick={() => onSelectColor(color)}
-            className={`relative w-12 h-12 rounded-full border-2 transition-all ${
-              selectedColor?.id === color.id
-                ? `border-blue-500 ${
-                    isDark ? "dark:border-blue-400" : ""
-                  } scale-110`
-                : `border-gray-300 ${isDark ? "dark:border-gray-600" : ""}`
+            className={`relative px-4 py-2 border-2 rounded-lg transition-all font-medium ${
+              selectedColor === color
+                ? `border-blue-500 bg-blue-500 text-white ${
+                    isDark ? "dark:border-blue-400 dark:bg-blue-400" : ""
+                  } scale-105`
+                : `border-gray-300 ${
+                    isDark
+                      ? "dark:border-gray-600 bg-gray-600 text-gray-200"
+                      : "bg-white text-gray-700"
+                  } hover:border-gray-400`
             }`}
-            style={{ backgroundColor: color.hexCode }}
-            title={color.name}
+            title={color}
           >
-            {selectedColor?.id === color.id && (
-              <div className="absolute inset-0 rounded-full flex items-center justify-center">
+            {color}
+            {selectedColor === color && (
+              <div className="absolute -top-1 -right-1 rounded-full bg-green-500 p-0.5">
                 <svg
-                  className="w-6 h-6 text-white drop-shadow-lg"
+                  className="w-3 h-3 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -49,7 +55,7 @@ export default function ProductColorSelector({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={3}
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
@@ -58,15 +64,6 @@ export default function ProductColorSelector({
           </button>
         ))}
       </div>
-      {selectedColor && (
-        <p
-          className={`text-sm font-medium mt-2 px-2 py-1 rounded ${
-            isDark ? "text-gray-300 bg-gray-600" : "text-gray-600 bg-white"
-          }`}
-        >
-          Đã chọn: {selectedColor.name}
-        </p>
-      )}
     </div>
   );
 }

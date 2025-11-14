@@ -31,7 +31,9 @@ export default function CheckoutPage() {
   const [selectedShipInfoId, setSelectedShipInfoId] = useState(null);
 
   // Order state
-  const [selectedDiscount, setSelectedDiscount] = useState(null);
+  const [selectedDiscounts, setSelectedDiscounts] = useState([]);
+  const [selectedShippingDiscount, setSelectedShippingDiscount] =
+    useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("CASH");
   const [orderNotes, setOrderNotes] = useState("");
   const [finalTotal, setFinalTotal] = useState(0);
@@ -83,14 +85,21 @@ export default function CheckoutPage() {
     }
   };
 
-  // Handle discount selection
+  // Handle price discount selection/toggle
   const handleSelectDiscount = (discount) => {
-    setSelectedDiscount(discount);
+    setSelectedDiscounts((prev) => {
+      const isSelected = prev.some((d) => d.id === discount.id);
+      if (isSelected) {
+        return prev.filter((d) => d.id !== discount.id);
+      } else {
+        return [...prev, discount];
+      }
+    });
   };
 
-  // Handle discount removal
-  const handleRemoveDiscount = () => {
-    setSelectedDiscount(null);
+  // Handle shipping discount selection
+  const handleSelectShippingDiscount = (discount) => {
+    setSelectedShippingDiscount(discount);
   };
 
   // Handle payment method change
@@ -141,20 +150,18 @@ export default function CheckoutPage() {
         0
       );
 
-      // Calculate discount amount
+      // Calculate discount amount from selected discounts
       let discountAmount = 0;
-      if (selectedDiscount && subtotal > 0) {
-        if (selectedDiscount.type === "PERCENTAGE") {
-          discountAmount = subtotal * (selectedDiscount.value / 100);
-          if (
-            selectedDiscount.maxDiscountAmount &&
-            discountAmount > selectedDiscount.maxDiscountAmount
-          ) {
-            discountAmount = selectedDiscount.maxDiscountAmount;
+      if (selectedDiscounts.length > 0 && subtotal > 0) {
+        discountAmount = selectedDiscounts.reduce((total, discount) => {
+          if (discount.type === "PERCENT") {
+            const amount = subtotal * (discount.discountPercent / 100);
+            return total + Math.min(amount, discount.discountAmount || amount);
+          } else if (discount.type === "FIXED") {
+            return total + Math.min(discount.discountAmount, subtotal);
           }
-        } else if (selectedDiscount.type === "FIXED") {
-          discountAmount = Math.min(selectedDiscount.value, subtotal);
-        }
+          return total;
+        }, 0);
       }
 
       const checkoutRequest = {
@@ -182,7 +189,9 @@ export default function CheckoutPage() {
         phoneNumber: selectedShipInfo?.recipientPhone || user?.phone || "",
         notes: orderNotes,
         discountAmount: discountAmount,
-        discountId: selectedDiscount?.id || null,
+        discountId:
+          selectedDiscounts.length > 0 ? selectedDiscounts[0].id : null, // Use first discount ID for now
+        shippingDiscountId: selectedShippingDiscount?.id || null,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
@@ -205,7 +214,7 @@ export default function CheckoutPage() {
         // Navigate to order confirmation or orders page
         setTimeout(() => {
           if (data.result?.id) {
-            navigate(`/orders`);
+            navigate(`/order-confirmation/${data.result.id}`);
           } else {
             navigate(`/orders`);
           }
@@ -332,9 +341,10 @@ export default function CheckoutPage() {
 
               {/* 3. Discount Selection */}
               <DiscountSelection
-                selectedDiscount={selectedDiscount}
+                selectedDiscounts={selectedDiscounts}
+                selectedShippingDiscount={selectedShippingDiscount}
                 onSelectDiscount={handleSelectDiscount}
-                onRemoveDiscount={handleRemoveDiscount}
+                onSelectShippingDiscount={handleSelectShippingDiscount}
                 cartTotal={cart.cartItems.reduce(
                   (sum, item) =>
                     sum + (item.salePrice || item.price || 0) * item.quantity,
@@ -354,10 +364,11 @@ export default function CheckoutPage() {
                 onNotesChange={handleNotesChange}
               />
 
-              6. Price Summary - Moved above checkout button
+              {/* 6. Price Summary - Moved above checkout button */}
               <PriceSummary
                 cartItems={cart.cartItems}
-                selectedDiscount={selectedDiscount}
+                selectedDiscounts={selectedDiscounts}
+                selectedShippingDiscount={selectedShippingDiscount}
                 shippingFee={30000}
                 onTotalChange={handleTotalChange}
               />

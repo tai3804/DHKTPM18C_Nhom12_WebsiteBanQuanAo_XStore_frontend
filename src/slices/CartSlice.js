@@ -82,7 +82,7 @@ export const createCart = createAsyncThunk(
 // ✅ ADD TO CART
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
-  async ({ cartId, productId, quantity = 1, stockId }, { dispatch, getState, rejectWithValue }) => { // <-- Thêm stockId
+  async ({ cartId, productId, quantity = 1, stockId, color, size }, { dispatch, getState, rejectWithValue }) => { // <-- Thêm stockId
     dispatch(startLoading());
     dispatch(clearError());
     try {
@@ -99,7 +99,7 @@ export const addToCart = createAsyncThunk(
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ cartId, productId, stockId, quantity }),
+        body: JSON.stringify({ cartId, productId, stockId, quantity, color, size }),
       });
 
       const json = await res.json();

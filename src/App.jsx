@@ -7,6 +7,9 @@ import Contact from "./pages/ContactPage";
 import Cart from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import OrdersPage from "./pages/OrdersPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
 import SalePage from "./pages/SalePage";
 import ProductsPage from "./pages/ProductsPage";
 import UserPage from "./pages/UserPage";
@@ -101,6 +104,12 @@ export default function App() {
           path="/order-confirmation/:orderId"
           element={<OrderConfirmationPage />}
         />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+        <Route
+          path="/orders/:orderId/tracking"
+          element={<OrderTrackingPage />}
+        />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -120,7 +129,7 @@ export default function App() {
         <Route path="/favourite" element={<FavouritePage />} />
         <Route path="/debug" element={<DebugPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route

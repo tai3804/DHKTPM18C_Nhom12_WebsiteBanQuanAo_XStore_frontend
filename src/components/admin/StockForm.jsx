@@ -59,11 +59,15 @@ const StockForm = ({ stock, onCancel, onSuccess }) => {
     dispatch(action)
       .unwrap()
       .then(() => {
-        toast.success(`Kho đã được ${isEditMode ? "cập nhật" : "tạo"} thành công!`);
+        toast.success(
+          `Kho đã được ${isEditMode ? "cập nhật" : "tạo"} thành công!`
+        );
         onSuccess();
       })
       .catch((err) => {
-        toast.error(`Lỗi khi ${isEditMode ? "cập nhật" : "tạo"} kho: ${err.message}`);
+        toast.error(
+          `Lỗi khi ${isEditMode ? "cập nhật" : "tạo"} kho: ${err.message}`
+        );
       });
   };
 
@@ -73,34 +77,40 @@ const StockForm = ({ stock, onCancel, onSuccess }) => {
       : "border-gray-300 bg-white text-gray-900 focus:ring-gray-800"
   }`;
 
-  const buttonCancelClass = `px-4 py-2 border rounded-lg transition-colors duration-300 hover:cursor-pointer ${
+  const buttonCancelClass = `px-5 py-2 rounded-lg border transition cursor-pointer ${
     themeMode === "dark"
-      ? "border-gray-600 text-gray-200 hover:bg-gray-700"
-      : "border-gray-300 text-gray-700 hover:bg-gray-100"
+      ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+      : "border-gray-200 text-gray-600 hover:bg-gray-100"
   }`;
 
-  const buttonSubmitClass = `px-4 py-2 rounded-lg text-white transition-colors duration-300 hover:cursor-pointer ${
-    themeMode === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-900 hover:bg-gray-800"
-  }`;
+  const buttonSubmitClass = `px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer font-medium`;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center z-50 animate-fadeIn" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
-        className={`rounded-2xl p-6 w-full max-w-md shadow-lg transform transition-all scale-95 animate-fadeIn ${
-          themeMode === "dark" ? "bg-gray-800" : "bg-white"
+        className={`rounded-2xl p-8 w-full max-w-md shadow-xl border animate-fadeIn transition-colors duration-300 ${
+          themeMode === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-100"
         }`}
       >
-        <h2 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
-          themeMode === "dark" ? "text-gray-100" : "text-gray-800"
-        }`}>
-          {isEditMode ? "Sửa thông tin kho" : "Thêm kho mới"}
+        <h2
+          className={`text-2xl font-bold text-center pb-4 mb-6 border-b transition-colors duration-300 ${
+            themeMode === "dark"
+              ? "text-gray-100 border-gray-700"
+              : "text-gray-800 border-gray-200"
+          }`}
+        >
+          {isEditMode ? "Chỉnh sửa thông tin kho" : "Thêm kho mới"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={`text-sm mb-1 block transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-            }`}>
+            <label
+              className={`text-sm mb-1 block transition-colors duration-300 ${
+                themeMode === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
               Tên kho
             </label>
             <input
@@ -114,9 +124,11 @@ const StockForm = ({ stock, onCancel, onSuccess }) => {
             />
           </div>
           <div>
-            <label className={`text-sm mb-1 block transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-            }`}>
+            <label
+              className={`text-sm mb-1 block transition-colors duration-300 ${
+                themeMode === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
               Email
             </label>
             <input
@@ -130,9 +142,11 @@ const StockForm = ({ stock, onCancel, onSuccess }) => {
             />
           </div>
           <div>
-            <label className={`text-sm mb-1 block transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-            }`}>
+            <label
+              className={`text-sm mb-1 block transition-colors duration-300 ${
+                themeMode === "dark" ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
               Số điện thoại
             </label>
             <input
@@ -145,12 +159,16 @@ const StockForm = ({ stock, onCancel, onSuccess }) => {
               required
             />
           </div>
-          <div className="flex justify-end space-x-3 pt-2">
-            <button type="button" onClick={onCancel} className={buttonCancelClass}>
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className={buttonCancelClass}
+            >
               Hủy
             </button>
             <button type="submit" className={buttonSubmitClass}>
-              {isEditMode ? "Cập nhật" : "Thêm mới"}
+              {isEditMode ? "Lưu thay đổi" : "Thêm mới"}
             </button>
           </div>
         </form>

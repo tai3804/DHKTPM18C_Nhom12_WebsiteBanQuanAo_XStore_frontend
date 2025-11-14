@@ -18,10 +18,22 @@ export default function StockSelector() {
     }
   }, [dispatch, stocks]);
 
-  // Set default stock to TP.HCM when stocks are loaded
+  // Set default stock from localStorage or TP.HCM when stocks are loaded
   useEffect(() => {
     if (stocks && stocks.length > 0 && !selectedStock) {
-      // Find TP.HCM stock or use first stock as fallback
+      // Check if there's a saved stock in localStorage
+      const savedStockId = localStorage.getItem("selectedStockId");
+      if (savedStockId) {
+        const savedStock = stocks.find(
+          (stock) => stock.id === parseInt(savedStockId)
+        );
+        if (savedStock) {
+          dispatch(setSelectedStock(savedStock));
+          return;
+        }
+      }
+
+      // Fallback to TP.HCM stock or use first stock as fallback
       const tphcmStock = stocks.find(
         (stock) =>
           stock.name?.toLowerCase().includes("tp.hcm") ||
@@ -35,7 +47,10 @@ export default function StockSelector() {
 
   const handleStockSelect = (stock) => {
     dispatch(setSelectedStock(stock));
+    // Save to localStorage
+    localStorage.setItem("selectedStockId", stock.id.toString());
     setIsOpen(false);
+    // Note: Removed page refresh - components should update automatically via Redux
   };
 
   if (!stocks || stocks.length === 0) {
