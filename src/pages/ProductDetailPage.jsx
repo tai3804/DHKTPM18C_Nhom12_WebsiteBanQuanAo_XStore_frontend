@@ -20,6 +20,8 @@ import ProductActionButtons from "../components/product/ProductActionButtons";
 import ProductDescription from "../components/product/ProductDescription";
 import ProductDetails from "../components/product/ProductDetails";
 import RelatedProducts from "../components/product/RelatedProducts";
+import ProductComments from "../components/product/ProductComments";
+import { getCommentsByProductId } from "../slices/CommentSlice";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -30,6 +32,7 @@ export default function ProductDetailPage() {
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const { favourites } = useSelector((state) => state.favourite);
+  const { commentsByProduct } = useSelector((state) => state.comment);
   const loading = useSelector((state) => state.loading.isLoading);
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
@@ -43,6 +46,10 @@ export default function ProductDetailPage() {
   const sizes = useMemo(
     () => [...new Set(infos.map((i) => i.sizeName).filter(Boolean))],
     [infos]
+  );
+  const comments = useMemo(
+    () => commentsByProduct[id] || [],
+    [commentsByProduct, id]
   );
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -74,6 +81,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (id) {
       dispatch(getProductById(id));
+      dispatch(getCommentsByProductId(id));
     }
   }, [dispatch, id]);
 
@@ -511,6 +519,9 @@ export default function ProductDetailPage() {
 
         {/* Thông tin chi tiết */}
         <ProductDetails product={product} />
+
+        {/* Bình luận sản phẩm */}
+        <ProductComments productId={id} comments={comments} />
 
         {/* Sản phẩm liên quan */}
         <RelatedProducts />

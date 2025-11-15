@@ -2,40 +2,41 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import { createComment } from "../../slices/CommentSlice";
+import { API_BASE_URL } from "../../config/api";
 
 const ProductComments = ({ productId, comments = [] }) => {
   const [showAll, setShowAll] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentRate, setCommentRate] = useState(5);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  // const [selectedFile, setSelectedFile] = useState(null);
+  // const [previewUrl, setPreviewUrl] = useState(null);
   const dispatch = useDispatch();
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
 
   const visibleComments = showAll ? comments : comments.slice(0, 3);
 
-  useEffect(() => {
-    // Revoke preview URL on unmount
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  // useEffect(() => {
+  //   // Revoke preview URL on unmount
+  //   return () => {
+  //     if (previewUrl) URL.revokeObjectURL(previewUrl);
+  //   };
+  // }, [previewUrl]);
 
   const user = useSelector((state) => state.auth.user);
 
-  const handleFileChange = (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (f) {
-      setSelectedFile(f);
-      const url = URL.createObjectURL(f);
-      setPreviewUrl(url);
-    } else {
-      setSelectedFile(null);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
-  };
+  // const handleFileChange = (e) => {
+  //   const f = e.target.files && e.target.files[0];
+  //   if (f) {
+  //     setSelectedFile(f);
+  //     const url = URL.createObjectURL(f);
+  //     setPreviewUrl(url);
+  //   } else {
+  //     setSelectedFile(null);
+  //     if (previewUrl) URL.revokeObjectURL(previewUrl);
+  //     setPreviewUrl(null);
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,18 +49,18 @@ const ProductComments = ({ productId, comments = [] }) => {
         authorId: user.id,
         text: commentText,
         rate: commentRate,
-        image: selectedFile || null,
+        // image: selectedFile || null,
       };
 
       const result = await dispatch(createComment(payload)).unwrap();
       // reset form
       setCommentText("");
       setCommentRate(5);
-      setSelectedFile(null);
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        setPreviewUrl(null);
-      }
+      // setSelectedFile(null);
+      // if (previewUrl) {
+      //   URL.revokeObjectURL(previewUrl);
+      //   setPreviewUrl(null);
+      // }
       // show all so new comment is visible
       setShowAll(true);
     } catch (err) {
@@ -114,6 +115,15 @@ const ProductComments = ({ productId, comments = [] }) => {
               >
                 {c.text}
               </div>
+              {c.imageUrl && (
+                <div className="mt-2">
+                  <img
+                    src={`${API_BASE_URL}${c.imageUrl}`}
+                    alt="comment-attachment"
+                    className="max-w-xs max-h-48 rounded-lg object-cover"
+                  />
+                </div>
+              )}
               <div
                 className={`${
                   isDark ? "text-gray-500" : "text-gray-400"
@@ -181,7 +191,7 @@ const ProductComments = ({ productId, comments = [] }) => {
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="file"
@@ -206,7 +216,7 @@ const ProductComments = ({ productId, comments = [] }) => {
                 className="h-16 w-16 object-cover rounded"
               />
             )}
-          </div>
+          </div> */}
         </div>
 
         <div className="flex items-center gap-3">
@@ -217,7 +227,7 @@ const ProductComments = ({ productId, comments = [] }) => {
           >
             Gửi bình luận
           </button>
-          {selectedFile && (
+          {/* {selectedFile && (
             <button
               type="button"
               onClick={() => {
@@ -231,7 +241,7 @@ const ProductComments = ({ productId, comments = [] }) => {
             >
               Xoá ảnh
             </button>
-          )}
+          )} */}
         </div>
       </form>
     </div>
