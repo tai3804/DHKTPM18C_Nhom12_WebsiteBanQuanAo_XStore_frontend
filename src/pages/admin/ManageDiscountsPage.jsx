@@ -22,19 +22,6 @@ const ManageDiscountsPage = () => {
     dispatch(getDiscounts());
   }, [dispatch]);
 
-  // Debug: Log dữ liệu discount
-  useEffect(() => {
-    if (discounts.length > 0) {
-      console.log("Sample discount data:", discounts[0]);
-      console.log("⚠️ isActive value:", discounts[0].isActive);
-      console.log("⚠️ isActive type:", typeof discounts[0].isActive);
-      console.log(
-        "⚠️ All discounts:",
-        discounts.map((d) => ({ id: d.id, name: d.name, isActive: d.isActive }))
-      );
-    }
-  }, [discounts]);
-
   const handleAdd = () => {
     setSelectedDiscount(null);
     setShowForm(true);
@@ -104,8 +91,6 @@ const ManageDiscountsPage = () => {
   return (
     <div className="space-y-6 relative">
       {/* Breadcrumb */}
-      <div className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${themeMode === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-        <Link to="/admin/dashboard" className="hover:underline">Trang chủ</Link>
       <div
         className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${
           themeMode === "dark" ? "text-gray-400" : "text-gray-500"
@@ -147,21 +132,33 @@ const ManageDiscountsPage = () => {
           Đang tải danh sách giảm giá...
         </div>
       ) : filtered.length > 0 ? (
-        <div className={`rounded-xl shadow-sm border overflow-x-auto transition-colors ${tableBgClass}`}>
+        <div
+          className={`rounded-xl shadow-sm border overflow-x-auto transition-colors ${tableBgClass}`}
+        >
           <table className="w-full text-left border-collapse min-w-max">
             <thead>
               <tr>
-                {["ID","Tên / Tiêu đề","Mô tả","Loại","Giảm","Trạng thái","Thời gian","Hành động"].map((title, idx) => (
+                {[
+                  "ID",
+                  "Tên / Tiêu đề",
+                  "Mô tả",
+                  "Loại",
+                  "Giảm",
+                  "Trạng thái",
+                  "Thời gian",
+                  "Hành động",
+                ].map((title, idx) => (
                   <th
                     key={idx}
-                    className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${tableHeaderClass} ${title === "Hành động" ? "text-right" : ""}`}
+                    className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${tableHeaderClass} ${
+                      title === "Hành động" ? "text-right" : ""
+                    }`}
                   >
                     {title}
                   </th>
                 ))}
               </tr>
             </thead>
-
             <tbody>
               {filtered.map((d) => (
                 <tr
@@ -170,7 +167,8 @@ const ManageDiscountsPage = () => {
                 >
                   <td className="px-4 py-3">{d.id || d._id}</td>
                   <td className="px-4 py-3">
-                    {d.name || "—"} <br />
+                    {d.name || "—"}
+                    <br />
                     <span className="text-gray-500 text-sm">
                       {d.title || ""}
                     </span>
@@ -185,30 +183,7 @@ const ManageDiscountsPage = () => {
                       : d.discountAmount.toLocaleString()}
                   </td>
                   <td className="px-4 py-3">
-                    {d.validUserType
-                      ? d.validUserType === "COPPER"
-                        ? "Đồng"
-                        : d.validUserType === "SILVER"
-                        ? "Bạc"
-                        : d.validUserType === "GOLD"
-                        ? "Vàng"
-                        : d.validUserType === "PLATINUM"
-                        ? "Bạch kim"
-                        : d.validUserType
-                      : "Tất cả"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        d.isActive || d.isActive === 1 || d.isActive === "true"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                      }`}
-                    >
-                      {d.isActive || d.isActive === 1 || d.isActive === "true"
-                        ? "Hoạt động"
-                        : "Vô hiệu"}
-                    </span>
+                    {d.isActive ? "Hoạt động" : "Vô hiệu"}
                   </td>
                   <td className="px-4 py-3">
                     {d.startDate ? d.startDate.slice(0, 10) : "—"} —{" "}
