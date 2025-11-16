@@ -1,60 +1,78 @@
-import React, { useRef, useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { selectThemeMode } from "../../slices/ThemeSlice";
+import { useParams } from "react-router-dom";
 import ProductCard from "./ProductCard";
+import { selectThemeMode } from "../../slices/ThemeSlice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function RelatedProducts({ currentProduct }) {
+export default function RelatedProducts() {
+  const { id } = useParams();
+  const { products } = useSelector((state) => state.product);
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
-  const scrollRef = useRef(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Lấy tất cả sản phẩm từ Redux store (giống như ProductsPage)
-  const allProducts = useSelector((state) => state.product.products) || [];
+  // Tìm sản phẩm hiện tại theo id từ products
+  const currentProduct = useMemo(() => {
+    return products?.find((p) => p.id === Number(id)) || null;
+  }, [products, id]);
 
-  // Tạo danh sách sản phẩm liên quan
+  // Lấy sản phẩm liên quan: 5 cùng type, 5 cùng brand
   const relatedProducts = useMemo(() => {
-    if (!allProducts.length || !currentProduct) return [];
+    if (!currentProduct || !products) return [];
 
-    // Lọc sản phẩm liên quan: cùng loại hoặc cùng brand, loại trừ sản phẩm hiện tại
-    const related = allProducts.filter((product) => {
-      if (product.id === currentProduct.id) return false;
+    const relatedByType = products
+      .filter(
+        (p) =>
+          p.type?.id === currentProduct.type?.id && p.id !== currentProduct.id
+      )
+      .slice(0, 5);
 
-      // Ưu tiên sản phẩm cùng loại
-      const sameType =
-        product.type?.name === currentProduct.type?.name ||
-        product.productType?.name === currentProduct.productType?.name;
+    const relatedByBrand = products
+      .filter(
+        (p) =>
+          p.brand?.id === currentProduct.brand?.id &&
+          p.id !== currentProduct.id &&
+          !relatedByType.some((rp) => rp.id === p.id)
+      )
+      .slice(0, 5);
 
-      // Hoặc sản phẩm cùng brand (nếu có)
-      const sameBrand = product.brand === currentProduct.brand;
+    return [...relatedByType, ...relatedByBrand];
+  }, [products, currentProduct]);
 
-      return sameType || sameBrand;
-    });
+  const productsPerSlide = 3;
+  const totalSlides = Math.ceil(relatedProducts.length / productsPerSlide);
 
-    // Giới hạn 6 sản phẩm
-    return related.slice(0, 6);
-  }, [allProducts, currentProduct]);
-
-  const scrollLeft = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -320, behavior: "smooth" });
-    }
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
   };
 
-  const scrollRight = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 320, behavior: "smooth" });
-    }
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
-  // Không hiển thị nếu không có sản phẩm liên quan
-  if (relatedProducts.length === 0) {
-    return null;
-  }
+  // Auto-play carousel
+  useEffect(() => {
+    if (isHovered || totalSlides <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 3000); // Change slide every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [currentSlide, totalSlides, isHovered]);
+
+  if (relatedProducts.length === 0) return null;
+
+  const displayedProducts = relatedProducts.slice(
+    currentSlide * productsPerSlide,
+    (currentSlide + 1) * productsPerSlide
+  );
 
   return (
     <div
-      className={`rounded-lg p-6 shadow-sm ${
+      className={`rounded-lg p-6 shadow-sm mt-8 ${
         isDark ? "bg-gray-800" : "bg-white"
       }`}
     >
@@ -65,46 +83,55 @@ export default function RelatedProducts({ currentProduct }) {
       >
         Sản phẩm liên quan
       </h2>
-
-      <div className="relative">
-        {/* Scroll Left Button */}
-        <button
-          onClick={scrollLeft}
-          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full shadow-lg transition-all ${
-            isDark
-              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              : "bg-white text-gray-700 hover:bg-gray-50"
-          }`}
-          title="Cuộn sang trái"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-
-        {/* Products Container */}
+      <div
+        className="relative overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide px-12 py-2"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
-          {relatedProducts.map((product) => (
-            <div key={product.id} className="shrink-0 w-72">
-              <ProductCard product={product} />
+          {Array.from({ length: totalSlides }, (_, slideIndex) => (
+            <div
+              key={slideIndex}
+              className="shrink-0 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {relatedProducts
+                .slice(
+                  slideIndex * productsPerSlide,
+                  (slideIndex + 1) * productsPerSlide
+                )
+                .map((prod) => (
+                  <ProductCard key={prod.id} product={prod} />
+                ))}
             </div>
           ))}
         </div>
-
-        {/* Scroll Right Button */}
-        <button
-          onClick={scrollRight}
-          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full shadow-lg transition-all ${
-            isDark
-              ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              : "bg-white text-gray-700 hover:bg-gray-50"
-          }`}
-          title="Cuộn sang phải"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
+        {totalSlides > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md transition-colors ${
+                isDark
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 rounded-full shadow-md transition-colors ${
+                isDark
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <ChevronRight size={24} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

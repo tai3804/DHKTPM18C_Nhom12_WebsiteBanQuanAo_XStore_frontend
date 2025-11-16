@@ -8,5 +8,8 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true, // Báo lỗi nếu port 5173 đã được sử dụng thay vì tự động chuyển
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    },
   }
 })

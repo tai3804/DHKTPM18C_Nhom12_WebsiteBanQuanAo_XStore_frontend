@@ -10,9 +10,9 @@ export default function SalePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
 
-  // Lấy sản phẩm sale (giả sử tất cả sản phẩm đều sale, hoặc có thể filter theo điều kiện)
+  // Lấy sản phẩm sale (có isSale = true)
   const saleProducts = useMemo(() => {
-    return [...allProducts].sort((a, b) => b.id - a.id); // Sắp xếp theo ID giảm dần (mới nhất)
+    return allProducts.filter(product => product.isSale).sort((a, b) => b.id - a.id);
   }, [allProducts]);
 
   // Tính toán phân trang
@@ -84,7 +84,7 @@ export default function SalePage() {
                 }`}
               >
                 Ưu đãi đặc biệt - Giảm giá khủng cho những sản phẩm thời trang
-                chọn lọc
+                chọn lọc. Thời gian còn lại: [Countdown]
               </p>
             </div>
 

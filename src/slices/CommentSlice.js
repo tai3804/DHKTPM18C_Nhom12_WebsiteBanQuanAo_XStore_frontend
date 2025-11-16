@@ -27,44 +27,28 @@ export const getCommentsByProductId = createAsyncThunk(
 
 export const createComment = createAsyncThunk(
   "comment/createComment",
-  async ({ productId, authorId, text, rate, image }, { dispatch, getState, rejectWithValue }) => {
+  async ({ productId, authorId, authorName, text, rate, imageUrls }, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
+      const requestBody = {
+        productId: parseInt(productId),
+        authorId: parseInt(authorId),
+        authorName: authorName,
+        text: text,
+        rate: parseInt(rate),
+        imageUrls: imageUrls || [],
+      };
       const token = getState()?.auth?.token;
-      let res;
-      // If image is a File (from input), send multipart/form-data
-      if (image instanceof File) {
-        const form = new FormData();
-        form.append("productId", parseInt(productId));
-        form.append("authorId", parseInt(authorId));
-        form.append("text", text);
-        form.append("rate", parseInt(rate));
-        form.append("image", image);
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        res = await fetch(`${API_BASE_URL}/api/comments`, {
-          method: "POST",
-          headers,
-          body: form,
-        });
-      } else {
-        const requestBody = {
-          productId: parseInt(productId),
-          authorId: parseInt(authorId),
-          text: text,
-          rate: parseInt(rate),
-          image: image || null,
-        };
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        };
-        res = await fetch(`${API_BASE_URL}/api/comments`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(requestBody),
-        });
-      }
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+      const res = await fetch(`${API_BASE_URL}/api/comments`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(requestBody),
+      });
       if (!res.ok) throw new Error("Không thể tạo bình luận");
       const json = await res.json();
       return json.result || json;
@@ -79,14 +63,13 @@ export const createComment = createAsyncThunk(
 
 export const updateComment = createAsyncThunk(
   "comment/updateComment",
-  async ({ id, text, rate, image }, { dispatch, getState, rejectWithValue }) => {
+  async ({ id, text, rate }, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
       const requestBody = {
         text: text,
         rate: parseInt(rate),
-        image: image || null
       };
       const token = getState()?.auth?.token;
       const headers = {

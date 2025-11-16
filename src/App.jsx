@@ -49,6 +49,7 @@ import ManageOrdersPage from "./pages/admin/ManageOrdersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import StockItemList from "./components/admin/StockItemList";
 import ChatManagementPage from "./pages/admin/ChatManagementPage";
+import CommentsPage from "./pages/CommentsPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -111,6 +112,10 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route
+            path="products/:productId/comments"
+            element={<CommentsPage />}
+          />
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route

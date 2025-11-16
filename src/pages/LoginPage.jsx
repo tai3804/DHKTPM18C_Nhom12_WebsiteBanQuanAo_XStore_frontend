@@ -60,6 +60,7 @@ export default function LoginPage() {
           <input
             type="text"
             placeholder="Username"
+            name="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className={`w-full mb-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${
@@ -72,6 +73,7 @@ export default function LoginPage() {
           <input
             type="password"
             placeholder="Password"
+            name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={`w-full mb-6 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors duration-300 ${

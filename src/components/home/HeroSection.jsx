@@ -182,6 +182,27 @@ export default function HeroSection() {
             <div className="absolute top-10 -left-10 w-20 h-20 bg-blue-500 rounded-full opacity-20 blur-2xl"></div>
             <div className="absolute bottom-10 -right-10 w-32 h-32 bg-purple-500 rounded-full opacity-20 blur-3xl"></div>
           </div>
+
+          {/* Icon Link to Products */}
+          <div className="flex justify-center mt-8 lg:mt-12">
+            <button
+              onClick={() => navigate("/products")}
+              className={`p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group ${
+                themeMode === "dark"
+                  ? "bg-gray-800 hover:bg-gray-700"
+                  : "bg-white hover:bg-gray-50"
+              }`}
+              title="Xem tất cả sản phẩm"
+            >
+              <ShoppingBag
+                className={`h-6 w-6 transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "text-gray-300 group-hover:text-blue-400"
+                    : "text-gray-600 group-hover:text-blue-600"
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </section>

@@ -10,9 +10,20 @@ export default function HotPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
 
-  // Lấy sản phẩm hot (giả sử tất cả sản phẩm đều hot, hoặc có thể filter theo điều kiện)
+  // Lấy sản phẩm hot (có rating trung bình từ 4 sao trở lên)
   const hotProducts = useMemo(() => {
-    return [...allProducts].sort((a, b) => b.id - a.id); // Sắp xếp theo ID giảm dần (mới nhất)
+    return allProducts
+      .filter((product) => {
+        const comments = product.comments || [];
+        if (comments.length === 0) return false;
+        const totalRating = comments.reduce(
+          (sum, comment) => sum + (comment.rate || 0),
+          0
+        );
+        const averageRating = totalRating / comments.length;
+        return averageRating >= 4;
+      })
+      .sort((a, b) => b.id - a.id); // Sắp xếp theo ID giảm dần (mới nhất)
   }, [allProducts]);
 
   // Tính toán phân trang
@@ -83,8 +94,8 @@ export default function HotPage() {
                   themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Khám phá những sản phẩm được yêu thích nhất, xu hướng thời trang
-                mới nhất
+                Khám phá những sản phẩm được yêu thích nhất với đánh giá từ 4
+                sao trở lên
               </p>
             </div>
 
@@ -111,7 +122,7 @@ export default function HotPage() {
                     themeMode === "dark" ? "text-gray-400" : "text-gray-500"
                   }`}
                 >
-                  Chưa có sản phẩm HOT nào
+                  Chưa có sản phẩm HOT (đánh giá ≥4 sao) nào
                 </p>
               </div>
             ) : (

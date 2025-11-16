@@ -34,15 +34,11 @@ export default function ProductCard({ product }) {
     }
   }, [favourites, product]);
 
-  // Load favourites khi user đăng nhập
-  useEffect(() => {
-    if (user?.id && (!favourites || favourites.length === 0)) {
-      dispatch(getFavouritesByUser(user.id));
-    }
-  }, [user, dispatch]);
-
   // Tính % giảm giá
   const calculateDiscount = () => {
+    if (product.isSale && product.productSales) {
+      return product.productSales.discountPercent;
+    }
     if (product.originalPrice && product.originalPrice > product.price) {
       return Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -311,17 +307,17 @@ export default function ProductCard({ product }) {
               themeMode === "dark" ? "text-white" : "text-gray-900"
             }`}
           >
-            ${product.price?.toLocaleString("vi-VN")}
+            ${(product.isSale && product.productSales ? product.productSales.discountedPrice : product.price)?.toLocaleString("vi-VN")}
           </span>
-          {product.originalPrice && product.originalPrice > product.price && (
+          {(product.isSale && product.productSales) || (product.originalPrice && product.originalPrice > product.price) ? (
             <span
               className={`text-sm line-through transition-colors duration-300 ${
                 themeMode === "dark" ? "text-gray-500" : "text-gray-400"
               }`}
             >
-              ${product.originalPrice?.toLocaleString("vi-VN")}
+              ${(product.isSale && product.productSales ? product.productSales.originalPrice : product.originalPrice)?.toLocaleString("vi-VN")}
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

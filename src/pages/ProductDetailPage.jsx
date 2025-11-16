@@ -17,8 +17,9 @@ import ProductSizeSelector from "../components/product/ProductSizeSelector";
 import ProductQuantitySelector from "../components/product/ProductQuantitySelector";
 import ProductActionButtons from "../components/product/ProductActionButtons";
 import ProductDetails from "../components/product/ProductDetails";
-import RelatedProducts from "../components/product/RelatedProducts";
 import ProductComments from "../components/product/ProductComments";
+import ProductCard from "../components/product/ProductCard";
+import RelatedProducts from "../components/product/RelatedProducts";
 import { getCommentsByProductId } from "../slices/CommentSlice";
 
 export default function ProductDetailPage() {
@@ -26,7 +27,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { product } = useSelector((state) => state.product);
+  const { product, products } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const { favourites } = useSelector((state) => state.favourite);
@@ -533,7 +534,11 @@ export default function ProductDetailPage() {
         <ProductDetails product={product} comments={comments} />
 
         {/* Bình luận sản phẩm */}
-        <ProductComments productId={id} comments={comments} />
+        <ProductComments
+          productId={id}
+          comments={comments}
+          showAllByDefault={false}
+        />
 
         {/* Sản phẩm liên quan */}
         <RelatedProducts />
