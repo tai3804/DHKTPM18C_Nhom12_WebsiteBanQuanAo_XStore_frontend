@@ -50,6 +50,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import StockItemList from "./components/admin/StockItemList";
 import ChatManagementPage from "./pages/admin/ChatManagementPage";
 import CommentsPage from "./pages/CommentsPage";
+import ManageProductSalePage from "./pages/admin/ManageProductSalePage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -158,6 +159,7 @@ export default function App() {
           <Route path="stocks" element={<ManageStockPage />} />
           <Route path="stocks/:stockId/items" element={<StockItemList />} />
           <Route path="discounts" element={<ManageDiscountsPage />} />
+          <Route path="product-sales" element={<ManageProductSalePage />} />
           <Route path="orders" element={<ManageOrdersPage />} />
           <Route path="chat" element={<ChatManagementPage />} />
         </Route>

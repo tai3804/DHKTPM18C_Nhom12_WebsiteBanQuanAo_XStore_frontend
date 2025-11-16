@@ -15,6 +15,7 @@ import favouriteReducer from '../slices/FavouriteSlice'
 import themeReducer from '../slices/ThemeSlice'
 import orderReducer from '../slices/OrderSlice'
 import commentReducer from '../slices/CommentSlice'
+import productSalesReducer from '../slices/ProductSalesSlice'
 
 export const store = configureStore({
 
@@ -36,5 +37,6 @@ export const store = configureStore({
     theme: themeReducer,
     order: orderReducer,
     comment: commentReducer,
+    productSales: productSalesReducer,
   },
 })

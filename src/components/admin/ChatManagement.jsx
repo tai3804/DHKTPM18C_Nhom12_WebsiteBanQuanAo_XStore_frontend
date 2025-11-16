@@ -1,16 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  MessageCircle,
-  Send,
-  User,
-  Clock,
-  CheckCircle,
-  Search,
-} from "lucide-react";
+import { MessageCircle, Send, User, Clock, CheckCircle } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
 import { useSelector } from "react-redux";
 import { selectAuthToken } from "../../slices/AuthSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
+import SearchBar from "../../components/admin/SearchBar";
+import { Link } from "react-router-dom";
 
 const ChatManagement = () => {
   const [chatRooms, setChatRooms] = useState([]);
@@ -193,6 +188,24 @@ const ChatManagement = () => {
             themeMode === "dark" ? "border-gray-700" : "border-gray-200"
           } border-b`}
         >
+          {/* Breadcrumb */}
+          <div
+            className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            <Link to="/admin/dashboard" className="hover:underline">
+              Trang chủ
+            </Link>
+            <span>/</span>
+            <span
+              className={`transition-colors ${
+                themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              Chat
+            </span>
+          </div>
           <h2
             className={`text-lg font-semibold ${
               themeMode === "dark" ? "text-gray-100" : "text-gray-800"
@@ -216,26 +229,12 @@ const ChatManagement = () => {
               : "border-gray-200 bg-white"
           } border-b`}
         >
-          <div className="relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm kiếm khách hàng..."
-              className={`w-full px-3 py-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                themeMode === "dark"
-                  ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400"
-                  : "border-gray-300 text-gray-900 placeholder-gray-500"
-              }`}
-            />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search
-                className={`h-5 w-5 ${
-                  themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              />
-            </div>
-          </div>
+          <SearchBar
+            searchQuery={searchTerm}
+            onSearchChange={setSearchTerm}
+            placeholder="Tìm kiếm khách hàng..."
+            onClear={() => setSearchTerm("")}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto">

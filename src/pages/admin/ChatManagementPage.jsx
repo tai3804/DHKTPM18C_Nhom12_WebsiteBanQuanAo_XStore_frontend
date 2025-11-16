@@ -8,8 +8,10 @@ const ChatManagementPage = () => {
   const themeMode = useSelector(selectThemeMode);
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
-      <ChatManagement />
+    <div className="space-y-6">
+      <div className="h-[calc(100vh-4rem)]">
+        <ChatManagement />
+      </div>
     </div>
   );
 };

@@ -34,6 +34,9 @@ export default function AdminLayout() {
   const orders = useSelector((state) => state.order.orders);
   const productTypes = useSelector((state) => state.productType.productTypes);
   const stocks = useSelector((state) => state.stock.stocks);
+  const allProductVariants = useSelector(
+    (state) => state.product.allProductVariants
+  );
   const themeMode = useSelector(selectThemeMode);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openProducts, setOpenProducts] = useState(false);
@@ -91,6 +94,26 @@ export default function AdminLayout() {
 
     preloadAdminData();
   }, [dispatch]);
+
+  // Load product variants khi products thay đổi
+  useEffect(() => {
+    const loadProductDetails = async () => {
+      if (
+        products &&
+        products.length > 0 &&
+        (!allProductVariants || Object.keys(allProductVariants).length === 0)
+      ) {
+        try {
+          await dispatch(getAllProductVariants());
+          console.log("Product variants loaded successfully");
+        } catch (err) {
+          console.error("Lỗi khi load product variants:", err);
+        }
+      }
+    };
+
+    loadProductDetails();
+  }, [dispatch, products, allProductVariants]);
 
   // Khi sidebar thu gọn thì dropdown luôn đóng
   useEffect(() => {
@@ -285,6 +308,23 @@ export default function AdminLayout() {
             >
               <Tag size={18} />
               {sidebarOpen && <span>Giảm giá</span>}
+            </NavLink>
+
+            {/* Khuyến mãi sản phẩm */}
+            <NavLink
+              to="/admin/product-sales"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <Tag size={18} />
+              {sidebarOpen && <span>Khuyến mãi sản phẩm</span>}
             </NavLink>
 
             {/* Đơn hàng */}

@@ -7,8 +7,10 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function SaleProducts({ products = [] }) {
   const themeMode = useSelector(selectThemeMode);
-  // Lấy 8 sản phẩm đầu tiên
-  const saleProducts = products.slice(0, 8);
+  // Lọc chỉ sản phẩm đang sale
+  const saleProducts = products
+    .filter((product) => product.sale && product.productSales)
+    .slice(0, 8);
 
   if (!Array.isArray(products) || products.length === 0) {
     return null;

@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { Trash2, Edit } from "lucide-react";
+import {
+  Trash2,
+  Edit,
+  Users,
+  UserPlus,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 import {
   getUsers,
   deleteUser,
@@ -21,6 +28,12 @@ export default function ManageUsersPage() {
   const { user } = useSelector((state) => state.auth);
   const themeMode = useSelector(selectThemeMode);
 
+  const [timeRange, setTimeRange] = useState("month");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    newCustomers: 0,
+  });
   const [showForm, setShowForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -145,18 +158,6 @@ export default function ManageUsersPage() {
     }));
   };
 
-  // ✅ Update các field trong account cho edit form
-  const handleEditAccountChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({
-      ...prev,
-      account: {
-        ...prev.account,
-        [name]: value,
-      },
-    }));
-  };
-
   // 🔍 Filter users dựa trên searchQuery
   const filteredUsers = users?.filter((u) => {
     const query = searchQuery.toLowerCase();
@@ -168,6 +169,72 @@ export default function ManageUsersPage() {
       u.phone?.toLowerCase().includes(query)
     );
   });
+
+  const timeRangeOptions = [
+    { value: "day", label: "Theo ngày" },
+    { value: "month", label: "Theo tháng" },
+    { value: "year", label: "Theo năm" },
+  ];
+
+  // Tính toán thống kê theo khoảng thời gian
+  const calculateStats = (range) => {
+    const now = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+      case "day":
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endDate = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + 1
+        );
+        break;
+      case "month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        break;
+      case "year":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear() + 1, 0, 1);
+        break;
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    }
+
+    // Tính tổng số khách hàng
+    const totalCustomers = users.length;
+
+    // Tính khách hàng mới trong khoảng thời gian
+    const newCustomers = users.filter((user) => {
+      const userCreated = new Date(user.createdAt || user.dob);
+      return userCreated >= startDate && userCreated < endDate;
+    }).length;
+
+    setStats({
+      totalCustomers,
+      newCustomers,
+    });
+  };
+
+  useEffect(() => {
+    if (users.length > 0) {
+      calculateStats(timeRange);
+    }
+  }, [users, timeRange]);
+
+  // Đóng dropdown khi click bên ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest(".dropdown-container")) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
 
   return (
     <div className="space-y-6 relative">
@@ -199,7 +266,6 @@ export default function ManageUsersPage() {
           Người dùng
         </Link>
       </div>
-
       {/* Header */}
       <div className="flex items-start justify-between gap-6">
         <div className="shrink-0">
@@ -229,18 +295,88 @@ export default function ManageUsersPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowForm(true)}
-          className={`px-4 py-2 text-white text-sm rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 ${
-            themeMode === "dark"
-              ? "bg-indigo-600 hover:bg-indigo-700"
-              : "bg-indigo-600 hover:bg-indigo-700"
-          }`}
-        >
-          + Thêm người dùng
-        </button>
-      </div>
+        {/* Dropdown chọn khoảng thời gian */}
+        <div className="flex items-center gap-4">
+          <div className="relative dropdown-container">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-300 ${
+                themeMode === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100 hover:bg-gray-700"
+                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Calendar size={18} />
+              {
+                timeRangeOptions.find((option) => option.value === timeRange)
+                  ?.label
+              }
+              <ChevronDown size={16} />
+            </button>
 
+            {isDropdownOpen && (
+              <div
+                className={`absolute right-0 mt-2 w-48 rounded-lg border shadow-lg z-10 transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                {timeRangeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTimeRange(option.value);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors duration-300 ${
+                      themeMode === "dark"
+                        ? "text-gray-100 hover:bg-gray-700"
+                        : "text-gray-700 hover:bg-gray-50"
+                    } ${
+                      timeRange === option.value
+                        ? themeMode === "dark"
+                          ? "bg-gray-700"
+                          : "bg-gray-100"
+                        : ""
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => setShowForm(true)}
+            className={`px-4 py-2 text-white text-sm rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 ${
+              themeMode === "dark"
+                ? "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
+          >
+            + Thêm người dùng
+          </button>
+        </div>
+      </div>
+      {/* Thống kê */}
+      <div className="flex gap-6">
+        <StatCard
+          label="Tổng khách hàng"
+          value={stats.totalCustomers}
+          color="bg-blue-500"
+          icon={<Users size={20} />}
+        />
+        <StatCard
+          label={`Khách hàng mới ${timeRangeOptions
+            .find((option) => option.value === timeRange)
+            ?.label.toLowerCase()}`}
+          value={stats.newCustomers}
+          color="bg-green-500"
+          icon={<UserPlus size={20} />}
+        />
+      </div>{" "}
       {/* Bảng danh sách người dùng */}
       <div
         className={`rounded-xl shadow-sm border overflow-x-auto transition-colors duration-300 ${
@@ -480,7 +616,6 @@ export default function ManageUsersPage() {
           </tbody>
         </table>
       </div>
-
       {/* Modal Form thêm người dùng */}
       {showForm && (
         <AddUserForm
@@ -491,7 +626,6 @@ export default function ManageUsersPage() {
           setShowForm={setShowForm}
         />
       )}
-
       {/* Modal Form chỉnh sửa người dùng */}
       {showEditForm && (
         <EditUserForm
@@ -503,6 +637,39 @@ export default function ManageUsersPage() {
           setShowForm={setShowEditForm}
         />
       )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, color, icon }) {
+  const themeMode = useSelector(selectThemeMode);
+  return (
+    <div
+      className={`w-80 p-4 rounded-xl shadow-sm border transition-colors duration-300 flex flex-col items-start ${
+        themeMode === "dark"
+          ? "bg-gray-800 border-gray-700"
+          : "bg-white border-gray-100"
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`p-2 rounded-lg ${color}`}>
+          <div className="text-white">{icon}</div>
+        </div>
+        <span
+          className={`text-sm font-medium transition-colors duration-300 ${
+            themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
+          {label}
+        </span>
+      </div>
+      <span
+        className={`text-2xl font-bold transition-colors duration-300 ${
+          themeMode === "dark" ? "text-gray-100" : "text-gray-800"
+        }`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

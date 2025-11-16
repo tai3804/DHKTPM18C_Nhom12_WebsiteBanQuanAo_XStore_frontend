@@ -36,13 +36,8 @@ export default function ProductCard({ product }) {
 
   // Tính % giảm giá
   const calculateDiscount = () => {
-    if (product.isSale && product.productSales) {
+    if (product.sale && product.productSales) {
       return product.productSales.discountPercent;
-    }
-    if (product.originalPrice && product.originalPrice > product.price) {
-      return Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100
-      );
     }
     return 0;
   };
@@ -307,15 +302,19 @@ export default function ProductCard({ product }) {
               themeMode === "dark" ? "text-white" : "text-gray-900"
             }`}
           >
-            ${(product.isSale && product.productSales ? product.productSales.discountedPrice : product.price)?.toLocaleString("vi-VN")}
+            $
+            {(product.sale && product.productSales
+              ? product.productSales.discountedPrice
+              : product.price
+            )?.toLocaleString("vi-VN")}
           </span>
-          {(product.isSale && product.productSales) || (product.originalPrice && product.originalPrice > product.price) ? (
+          {product.sale && product.productSales ? (
             <span
               className={`text-sm line-through transition-colors duration-300 ${
                 themeMode === "dark" ? "text-gray-500" : "text-gray-400"
               }`}
             >
-              ${(product.isSale && product.productSales ? product.productSales.originalPrice : product.originalPrice)?.toLocaleString("vi-VN")}
+              ${product.productSales.originalPrice?.toLocaleString("vi-VN")}
             </span>
           ) : null}
         </div>

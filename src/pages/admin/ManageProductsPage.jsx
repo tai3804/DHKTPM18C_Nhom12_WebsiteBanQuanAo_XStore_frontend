@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Package, User, Shirt, Gem } from "lucide-react";
 
 import {
   getProducts,
@@ -18,6 +18,7 @@ import {
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import ProductForm from "../../components/admin/ProductForm";
 import SearchBar from "../../components/admin/SearchBar";
+import StatsSection from "../../components/admin/StatsSection";
 
 export default function ManageProductsPage() {
   const dispatch = useDispatch();
@@ -31,6 +32,14 @@ export default function ManageProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Thống kê sản phẩm
+  const [productStats, setProductStats] = useState({
+    totalProducts: 0,
+    womenProducts: 0,
+    menProducts: 0,
+    accessoriesProducts: 0,
+  });
+
   useEffect(() => {
     const fetchTypes = async () => {
       const result = await dispatch(getProductTypes());
@@ -38,6 +47,43 @@ export default function ManageProductsPage() {
     };
     fetchTypes();
   }, [dispatch]);
+
+  // Tính toán thống kê sản phẩm
+  useEffect(() => {
+    if (products && productTypes) {
+      const totalProducts = products.length;
+      const womenProducts = products.filter((product) => {
+        const categoryId =
+          product.productTypeId || product.typeId || product.categoryId;
+        const category = productTypes.find((pt) => pt.id === categoryId);
+        return category && category.name.toLowerCase().includes("nữ");
+      }).length;
+      const menProducts = products.filter((product) => {
+        const categoryId =
+          product.productTypeId || product.typeId || product.categoryId;
+        const category = productTypes.find((pt) => pt.id === categoryId);
+        return category && category.name.toLowerCase().includes("nam");
+      }).length;
+      const accessoriesProducts = products.filter((product) => {
+        const categoryId =
+          product.productTypeId || product.typeId || product.categoryId;
+        const category = productTypes.find((pt) => pt.id === categoryId);
+        return (
+          category &&
+          (category.name.toLowerCase().includes("phụ kiện") ||
+            category.name.toLowerCase().includes("accessories") ||
+            category.name.toLowerCase().includes("phụ"))
+        );
+      }).length;
+
+      setProductStats({
+        totalProducts,
+        womenProducts,
+        menProducts,
+        accessoriesProducts,
+      });
+    }
+  }, [products, productTypes]);
 
   // Không cần load variants nữa vì đã có trong AdminLayout
 
@@ -159,6 +205,36 @@ export default function ManageProductsPage() {
           + Thêm sản phẩm
         </button>
       </div>
+
+      {/* Thống kê sản phẩm */}
+      <StatsSection
+        stats={[
+          {
+            label: "Tổng sản phẩm",
+            value: productStats.totalProducts,
+            color: "bg-indigo-500",
+            icon: <Package size={20} />,
+          },
+          {
+            label: "Đồ nữ",
+            value: productStats.womenProducts,
+            color: "bg-pink-500",
+            icon: <User size={20} />,
+          },
+          {
+            label: "Đồ nam",
+            value: productStats.menProducts,
+            color: "bg-cyan-500",
+            icon: <Shirt size={20} />,
+          },
+          {
+            label: "Phụ kiện",
+            value: productStats.accessoriesProducts,
+            color: "bg-yellow-500",
+            icon: <Gem size={20} />,
+          },
+        ]}
+      />
 
       {/* Danh sách sản phẩm */}
       {loading ? (

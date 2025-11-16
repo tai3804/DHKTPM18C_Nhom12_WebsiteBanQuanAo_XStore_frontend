@@ -12,7 +12,9 @@ export default function SalePage() {
 
   // Lấy sản phẩm sale (có isSale = true)
   const saleProducts = useMemo(() => {
-    return allProducts.filter(product => product.isSale).sort((a, b) => b.id - a.id);
+    return allProducts
+      .filter((product) => product.isSale)
+      .sort((a, b) => b.id - a.id);
   }, [allProducts]);
 
   // Tính toán phân trang
@@ -84,7 +86,7 @@ export default function SalePage() {
                 }`}
               >
                 Ưu đãi đặc biệt - Giảm giá khủng cho những sản phẩm thời trang
-                chọn lọc. Thời gian còn lại: [Countdown]
+                chọn lọc. Thời gian còn lại: [Countdown - cần implement]
               </p>
             </div>
 
