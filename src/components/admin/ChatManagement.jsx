@@ -74,6 +74,12 @@ const ChatManagement = () => {
       if (response.ok) {
         const rooms = await response.json();
         setChatRooms(rooms);
+        // Calculate total unread count from all rooms
+        const totalUnread = rooms.reduce(
+          (sum, room) => sum + (room.unreadCount || 0),
+          0
+        );
+        setUnreadCount(totalUnread);
       }
     } catch (error) {
       console.error("Error loading chat rooms:", error);
@@ -260,13 +266,22 @@ const ChatManagement = () => {
                     }
                   />
                   <div>
-                    <span
-                      className={`text-sm font-medium ${
-                        themeMode === "dark" ? "text-gray-100" : "text-gray-800"
-                      }`}
-                    >
-                      {room.name}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-sm font-medium ${
+                          themeMode === "dark"
+                            ? "text-gray-100"
+                            : "text-gray-800"
+                        }`}
+                      >
+                        {room.name}
+                      </span>
+                      {room.unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                          {room.unreadCount}
+                        </span>
+                      )}
+                    </div>
                     <p
                       className={`text-xs ${
                         themeMode === "dark" ? "text-gray-400" : "text-gray-500"
@@ -280,6 +295,27 @@ const ChatManagement = () => {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
+                  {room.unreadCount > 0 ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-red-500 font-medium">
+                        Chưa xem
+                      </span>
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <span
+                        className={`text-xs ${
+                          themeMode === "dark"
+                            ? "text-gray-500"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        Đã xem
+                      </span>
+                      <CheckCircle size={12} className="text-green-500" />
+                    </div>
+                  )}
                   <Clock
                     size={14}
                     className={

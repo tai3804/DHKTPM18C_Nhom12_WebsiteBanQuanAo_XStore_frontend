@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, User as UserIcon } from "lucide-react";
 import { API_BASE_URL } from "../../config/api";
 import { useSelector } from "react-redux";
 import { selectAuthUser, selectAuthToken } from "../../slices/AuthSlice";
+import { selectThemeMode } from "../../slices/ThemeSlice";
 
 const ChatbotStaff = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,7 @@ const ChatbotStaff = () => {
   );
   const authUser = useSelector(selectAuthUser);
   const authToken = useSelector(selectAuthToken);
+  const themeMode = useSelector(selectThemeMode);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -164,7 +166,11 @@ const ChatbotStaff = () => {
       {/* Chat Bubble */}
       {!isOpen && (
         <div
-          className="fixed bottom-24 right-6 bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110 z-50"
+          className={`fixed bottom-24 right-6 rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110 z-50 ${
+            themeMode === "dark"
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-green-600 hover:bg-green-700"
+          } text-white`}
           onClick={() => setIsOpen(true)}
         >
           <UserIcon size={24} />
@@ -173,7 +179,13 @@ const ChatbotStaff = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex flex-col">
+        <div
+          className={`fixed bottom-24 right-6 w-96 h-[500px] rounded-lg shadow-2xl z-50 flex flex-col transition-colors duration-300 ${
+            themeMode === "dark"
+              ? "bg-gray-800 border-gray-700"
+              : "bg-white border-gray-200"
+          } border`}
+        >
           {/* Header */}
           <div className="bg-green-600 text-white p-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -201,9 +213,11 @@ const ChatbotStaff = () => {
                 }`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
+                  className={`max-w-[80%] p-3 rounded-lg transition-colors duration-300 ${
                     message.sender !== "bot"
                       ? "bg-green-600 text-white"
+                      : themeMode === "dark"
+                      ? "bg-gray-700 text-gray-100"
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
@@ -215,6 +229,8 @@ const ChatbotStaff = () => {
                     className={`text-xs mt-1 ${
                       message.sender !== "bot"
                         ? "text-green-100"
+                        : themeMode === "dark"
+                        ? "text-gray-400"
                         : "text-gray-500"
                     }`}
                   >
@@ -229,20 +245,38 @@ const ChatbotStaff = () => {
 
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 p-3 rounded-lg">
+                <div
+                  className={`p-3 rounded-lg transition-colors duration-300 ${
+                    themeMode === "dark" ? "bg-gray-700" : "bg-gray-100"
+                  }`}
+                >
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                       <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        className={`w-2 h-2 rounded-full animate-bounce ${
+                          themeMode === "dark" ? "bg-gray-400" : "bg-gray-400"
+                        }`}
+                      ></div>
+                      <div
+                        className={`w-2 h-2 rounded-full animate-bounce ${
+                          themeMode === "dark" ? "bg-gray-400" : "bg-gray-400"
+                        }`}
                         style={{ animationDelay: "0.1s" }}
                       ></div>
                       <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        className={`w-2 h-2 rounded-full animate-bounce ${
+                          themeMode === "dark" ? "bg-gray-400" : "bg-gray-400"
+                        }`}
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-500">Đang gửi...</span>
+                    <span
+                      className={`text-sm ${
+                        themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
+                      Đang gửi...
+                    </span>
                   </div>
                 </div>
               </div>
@@ -252,7 +286,11 @@ const ChatbotStaff = () => {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-gray-200">
+          <div
+            className={`p-4 border-t transition-colors duration-300 ${
+              themeMode === "dark" ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
             <div className="flex gap-2">
               <input
                 ref={inputRef}
@@ -261,7 +299,11 @@ const ChatbotStaff = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Nhập tin nhắn cho nhân viên..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:ring-green-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
                 disabled={isLoading}
               />
               <button

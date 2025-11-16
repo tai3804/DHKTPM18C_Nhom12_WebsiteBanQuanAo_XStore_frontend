@@ -2,17 +2,17 @@ import React from "react";
 
 export default function RefundPolicyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
       <main className="grow">
         {/* Content */}
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-4xl">
-            <h1 className="text-3xl font-light tracking-wide text-gray-900 mb-10 text-center">
+            <h1 className="text-3xl font-light tracking-wide mb-10 text-center text-gray-900 dark:text-white transition-colors duration-300">
               CHÍNH SÁCH ĐỔI TRẢ
             </h1>
-            <div className="space-y-12 text-gray-600 font-light leading-relaxed">
+            <div className="space-y-12 font-light leading-relaxed text-gray-600 dark:text-gray-300 transition-colors duration-300">
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   1. Điều Kiện Đổi Trả
                 </h2>
                 <p className="mb-3">
@@ -28,7 +28,7 @@ export default function RefundPolicyPage() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   2. Quy Trình Đổi Trả
                 </h2>
                 <p className="mb-3">
@@ -52,7 +52,7 @@ export default function RefundPolicyPage() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   3. Phí Đổi Trả
                 </h2>
                 <p className="mb-3">
@@ -60,21 +60,28 @@ export default function RefundPolicyPage() {
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>
-                    <strong>Miễn phí:</strong> Nếu lỗi do nhà sản xuất hoặc giao
-                    sai hàng
+                    <strong className="text-gray-900 dark:text-white transition-colors duration-300">
+                      Miễn phí:
+                    </strong>{" "}
+                    Nếu lỗi do nhà sản xuất hoặc giao sai hàng
                   </li>
                   <li>
-                    <strong>Khách hàng chịu phí:</strong> Nếu đổi size hoặc đổi
-                    ý không mua
+                    <strong className="text-gray-900 dark:text-white transition-colors duration-300">
+                      Khách hàng chịu phí:
+                    </strong>{" "}
+                    Nếu đổi size hoặc đổi ý không mua
                   </li>
                   <li>
-                    <strong>Miễn phí lần đầu:</strong> Đối với thành viên VIP
+                    <strong className="text-gray-900 dark:text-white transition-colors duration-300">
+                      Miễn phí lần đầu:
+                    </strong>{" "}
+                    Đối với thành viên VIP
                   </li>
                 </ul>
               </div>
 
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   4. Hoàn Tiền
                 </h2>
                 <p className="mb-3">Thời gian và hình thức hoàn tiền:</p>
@@ -93,7 +100,7 @@ export default function RefundPolicyPage() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   5. Trường Hợp Không Được Đổi Trả
                 </h2>
                 <p className="mb-3">Các trường hợp sau không được chấp nhận:</p>
@@ -107,7 +114,7 @@ export default function RefundPolicyPage() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-medium text-gray-900 mb-4">
+                <h2 className="text-2xl font-medium mb-4 text-gray-900 dark:text-white transition-colors duration-300">
                   6. Liên Hệ Hỗ Trợ
                 </h2>
                 <p className="mb-3">

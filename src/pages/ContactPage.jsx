@@ -1,7 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
 
@@ -16,7 +14,6 @@ export default function ContactPage() {
           : "bg-white text-gray-900"
       }`}
     >
-      <Header />
       <main className="grow">
         {/* Contact Info & Form */}
         <section className="py-20">
@@ -275,7 +272,6 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { Star } from "lucide-react";
 import { getProductById } from "../slices/ProductSlice";
 import { addToCart, createCart } from "../slices/CartSlice";
 import {
@@ -48,6 +49,15 @@ export default function ProductDetailPage() {
     () => commentsByProduct[id] || [],
     [commentsByProduct, id]
   );
+
+  const calculateRating = (comments) => {
+    if (!comments || comments.length === 0) return 0;
+    const totalRating = comments.reduce(
+      (sum, comment) => sum + comment.rate,
+      0
+    );
+    return totalRating / comments.length;
+  };
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -443,19 +453,37 @@ export default function ProductDetailPage() {
             {/* Thông tin sản phẩm */}
             <div>
               <div className="mb-4">
-                <h1
-                  className={`text-3xl font-bold mb-2 ${
-                    isDark ? "text-white" : "text-gray-800"
-                  }`}
-                >
-                  {product.name}
-                </h1>
-                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                  Danh mục:{" "}
-                  <span className="font-medium">
-                    {product.productType?.name || product.type?.name}
-                  </span>
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <h1
+                    className={`text-3xl font-bold ${
+                      isDark ? "text-white" : "text-gray-800"
+                    }`}
+                  >
+                    {product.name}
+                  </h1>
+                  {comments.length > 0 && (
+                    <span className="text-yellow-500 flex items-center gap-1">
+                      ({calculateRating(comments).toFixed(1)}
+                      <Star className="w-4 h-4 fill-current" />)
+                    </span>
+                  )}
+                </div>
+
+                {/* Mô tả sản phẩm */}
+                {product.description && (
+                  <div
+                    className={`${isDark ? "text-gray-300" : "text-gray-700"}`}
+                  >
+                    <div
+                      className={`leading-relaxed text-sm ${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {product.description}
+                      <div />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Giá */}
@@ -502,7 +530,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Thông tin chi tiết */}
-        <ProductDetails product={product} />
+        <ProductDetails product={product} comments={comments} />
 
         {/* Bình luận sản phẩm */}
         <ProductComments productId={id} comments={comments} />

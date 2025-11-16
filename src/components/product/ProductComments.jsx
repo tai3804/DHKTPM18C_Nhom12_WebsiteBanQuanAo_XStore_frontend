@@ -80,7 +80,7 @@ const ProductComments = ({ productId, comments = [] }) => {
           isDark ? "text-white" : "text-gray-800"
         }`}
       >
-        Bình luận sản phẩm
+        Bình luận sản phẩm ({comments.length})
       </h2>
 
       {/* Danh sách bình luận */}

@@ -39,8 +39,8 @@ export default function ProductFilter({
     { value: "newest", label: "Mới nhất" },
   ];
 
-  // Apply filters
-  const handleApplyFilters = () => {
+  // Apply filters immediately when changed
+  const applyFilters = () => {
     const filters = {
       type: selectedType,
       minPrice: priceRange.min,
@@ -48,20 +48,39 @@ export default function ProductFilter({
       sortBy,
     };
     onFilterChange(filters);
-    setIsOpen(false);
   };
+
+  // Handle category change
+  const handleCategoryChange = (value) => {
+    setSelectedType(value);
+  };
+
+  // Handle price range change
+  const handlePriceChange = (field, value) => {
+    setPriceRange({ ...priceRange, [field]: value });
+  };
+
+  // Handle sort change
+  const handleSortChange = (value) => {
+    setSortBy(value);
+  };
+
+  // Apply filters when any filter changes
+  useEffect(() => {
+    applyFilters();
+  }, [selectedType, priceRange, sortBy]);
 
   // Reset filters
   const handleResetFilters = () => {
     setSelectedType("");
     setPriceRange({ min: "", max: "" });
     setSortBy("");
-    onFilterChange({});
   };
 
   // Quick price filter
   const handleQuickPriceFilter = (range) => {
-    setPriceRange({ min: range.min, max: range.max || "" });
+    const newPriceRange = { min: range.min, max: range.max || "" };
+    setPriceRange(newPriceRange);
   };
 
   // Count active filters
@@ -173,7 +192,7 @@ export default function ProductFilter({
               {showCategoryFilter && (
                 <select
                   value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
                     themeMode === "dark"
                       ? "border-gray-600 bg-gray-700 text-white"
@@ -231,9 +250,7 @@ export default function ProductFilter({
                       type="number"
                       placeholder="Từ"
                       value={priceRange.min}
-                      onChange={(e) =>
-                        setPriceRange({ ...priceRange, min: e.target.value })
-                      }
+                      onChange={(e) => handlePriceChange("min", e.target.value)}
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
                         themeMode === "dark"
                           ? "border-gray-600 bg-gray-700 text-white"
@@ -244,9 +261,7 @@ export default function ProductFilter({
                       type="number"
                       placeholder="Đến"
                       value={priceRange.max}
-                      onChange={(e) =>
-                        setPriceRange({ ...priceRange, max: e.target.value })
-                      }
+                      onChange={(e) => handlePriceChange("max", e.target.value)}
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
                         themeMode === "dark"
                           ? "border-gray-600 bg-gray-700 text-white"
@@ -292,7 +307,7 @@ export default function ProductFilter({
               </label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => handleSortChange(e.target.value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors ${
                   themeMode === "dark"
                     ? "border-gray-600 bg-gray-700 text-white"
@@ -313,12 +328,6 @@ export default function ProductFilter({
                 themeMode === "dark" ? "border-gray-700" : "border-gray-300"
               }`}
             >
-              <button
-                onClick={handleApplyFilters}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-sm font-medium"
-              >
-                Áp dụng
-              </button>
               {activeFiltersCount > 0 && (
                 <button
                   onClick={handleResetFilters}
@@ -368,12 +377,6 @@ export default function ProductFilter({
                     <button
                       onClick={() => {
                         setSelectedType("");
-                        onFilterChange({
-                          type: "",
-                          minPrice: priceRange.min,
-                          maxPrice: priceRange.max,
-                          sortBy,
-                        });
                       }}
                       className={`rounded-full p-0.5 transition-colors ${
                         themeMode === "dark"
@@ -403,12 +406,6 @@ export default function ProductFilter({
                     <button
                       onClick={() => {
                         setPriceRange({ min: "", max: "" });
-                        onFilterChange({
-                          type: selectedType,
-                          minPrice: "",
-                          maxPrice: "",
-                          sortBy,
-                        });
                       }}
                       className={`rounded-full p-0.5 transition-colors ${
                         themeMode === "dark"
@@ -432,12 +429,6 @@ export default function ProductFilter({
                     <button
                       onClick={() => {
                         setSortBy("");
-                        onFilterChange({
-                          type: selectedType,
-                          minPrice: priceRange.min,
-                          maxPrice: priceRange.max,
-                          sortBy: "",
-                        });
                       }}
                       className={`rounded-full p-0.5 transition-colors ${
                         themeMode === "dark"

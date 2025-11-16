@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import HeroSection from "../components/home/HeroSection";
 import CategorySection from "../components/home/CategorySection";
-import NewCollectionSection from "../components/home/NewCollectionSection";
 import HotProducts from "../components/home/HotProducts";
 import SaleProducts from "../components/home/SaleProducts";
 import BenefitsSection from "../components/home/BenefitsSection";
@@ -32,7 +31,6 @@ export default function HomePage() {
     >
       <HeroSection />
       <CategorySection />
-      <NewCollectionSection products={products} />
       <HotProducts products={products} />
       <SaleProducts products={products} />
       <BenefitsSection />

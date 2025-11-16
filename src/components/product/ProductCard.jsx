@@ -156,6 +156,24 @@ export default function ProductCard({ product }) {
     navigate(`/products/${product.id}`);
   };
 
+  // Tính rating trung bình và tổng số đánh giá
+  const calculateRating = () => {
+    if (!product.comments || product.comments.length === 0) {
+      return { average: 0, total: 0 };
+    }
+
+    const totalComments = product.comments.length;
+    const totalRating = product.comments.reduce(
+      (sum, comment) => sum + (comment.rate || 0),
+      0
+    );
+    const average = totalComments > 0 ? totalRating / totalComments : 0;
+
+    return { average, total: totalComments };
+  };
+
+  const { average: averageRating, total: totalComments } = calculateRating();
+
   const discount = calculateDiscount();
 
   return (
@@ -255,33 +273,34 @@ export default function ProductCard({ product }) {
           {product.name}
         </h3>
 
-        {/* Rating - Mock data */}
+        {/* Rating */}
         <div className="flex items-center gap-1 mb-2">
-          <div className="flex text-yellow-400">
-            {[1, 2, 3, 4].map((star) => (
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star) => (
               <svg
                 key={star}
-                className="w-4 h-4 fill-current"
+                className={`w-4 h-4 ${
+                  star <= Math.floor(averageRating)
+                    ? "text-yellow-400 fill-current"
+                    : star === Math.ceil(averageRating) &&
+                      averageRating % 1 !== 0
+                    ? "text-yellow-400 fill-current opacity-50"
+                    : themeMode === "dark"
+                    ? "text-gray-300 fill-current"
+                    : "text-gray-200 fill-current"
+                }`}
                 viewBox="0 0 20 20"
               >
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
               </svg>
             ))}
-            <svg
-              className={`w-4 h-4 fill-current ${
-                themeMode === "dark" ? "text-gray-600" : "text-gray-300"
-              }`}
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-            </svg>
           </div>
           <span
             className={`text-xs transition-colors duration-300 ${
               themeMode === "dark" ? "text-gray-400" : "text-gray-500"
             }`}
           >
-            (124)
+            ({totalComments})
           </span>
         </div>
 

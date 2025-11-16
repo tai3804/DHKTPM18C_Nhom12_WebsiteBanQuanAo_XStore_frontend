@@ -1,10 +1,25 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { Star } from "lucide-react";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
-export default function ProductDetails({ product, colors = [], sizes = [] }) {
+export default function ProductDetails({
+  product,
+  colors = [],
+  sizes = [],
+  comments = [],
+}) {
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
+
+  const calculateRating = (comments) => {
+    if (!comments || comments.length === 0) return 0;
+    const totalRating = comments.reduce(
+      (sum, comment) => sum + comment.rate,
+      0
+    );
+    return totalRating / comments.length;
+  };
 
   return (
     <div
@@ -26,12 +41,13 @@ export default function ProductDetails({ product, colors = [], sizes = [] }) {
           </p>
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
             <span className="font-semibold">Danh mục:</span>{" "}
-            {product.productType?.name}
+            {product.productType?.name || product.type?.name}
           </p>
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
             <span className="font-semibold">Thương hiệu:</span> XStore
           </p>
         </div>
+
         <div className="space-y-2">
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
             <span className="font-semibold">Tình trạng:</span>
@@ -48,21 +64,6 @@ export default function ProductDetails({ product, colors = [], sizes = [] }) {
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
             <span className="font-semibold">Có sẵn:</span> Tại tất cả các kho
           </p>
-          {/* Mô tả sản phẩm */}
-          {product.description && (
-            <div className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
-              <span className="font-semibold">Mô tả:</span>
-              <div
-                className={`leading-relaxed mt-1 text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                <div
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
