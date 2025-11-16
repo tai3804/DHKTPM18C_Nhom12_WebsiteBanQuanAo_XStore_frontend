@@ -84,8 +84,7 @@ export default function ManageProductsPage() {
       p.name?.toLowerCase().includes(query) ||
       p.brand?.toLowerCase().includes(query) ||
       p.description?.toLowerCase().includes(query) ||
-      p.type?.name?.toLowerCase().includes(query) ||
-      p.color?.toLowerCase().includes(query)
+      p.type?.name?.toLowerCase().includes(query)
     );
   });
 
@@ -143,7 +142,7 @@ export default function ManageProductsPage() {
             <SearchBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              placeholder="Tìm kiếm theo tên, thương hiệu, loại, màu sắc..."
+              placeholder="Tìm kiếm theo tên, thương hiệu, loại..."
               onClear={() => setSearchQuery("")}
             />
           </div>
@@ -206,14 +205,7 @@ export default function ManageProductsPage() {
                     themeMode === "dark" ? "text-gray-300" : "text-gray-600"
                   }`}
                 >
-                  Màu sắc
-                </th>
-                <th
-                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Kích thước
+                  Chi tiết
                 </th>
                 <th
                   className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -285,79 +277,33 @@ export default function ManageProductsPage() {
                       {p.name}
                     </td>
 
-                    {/* Màu sắc */}
+                    {/* Biến thể */}
                     <td className="px-4 py-3">
-                      {allProductVariants[p.id]?.colors &&
-                      allProductVariants[p.id].colors.length > 0 ? (
-                        <div className="flex items-center gap-1">
-                          {allProductVariants[p.id].colors.map(
-                            (color, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-1"
-                              >
-                                <div
-                                  className="w-4 h-4 rounded border border-gray-300"
-                                  style={{ backgroundColor: color.hexCode }}
-                                  title={color.name}
-                                ></div>
-                                {index <
-                                  allProductVariants[p.id].colors.length -
-                                    1 && (
-                                  <span className="text-gray-400"></span>
-                                )}
-                              </div>
-                            )
-                          )}
-                          {allProductVariants[p.id].colors.length >= 3 && (
-                            <span className="text-xs text-gray-500 ml-1">
-                              +
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span
-                          className={`text-sm ${
-                            themeMode === "dark"
-                              ? "text-gray-400"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          N/A
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Kích thước */}
-                    <td className="px-4 py-3">
-                      {allProductVariants[p.id]?.sizes &&
-                      allProductVariants[p.id].sizes.length > 0 ? (
-                        <div className="flex items-center gap-1">
-                          {allProductVariants[p.id].sizes.map((size, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-1"
-                            >
-                              <span
-                                className={`text-sm px-2 py-1 rounded border ${
-                                  themeMode === "dark"
-                                    ? "bg-gray-700 border-gray-600 text-gray-300"
-                                    : "bg-gray-100 border-gray-300 text-gray-700"
-                                }`}
-                              >
-                                {size}
-                              </span>
-                              {index <
-                                allProductVariants[p.id].sizes.length - 1 && (
-                                <span className="text-gray-400"></span>
-                              )}
-                            </div>
-                          ))}
-                          {allProductVariants[p.id].sizes.length >= 3 && (
-                            <span className="text-xs text-gray-500 ml-1">
-                              +
-                            </span>
-                          )}
+                      {allProductVariants[p.id] ? (
+                        <div className="text-sm">
+                          <div
+                            className={`font-medium ${
+                              themeMode === "dark"
+                                ? "text-gray-200"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {allProductVariants[p.id].colors?.length || 0} màu ×{" "}
+                            {allProductVariants[p.id].sizes?.length || 0} size
+                          </div>
+                          <div
+                            className={`text-xs ${
+                              themeMode === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            Tổng:{" "}
+                            {(allProductVariants[p.id].colors?.length || 0) *
+                              (allProductVariants[p.id].sizes?.length ||
+                                0)}{" "}
+                            biến thể
+                          </div>
                         </div>
                       ) : (
                         <span

@@ -95,14 +95,28 @@ export const createProductInfo = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/info`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(productInfoData),
-      });
+      
+      let res;
+      if (productInfoData instanceof FormData) {
+        // Handle FormData for file uploads
+        res = await fetch(`${API_BASE_URL}/api/products/${productId}/info/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: productInfoData,
+        });
+      } else {
+        // Handle JSON for regular creation
+        res = await fetch(`${API_BASE_URL}/api/products/${productId}/info`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productInfoData),
+        });
+      }
 
       if (!res.ok) throw new Error("Không thể tạo biến thể sản phẩm");
 
@@ -127,20 +141,49 @@ export const createMultipleProductInfos = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/info/batch`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(productInfoList),
-      });
+      
+      // Check if productInfoList contains FormData objects
+      const hasFormData = productInfoList.some(item => item instanceof FormData);
+      
+      let res;
+      if (hasFormData) {
+        // Use multipart endpoint for file uploads
+        // Since we have multiple FormData objects, we need to send them one by one
+        const results = [];
+        for (const formData of productInfoList) {
+          const response = await fetch(`${API_BASE_URL}/api/products/${productId}/info/upload`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          });
+          
+          if (!response.ok) throw new Error("Không thể tạo biến thể sản phẩm");
+          
+          const json = await response.json();
+          results.push(json.result || json);
+        }
+        
+        console.log("createMultipleProductInfos API response:", results);
+        return { productId, data: results };
+      } else {
+        // Use JSON endpoint for regular creation
+        res = await fetch(`${API_BASE_URL}/api/products/${productId}/info/batch`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productInfoList),
+        });
 
-      if (!res.ok) throw new Error("Không thể tạo biến thể sản phẩm");
+        if (!res.ok) throw new Error("Không thể tạo biến thể sản phẩm");
 
-      const json = await res.json();
-      console.log("createMultipleProductInfos API response:", json);
-      return { productId, data: json.result || json };
+        const json = await res.json();
+        console.log("createMultipleProductInfos API response:", json);
+        return { productId, data: json.result || json };
+      }
     } catch (error) {
       console.error("createMultipleProductInfos error:", error);
       dispatch(setError(error.message));
@@ -154,19 +197,33 @@ export const createMultipleProductInfos = createAsyncThunk(
 // UPDATE PRODUCT INFO
 export const updateProductInfo = createAsyncThunk(
   "productInfo/updateProductInfo",
-  async ({ id, productInfoData }, { dispatch, getState, rejectWithValue }) => {
+  async ({ id, productInfo }, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
     try {
       const token = getState().auth.token;
-      const res = await fetch(`${API_BASE_URL}/api/products/info/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(productInfoData),
-      });
+      
+      let res;
+      if (productInfo instanceof FormData) {
+        // Handle FormData for file uploads
+        res = await fetch(`${API_BASE_URL}/api/products/info/${id}/upload`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: productInfo,
+        });
+      } else {
+        // Handle JSON for regular updates
+        res = await fetch(`${API_BASE_URL}/api/products/info/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productInfo),
+        });
+      }
 
       if (!res.ok) throw new Error("Không thể cập nhật biến thể sản phẩm");
 
