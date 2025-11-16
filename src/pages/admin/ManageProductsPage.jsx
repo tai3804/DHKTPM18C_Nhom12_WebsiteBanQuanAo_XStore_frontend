@@ -1,11 +1,15 @@
 // ManageProductsPage.jsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { Edit2, Trash2 } from "lucide-react";
 
-import { getProducts, deleteProduct } from "../../slices/ProductSlice";
+import {
+  getProducts,
+  deleteProduct,
+  getAllProductVariants,
+} from "../../slices/ProductSlice";
 import { getImageUrl } from "../../utils/imageUrl";
 import {
   getProductTypes,
@@ -17,7 +21,9 @@ import SearchBar from "../../components/admin/SearchBar";
 
 export default function ManageProductsPage() {
   const dispatch = useDispatch();
-  const { products, loading } = useSelector((state) => state.product);
+  const { products, loading, allProductVariants } = useSelector(
+    (state) => state.product
+  );
   const productTypes = useSelector((state) => state.productType.productTypes);
   const themeMode = useSelector(selectThemeMode);
 
@@ -33,12 +39,16 @@ export default function ManageProductsPage() {
     fetchTypes();
   }, [dispatch]);
 
+  // Không cần load variants nữa vì đã có trong AdminLayout
+
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
       try {
         await dispatch(deleteProduct(id));
         toast.success("Đã xóa sản phẩm!");
         dispatch(getProducts());
+        // Cập nhật variants sau khi xóa sản phẩm
+        dispatch(getAllProductVariants());
       } catch (err) {
         toast.error("Không thể xóa sản phẩm: " + err);
       }
@@ -63,6 +73,8 @@ export default function ManageProductsPage() {
   const handleSuccess = () => {
     handleCloseForm();
     dispatch(getProducts());
+    // Cập nhật variants sau khi products thay đổi
+    dispatch(getAllProductVariants());
   };
 
   // 🔍 Filter products dựa trên searchQuery
@@ -194,27 +206,6 @@ export default function ManageProductsPage() {
                     themeMode === "dark" ? "text-gray-300" : "text-gray-600"
                   }`}
                 >
-                  Thương hiệu
-                </th>
-                <th
-                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Loại
-                </th>
-                <th
-                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Chất liệu
-                </th>
-                <th
-                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
                   Màu sắc
                 </th>
                 <th
@@ -222,7 +213,14 @@ export default function ManageProductsPage() {
                     themeMode === "dark" ? "text-gray-300" : "text-gray-600"
                   }`}
                 >
-                  Kích cỡ
+                  Kích thước
+                </th>
+                <th
+                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
+                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Giá nhập
                 </th>
                 <th
                   className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -230,13 +228,6 @@ export default function ManageProductsPage() {
                   }`}
                 >
                   Giá bán
-                </th>
-                <th
-                  className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Tồn kho
                 </th>
                 <th
                   className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 text-right ${
@@ -248,216 +239,177 @@ export default function ManageProductsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((p) => (
-                <tr
-                  key={p.id}
-                  className={`border-b hover:transition cursor-pointer transition-colors duration-300 ${
-                    themeMode === "dark"
-                      ? "border-gray-700 hover:bg-gray-700"
-                      : "border-gray-100 hover:bg-gray-50"
-                  }`}
-                >
-                  {/* Hình ảnh */}
-                  <td className="px-4 py-3">
-                    {p.image ? (
-                      <img
-                        src={getImageUrl(p.image)}
-                        alt={p.name}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div
-                        className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                          themeMode === "dark" ? "bg-gray-700" : "bg-gray-200"
-                        }`}
-                      >
-                        <span
-                          className={`text-xs ${
-                            themeMode === "dark"
-                              ? "text-gray-500"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          N/A
-                        </span>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Tên sản phẩm */}
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+              {filteredProducts.map((p) => {
+                return (
+                  <tr
+                    key={p.id}
+                    className={`border-b hover:transition cursor-pointer transition-colors duration-300 ${
+                      themeMode === "dark"
+                        ? "border-gray-700 hover:bg-gray-700"
+                        : "border-gray-100 hover:bg-gray-50"
                     }`}
                   >
-                    {p.name}
-                  </td>
-
-                  {/* Thương hiệu */}
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {p.brand || "N/A"}
-                  </td>
-
-                  {/* Loại */}
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {p.type?.name || "N/A"}
-                  </td>
-
-                  {/* Chất liệu */}
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {p.fabric || "N/A"}
-                  </td>
-
-                  {/* Màu sắc */}
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 flex-wrap items-center">
-                      {p.colors && p.colors.length > 0 ? (
-                        <>
-                          {p.colors.slice(0, 3).map((color, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-1"
-                              title={
-                                typeof color === "object" ? color.name : color
-                              }
-                            >
-                              <div
-                                className="w-5 h-5 rounded-full border"
-                                style={{
-                                  backgroundColor:
-                                    typeof color === "object"
-                                      ? color.hexCode
-                                      : color,
-                                }}
-                              />
-                            </div>
-                          ))}
-                          {p.colors.length > 3 && (
-                            <span
-                              className={`text-xs font-semibold ${
-                                themeMode === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              +{p.colors.length - 3}
-                            </span>
-                          )}
-                        </>
+                    {/* Hình ảnh */}
+                    <td className="px-4 py-3">
+                      {p.image ? (
+                        <img
+                          src={getImageUrl(p.image)}
+                          alt={p.name}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
                       ) : (
-                        <span
-                          className={`text-xs ${
-                            themeMode === "dark"
-                              ? "text-gray-500"
-                              : "text-gray-400"
+                        <div
+                          className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                            themeMode === "dark" ? "bg-gray-700" : "bg-gray-200"
                           }`}
                         >
-                          N/A
-                        </span>
+                          <span
+                            className={`text-xs ${
+                              themeMode === "dark"
+                                ? "text-gray-500"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            N/A
+                          </span>
+                        </div>
                       )}
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Kích cỡ */}
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2 flex-wrap items-center">
-                      {p.sizes && p.sizes.length > 0 ? (
-                        <>
-                          {p.sizes.slice(0, 3).map((size, idx) => (
-                            <span
-                              key={idx}
-                              className={`px-2 py-1 text-xs rounded ${
-                                themeMode === "dark"
-                                  ? "bg-gray-700 text-gray-300"
-                                  : "bg-gray-200 text-gray-700"
-                              }`}
-                            >
-                              {typeof size === "object" ? size.name : size}
-                            </span>
-                          ))}
-                          {p.sizes.length > 3 && (
-                            <span
-                              className={`text-xs font-semibold ${
-                                themeMode === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              +{p.sizes.length - 3}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span
-                          className={`text-xs ${
-                            themeMode === "dark"
-                              ? "text-gray-500"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          N/A
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Giá bán */}
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    {p.price?.toLocaleString()}₫
-                  </td>
-
-                  {/* Tồn kho */}
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        p.priceInStock > 0
-                          ? themeMode === "dark"
-                            ? "bg-green-900/30 text-green-300"
-                            : "bg-green-100 text-green-700"
-                          : themeMode === "dark"
-                          ? "bg-red-900/30 text-red-300"
-                          : "bg-red-100 text-red-700"
+                    {/* Tên sản phẩm */}
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
-                      {p.priceInStock > 0 ? "Còn hàng" : "Hết hàng"}
-                    </span>
-                  </td>
+                      {p.name}
+                    </td>
 
-                  {/* Hành động */}
-                  <td className="px-4 py-3 text-right space-x-2">
-                    <button
-                      onClick={() => handleEdit(p)}
-                      className="inline-flex text-blue-600 hover:text-blue-800 transition cursor-pointer"
-                      title="Sửa sản phẩm"
+                    {/* Màu sắc */}
+                    <td className="px-4 py-3">
+                      {allProductVariants[p.id]?.colors &&
+                      allProductVariants[p.id].colors.length > 0 ? (
+                        <div className="flex items-center gap-1">
+                          {allProductVariants[p.id].colors.map(
+                            (color, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-1"
+                              >
+                                <div
+                                  className="w-4 h-4 rounded border border-gray-300"
+                                  style={{ backgroundColor: color.hexCode }}
+                                  title={color.name}
+                                ></div>
+                                {index <
+                                  allProductVariants[p.id].colors.length -
+                                    1 && (
+                                  <span className="text-gray-400"></span>
+                                )}
+                              </div>
+                            )
+                          )}
+                          {allProductVariants[p.id].colors.length >= 3 && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              +
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span
+                          className={`text-sm ${
+                            themeMode === "dark"
+                              ? "text-gray-400"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          N/A
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Kích thước */}
+                    <td className="px-4 py-3">
+                      {allProductVariants[p.id]?.sizes &&
+                      allProductVariants[p.id].sizes.length > 0 ? (
+                        <div className="flex items-center gap-1">
+                          {allProductVariants[p.id].sizes.map((size, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-1"
+                            >
+                              <span
+                                className={`text-sm px-2 py-1 rounded border ${
+                                  themeMode === "dark"
+                                    ? "bg-gray-700 border-gray-600 text-gray-300"
+                                    : "bg-gray-100 border-gray-300 text-gray-700"
+                                }`}
+                              >
+                                {size}
+                              </span>
+                              {index <
+                                allProductVariants[p.id].sizes.length - 1 && (
+                                <span className="text-gray-400"></span>
+                              )}
+                            </div>
+                          ))}
+                          {allProductVariants[p.id].sizes.length >= 3 && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              +
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span
+                          className={`text-sm ${
+                            themeMode === "dark"
+                              ? "text-gray-400"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          N/A
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Giá nhập */}
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
-                      <Edit2 size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="inline-flex text-red-600 hover:text-red-800 transition cursor-pointer"
-                      title="Xóa sản phẩm"
+                      {p.price?.toLocaleString()}₫
+                    </td>
+
+                    {/* Giá bán */}
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      {p.priceInStock?.toLocaleString()}₫
+                    </td>
+
+                    {/* Hành động */}
+                    <td className="px-4 py-3 text-right space-x-2">
+                      <button
+                        onClick={() => handleEdit(p)}
+                        className="inline-flex text-blue-600 hover:text-blue-800 transition cursor-pointer"
+                        title="Sửa sản phẩm"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        className="inline-flex text-red-600 hover:text-red-800 transition cursor-pointer"
+                        title="Xóa sản phẩm"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

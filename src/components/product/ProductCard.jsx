@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart } from "lucide-react";
 import { addToCart, createCart } from "../../slices/CartSlice";
 import {
-  toggleFavourite,
+  toggleFavouriteInstant,
   getFavouritesByUser,
 } from "../../slices/FavouriteSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
@@ -141,7 +141,7 @@ export default function ProductCard({ product }) {
 
     try {
       await dispatch(
-        toggleFavourite({
+        toggleFavouriteInstant({
           userId: user.id,
           productId: product.id,
         })

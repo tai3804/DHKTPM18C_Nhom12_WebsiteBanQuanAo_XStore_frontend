@@ -6,8 +6,9 @@ import { API_BASE_URL } from "../config/api";
 
 const initialState = {
   stocks: [], // Danh sách tất cả kho
-  stock: null, // Kho hiện tại (chi tiết)
+  stock:  null, // Kho hiện tại (chi tiết)
   stockItems: [], // Danh sách sản phẩm trong kho hiện tại
+  productStocks: [], // Danh sách stock items của một sản phẩm
   selectedStock: null, // Kho được chọn trong header
 };
 
@@ -298,6 +299,33 @@ export const deleteStockItem = createAsyncThunk(
   }
 );
 
+// LẤY STOCK ITEMS THEO PRODUCT ID
+export const getProductStocks = createAsyncThunk(
+  "stock/getProductStocks",
+  async (productId, { dispatch, getState, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const token = getState().auth.token;
+      const res = await fetch(`${API_BASE_URL}/api/products/${productId}/stocks`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error(Errors.STOCK_ITEM_FETCH_FAILED);
+      const json = await res.json();
+      return json.result || json;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
 //SLICE
 
 const stockSlice = createSlice({
@@ -376,6 +404,10 @@ const stockSlice = createSlice({
         state.stockItems = state.stockItems.filter(
           (i) => i.productId !== action.payload.productId // Xóa sản phẩm khỏi kho
         );
+      })
+      // Lấy stock items theo product ID
+      .addCase(getProductStocks.fulfilled, (state, action) => {
+        state.productStocks = action.payload;
       });
   },
 });

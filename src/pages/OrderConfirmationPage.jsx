@@ -163,9 +163,7 @@ export default function OrderConfirmationPage() {
                   <div>
                     <p
                       className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
-                        themeMode === "dark"
-                          ? "text-gray-400"
-                          : "text-gray-600"
+                        themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
                       Người nhận
@@ -182,9 +180,7 @@ export default function OrderConfirmationPage() {
                   <div>
                     <p
                       className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
-                        themeMode === "dark"
-                          ? "text-gray-400"
-                          : "text-gray-600"
+                        themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                       }`}
                     >
                       Số điện thoại
@@ -203,32 +199,44 @@ export default function OrderConfirmationPage() {
                     Danh sách sản phẩm
                   </h2>
                   <div className="space-y-3">
-                    {order.orderItems && order.orderItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`flex justify-between p-3 rounded-lg transition-colors duration-300 ${
-                          themeMode === "dark"
-                            ? "bg-gray-700"
-                            : "bg-gray-50"
-                        }`}
-                      >
-                        <div>
-                          <p className="font-medium">{item.product?.name}</p>
-                          <p
-                            className={`text-sm transition-colors duration-300 ${
-                              themeMode === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            Số lượng: {item.quantity} × {item.unitPrice?.toLocaleString()}₫
+                    {order.orderItems &&
+                      order.orderItems.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`flex justify-between p-3 rounded-lg transition-colors duration-300 ${
+                            themeMode === "dark" ? "bg-gray-700" : "bg-gray-50"
+                          }`}
+                        >
+                          <div>
+                            <p className="font-medium">{item.product?.name}</p>
+                            {(item.color || item.size) && (
+                              <p
+                                className={`text-xs transition-colors duration-300 ${
+                                  themeMode === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {item.color && `Màu: ${item.color}`}{" "}
+                                {item.size && `Size: ${item.size}`}
+                              </p>
+                            )}
+                            <p
+                              className={`text-sm transition-colors duration-300 ${
+                                themeMode === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              Số lượng: {item.quantity} ×{" "}
+                              {item.unitPrice?.toLocaleString()}₫
+                            </p>
+                          </div>
+                          <p className="font-bold">
+                            {item.subTotal?.toLocaleString()}₫
                           </p>
                         </div>
-                        <p className="font-bold">
-                          {(item.subTotal)?.toLocaleString()}₫
-                        </p>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
 
@@ -243,7 +251,8 @@ export default function OrderConfirmationPage() {
                       themeMode === "dark" ? "text-blue-300" : "text-blue-600"
                     }`}
                   >
-                    Trạng thái: <span className="font-bold">{order.status}</span>
+                    Trạng thái:{" "}
+                    <span className="font-bold">{order.status}</span>
                   </p>
                   <p
                     className={`text-xs mt-2 transition-colors duration-300 ${
@@ -278,7 +287,11 @@ export default function OrderConfirmationPage() {
                   <div className="flex justify-between">
                     <span>Tạm tính</span>
                     <span>
-                      {((order.total - (order.discountAmount || 0)) / 1.1)?.toLocaleString()}₫
+                      {(
+                        (order.total - (order.discountAmount || 0)) /
+                        1.1
+                      )?.toLocaleString()}
+                      ₫
                     </span>
                   </div>
                   {order.discountAmount > 0 && (
@@ -289,12 +302,14 @@ export default function OrderConfirmationPage() {
                   )}
                   <div className="flex justify-between">
                     <span>Phí vận chuyển</span>
-                    <span>25,000₫</span>
+                    <span>{(order.shippingFee || 0).toLocaleString()}₫</span>
                   </div>
 
                   <div
                     className={`border-t pt-3 flex justify-between font-bold text-lg ${
-                      themeMode === "dark" ? "border-gray-700" : "border-gray-200"
+                      themeMode === "dark"
+                        ? "border-gray-700"
+                        : "border-gray-200"
                     }`}
                   >
                     <span>Tổng cộng</span>
@@ -346,10 +361,13 @@ export default function OrderConfirmationPage() {
                   }`}
                 >
                   Liên hệ chúng tôi qua email{" "}
-                  <a href="mailto:support@xstore.com" className="text-indigo-600">
+                  <a
+                    href="mailto:support@xstore.com"
+                    className="text-indigo-600"
+                  >
                     support@xstore.com
-                  </a>
-                  {" "}hoặc gọi{" "}
+                  </a>{" "}
+                  hoặc gọi{" "}
                   <a href="tel:0123456789" className="text-indigo-600">
                     0123 456 789
                   </a>

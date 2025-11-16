@@ -4,14 +4,17 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 
 const PriceSummary = ({
   cartItems = [],
-  selectedDiscount = null,
-  shippingFee = 30000, // Default shipping fee
+  selectedDiscounts = [],
+  selectedShippingDiscount = null,
+  shippingFee = 30000,
   onTotalChange,
 }) => {
   const themeMode = useSelector(selectThemeMode);
   const [calculations, setCalculations] = useState({
     subtotal: 0,
-    discountAmount: 0,
+    productDiscountAmount: 0,
+    shippingDiscountAmount: 0,
+    finalShippingFee: 0,
     finalTotal: 0,
   });
 
@@ -24,10 +27,10 @@ const PriceSummary = ({
     if (onTotalChange) {
       onTotalChange(newCalculations.finalTotal);
     }
-  }, [cartItems, selectedDiscount, shippingFee]);
+  }, [cartItems, selectedDiscounts, selectedShippingDiscount, shippingFee]);
 
   const calculateTotals = () => {
-    // Calculate subtotal from cart items with safety checks
+    // Calculate subtotal from cart items
     const subtotal = cartItems.reduce((total, item) => {
       const product = item.product || {};
       const itemPrice = Number(product.salePrice) || Number(product.price) || 0;
@@ -35,35 +38,60 @@ const PriceSummary = ({
       return total + itemPrice * quantity;
     }, 0);
 
-    // Calculate discount amount
-    let discountAmount = 0;
-    if (selectedDiscount && subtotal > 0) {
-      if (selectedDiscount.type === "PERCENTAGE") {
-        discountAmount =
-          (subtotal * (Number(selectedDiscount.value) || 0)) / 100;
-        // Apply max discount limit if exists
-        if (
-          selectedDiscount.maxDiscountAmount &&
-          discountAmount > Number(selectedDiscount.maxDiscountAmount)
-        ) {
-          discountAmount = Number(selectedDiscount.maxDiscountAmount);
+    // Calculate product discount amount (multiple discounts)
+    let productDiscountAmount = 0;
+    if (selectedDiscounts.length > 0 && subtotal > 0) {
+      selectedDiscounts.forEach((discount) => {
+        if (discount.type === "PERCENT") {
+          const amount =
+            (subtotal * (Number(discount.discountPercent) || 0)) / 100;
+          const maxDiscount = Number(discount.discountAmount) || amount;
+          productDiscountAmount += Math.min(amount, maxDiscount);
+        } else {
+          productDiscountAmount += Math.min(
+            Number(discount.discountAmount) || 0,
+            subtotal
+          );
         }
-      } else if (selectedDiscount.type === "FIXED") {
-        discountAmount = Math.min(
-          Number(selectedDiscount.value) || 0,
-          subtotal
-        );
-      }
+      });
+      // Đảm bảo không giảm quá subtotal
+      productDiscountAmount = Math.min(productDiscountAmount, subtotal);
     }
 
-    // Calculate final total with safety checks
-    const safeShippingFee = Number(shippingFee) || 0;
-    const finalTotal = subtotal - discountAmount + safeShippingFee;
+    // Calculate shipping discount amount
+    let shippingDiscountAmount = 0;
+    let finalShippingFee = Number(shippingFee) || 0;
+    if (selectedShippingDiscount && finalShippingFee > 0) {
+      if (selectedShippingDiscount.type === "PERCENT") {
+        const amount =
+          (finalShippingFee *
+            (Number(selectedShippingDiscount.discountPercent) || 0)) /
+          100;
+        const maxDiscount =
+          Number(selectedShippingDiscount.discountAmount) || amount;
+        shippingDiscountAmount = Math.min(
+          amount,
+          maxDiscount,
+          finalShippingFee
+        );
+      } else {
+        shippingDiscountAmount = Math.min(
+          Number(selectedShippingDiscount.discountAmount) || 0,
+          finalShippingFee
+        );
+      }
+      finalShippingFee -= shippingDiscountAmount;
+    }
+
+    // Calculate final total
+    const finalTotal = subtotal - productDiscountAmount + finalShippingFee;
 
     return {
-      subtotal: subtotal,
-      discountAmount: discountAmount,
-      finalTotal: Math.max(0, finalTotal), // Ensure total is never negative
+      subtotal,
+      productDiscountAmount,
+      shippingDiscountAmount,
+      finalShippingFee,
+      finalTotal: Math.max(0, finalTotal),
     };
   };
 
@@ -72,7 +100,13 @@ const PriceSummary = ({
     return safeAmount.toLocaleString("vi-VN");
   };
 
-  const { subtotal, discountAmount, finalTotal } = calculations;
+  const {
+    subtotal,
+    productDiscountAmount,
+    shippingDiscountAmount,
+    finalShippingFee,
+    finalTotal,
+  } = calculations;
   const itemCount = cartItems.reduce(
     (count, item) => count + (Number(item.quantity) || 0),
     0
@@ -140,6 +174,50 @@ const PriceSummary = ({
           </span>
         </div>
 
+        {/* Product Discounts */}
+        {selectedDiscounts.length > 0 && productDiscountAmount > 0 && (
+          <div className="flex flex-col gap-1">
+            {selectedDiscounts.map((discount, index) => (
+              <div
+                key={discount.id}
+                className="flex items-center justify-between"
+              >
+                <span
+                  className={`text-sm ${
+                    themeMode === "dark" ? "text-green-400" : "text-green-600"
+                  }`}
+                >
+                  <span className="text-lg mr-2">🎟️</span>
+                  {discount.name}
+                </span>
+                <span
+                  className={`text-sm font-semibold ${
+                    themeMode === "dark" ? "text-green-400" : "text-green-600"
+                  }`}
+                >
+                  {index === selectedDiscounts.length - 1 && "-"}
+                </span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between">
+              <span
+                className={`font-semibold ${
+                  themeMode === "dark" ? "text-green-400" : "text-green-600"
+                }`}
+              >
+                Tổng giảm giá sản phẩm
+              </span>
+              <span
+                className={`font-semibold ${
+                  themeMode === "dark" ? "text-green-400" : "text-green-600"
+                }`}
+              >
+                -{formatCurrency(productDiscountAmount)}đ
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Shipping Fee */}
         <div className="flex items-center justify-between">
           <span
@@ -148,37 +226,18 @@ const PriceSummary = ({
             }`}
           >
             <span className="text-lg mr-2">🚚</span>
-            Phí vận chuyển
+            Phí vận chuyển{" "}
+            {shippingDiscountAmount > 0 &&
+              `(đã giảm ${formatCurrency(shippingDiscountAmount)}đ)`}
           </span>
           <span
             className={`font-semibold ${
               themeMode === "dark" ? "text-gray-200" : "text-gray-800"
             }`}
           >
-            {formatCurrency(shippingFee)}đ
+            {formatCurrency(finalShippingFee)}đ
           </span>
         </div>
-
-        {/* Discount */}
-        {selectedDiscount && discountAmount > 0 && (
-          <div className="flex items-center justify-between">
-            <span
-              className={`${
-                themeMode === "dark" ? "text-green-400" : "text-green-600"
-              }`}
-            >
-              <span className="text-lg mr-2">🎟️</span>
-              Giảm giá ({selectedDiscount.code})
-            </span>
-            <span
-              className={`font-semibold ${
-                themeMode === "dark" ? "text-green-400" : "text-green-600"
-              }`}
-            >
-              -{formatCurrency(discountAmount)}đ
-            </span>
-          </div>
-        )}
 
         {/* Divider */}
         <div

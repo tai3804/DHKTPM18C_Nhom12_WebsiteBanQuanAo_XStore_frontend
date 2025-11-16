@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { Trash2 } from "lucide-react";
-import { getUsers, deleteUser, createUser } from "../../slices/UserSlice";
+import { Trash2, Edit } from "lucide-react";
+import {
+  getUsers,
+  deleteUser,
+  createUser,
+  updateUser,
+} from "../../slices/UserSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import { Link } from "react-router-dom";
 import AddUserForm from "../../components/admin/AddUserForm";
+import EditUserForm from "../../components/admin/EditUserForm";
 import FormInput from "../../components/admin/FormInput";
 import SearchBar from "../../components/admin/SearchBar";
 
@@ -16,6 +22,8 @@ export default function ManageUsersPage() {
   const themeMode = useSelector(selectThemeMode);
 
   const [showForm, setShowForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
     account: {
@@ -27,6 +35,21 @@ export default function ManageUsersPage() {
     firstName: "",
     lastName: "",
     dob: "",
+    userType: "COPPER",
+  });
+  const [editFormData, setEditFormData] = useState({
+    account: {
+      username: "",
+      role: "CUSTOMER",
+    },
+    email: "",
+    firstName: "",
+    lastName: "",
+    dob: "",
+    phone: "",
+    city: "",
+    point: 0,
+    userType: "COPPER",
   });
 
   // ✅ Update các field bình thường
@@ -53,6 +76,8 @@ export default function ManageUsersPage() {
   const handleCreateUser = async (e) => {
     e.preventDefault();
 
+    console.log("Form data being sent:", formData); // Debug log
+
     try {
       await dispatch(createUser(formData)).unwrap();
       toast.success("Tạo người dùng thành công!");
@@ -63,11 +88,73 @@ export default function ManageUsersPage() {
         firstName: "",
         lastName: "",
         dob: "",
+        userType: "COPPER",
       });
+      dispatch(getUsers());
+    } catch (err) {
+      console.error("Error creating user:", err); // Debug log
+      toast.error(err);
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setEditFormData({
+      account: {
+        username: user.account?.username || "",
+        role: user.account?.role || "CUSTOMER",
+      },
+      email: user.email || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      dob: user.dob ? user.dob.split("T")[0] : "", // Format date for input
+      phone: user.phone || "",
+      city: user.city || "",
+      point: user.point || 0,
+      userType: user.userType || "COPPER",
+    });
+    setShowEditForm(true);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+
+    try {
+      await dispatch(
+        updateUser({
+          id: editingUser.id,
+          userData: editFormData,
+          token: user.token,
+        })
+      ).unwrap();
+      toast.success("Cập nhật người dùng thành công!");
+      setShowEditForm(false);
+      setEditingUser(null);
       dispatch(getUsers());
     } catch (err) {
       toast.error(err);
     }
+  };
+
+  // ✅ Update các field cho edit form
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ✅ Update các field trong account cho edit form
+  const handleEditAccountChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      account: {
+        ...prev.account,
+        [name]: value,
+      },
+    }));
   };
 
   // 🔍 Filter users dựa trên searchQuery
@@ -144,7 +231,11 @@ export default function ManageUsersPage() {
 
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800 hover:cursor-pointer transition flex items-center gap-1 whitespace-nowrap shrink-0"
+          className={`px-4 py-2 text-white text-sm rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            themeMode === "dark"
+              ? "bg-indigo-600 hover:bg-indigo-700"
+              : "bg-indigo-600 hover:bg-indigo-700"
+          }`}
         >
           + Thêm người dùng
         </button>
@@ -322,7 +413,15 @@ export default function ManageUsersPage() {
                       themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {u.userType || "N/A"}
+                    {u.userType === "COPPER"
+                      ? "Đồng"
+                      : u.userType === "SILVER"
+                      ? "Bạc"
+                      : u.userType === "GOLD"
+                      ? "Vàng"
+                      : u.userType === "PLATINUM"
+                      ? "Bạch kim"
+                      : u.userType || "N/A"}
                   </td>
                   <td
                     className={`px-4 py-3 transition-colors duration-300 ${
@@ -344,13 +443,22 @@ export default function ManageUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-right space-x-2">
                     {user?.id !== u.id && (
-                      <button
-                        onClick={() => dispatch(deleteUser(u.id))}
-                        className="text-red-600 hover:text-red-800 transition cursor-pointer"
-                        title="Xóa người dùng"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleEditUser(u)}
+                          className="text-blue-600 hover:text-blue-800 transition cursor-pointer mr-2"
+                          title="Chỉnh sửa người dùng"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => dispatch(deleteUser(u.id))}
+                          className="text-red-600 hover:text-red-800 transition cursor-pointer"
+                          title="Xóa người dùng"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>
@@ -381,6 +489,18 @@ export default function ManageUsersPage() {
           handleAccountChange={handleAccountChange}
           handleCreateUser={handleCreateUser}
           setShowForm={setShowForm}
+        />
+      )}
+
+      {/* Modal Form chỉnh sửa người dùng */}
+      {showEditForm && (
+        <EditUserForm
+          user={editingUser}
+          formData={editFormData}
+          handleChange={handleEditChange}
+          handleAccountChange={handleEditAccountChange}
+          handleUpdateUser={handleUpdateUser}
+          setShowForm={setShowEditForm}
         />
       )}
     </div>

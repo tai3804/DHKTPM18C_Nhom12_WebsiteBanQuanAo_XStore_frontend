@@ -237,8 +237,7 @@ export default function CartPage() {
                         themeMode === "dark" ? "text-gray-300" : "text-gray-700"
                       }`}
                     >
-                      {item.product?.brand} • {item.product?.size} •{" "}
-                      {item.product?.color}
+                      {item.product?.brand} • {item.size} • {item.color}
                     </p>
                     <p
                       className={`text-lg font-bold transition-colors duration-300 ${

@@ -33,9 +33,8 @@ export default function FormSelect({
             : "bg-white border-gray-200 text-gray-700 focus:ring-2 focus:ring-gray-300 focus:border-gray-300"
         }`}
       >
-        <option value="">-- Vui lòng chọn --</option>
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
             {opt.label}
           </option>
         ))}

@@ -1,5 +1,5 @@
-import React from "react";
-import { Heart } from "lucide-react";
+import React, { useState } from "react";
+import { Heart, Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import { getImageUrl } from "../../utils/imageUrl";
@@ -11,6 +11,18 @@ export default function ProductImageSection({
 }) {
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+    setImageError(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -20,18 +32,27 @@ export default function ProductImageSection({
           isDark ? "bg-gray-800" : "bg-white"
         }`}
       >
+        {/* Loading overlay */}
+        {imageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          </div>
+        )}
+
         <img
           src={
-            product.image
+            product.image && !imageError
               ? getImageUrl(product.image)
-              : "/placeholder-image.jpg"
+              : "https://via.placeholder.com/600x400/f3f4f6/9ca3af?text=No+Image"
           }
           alt={product.name}
-          className="w-full h-96 object-cover rounded-lg"
-          onError={(e) => {
-            e.target.src = "/placeholder-image.jpg";
-          }}
+          className={`w-full h-96 object-cover rounded-lg transition-opacity duration-300 ${
+            imageLoading ? "opacity-0" : "opacity-100"
+          }`}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
+
         {/* Favourite Heart Icon */}
         <button
           onClick={onToggleFavourite}

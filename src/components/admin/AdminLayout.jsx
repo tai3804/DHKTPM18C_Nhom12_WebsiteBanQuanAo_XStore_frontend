@@ -3,7 +3,7 @@ import Header from "./Header";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers } from "../../slices/UserSlice";
-import { getProducts } from "../../slices/ProductSlice";
+import { getProducts, getAllProductVariants } from "../../slices/ProductSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import {
   LayoutDashboard,
@@ -17,7 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
   Warehouse,
-  CreditCard 
+  CreditCard,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -32,6 +32,13 @@ export default function AdminLayout() {
     const fetchData = async () => {
       try {
         if (!users || users.length === 0) await dispatch(getUsers()).unwrap();
+
+        // Load products và variants nếu chưa có
+        if (!products || products.length === 0) {
+          await dispatch(getProducts()).unwrap();
+          // Sau khi load products, load variants
+          await dispatch(getAllProductVariants()).unwrap();
+        }
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu admin:", err);
       }
@@ -248,7 +255,6 @@ export default function AdminLayout() {
               <CreditCard size={18} />
               {sidebarOpen && <span>Đơn hàng</span>}
             </NavLink>
-            
           </nav>
         </aside>
 

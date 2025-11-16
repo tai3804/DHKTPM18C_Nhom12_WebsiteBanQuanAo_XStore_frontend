@@ -41,13 +41,29 @@ const OrderDetailModal = ({ order, onClose }) => {
 
         {/* Customer info */}
         <div className="mb-4 text-gray-700 dark:text-gray-300 space-y-1">
-          <p><strong>Khách hàng:</strong> {user?.username || "—"}</p>
-          <p><strong>SĐT:</strong> {phoneNumber || "—"}</p>
-          <p><strong>Địa chỉ:</strong> {shippingAddress || "—"}</p>
-          <p><strong>Trạng thái:</strong> {status || "—"}</p>
-          <p><strong>Ngày tạo:</strong> {createdAt || "—"}</p>
-          <p><strong>Phương thức thanh toán:</strong> {paymentMethod || "—"}</p>
-          {notes && <p><strong>Ghi chú:</strong> {notes}</p>}
+          <p>
+            <strong>Khách hàng:</strong> {user?.account?.username || "—"}
+          </p>
+          <p>
+            <strong>SĐT:</strong> {phoneNumber || "—"}
+          </p>
+          <p>
+            <strong>Địa chỉ:</strong> {shippingAddress || "—"}
+          </p>
+          <p>
+            <strong>Trạng thái:</strong> {status || "—"}
+          </p>
+          <p>
+            <strong>Ngày tạo:</strong> {createdAt || "—"}
+          </p>
+          <p>
+            <strong>Phương thức thanh toán:</strong> {paymentMethod || "—"}
+          </p>
+          {notes && (
+            <p>
+              <strong>Ghi chú:</strong> {notes}
+            </p>
+          )}
         </div>
 
         {/* Order Items */}
@@ -55,20 +71,36 @@ const OrderDetailModal = ({ order, onClose }) => {
           <table className="w-full text-left border-collapse min-w-max">
             <thead>
               <tr className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                {["Sản phẩm", "Màu", "Size", "SL", "Giá đơn vị", "Subtotal"].map((title, idx) => (
-                  <th key={idx} className="px-4 py-2 text-sm font-semibold">{title}</th>
+                {[
+                  "Sản phẩm",
+                  "Màu",
+                  "Size",
+                  "SL",
+                  "Giá đơn vị",
+                  "Subtotal",
+                ].map((title, idx) => (
+                  <th key={idx} className="px-4 py-2 text-sm font-semibold">
+                    {title}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {orderItems.map((item) => (
-                <tr key={item.id} className="border-b dark:border-gray-600 text-gray-700 dark:text-gray-200">
+                <tr
+                  key={item.id}
+                  className="border-b dark:border-gray-600 text-gray-700 dark:text-gray-200"
+                >
                   <td className="px-4 py-2">{item.product?.name || "—"}</td>
                   <td className="px-4 py-2">{item.color || "—"}</td>
                   <td className="px-4 py-2">{item.size || "—"}</td>
                   <td className="px-4 py-2">{item.quantity}</td>
-                  <td className="px-4 py-2">{item.unitPrice?.toLocaleString() || 0}</td>
-                  <td className="px-4 py-2">{item.subTotal?.toLocaleString() || 0}</td>
+                  <td className="px-4 py-2">
+                    {item.unitPrice?.toLocaleString() || 0}
+                  </td>
+                  <td className="px-4 py-2">
+                    {item.subTotal?.toLocaleString() || 0}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -82,7 +114,10 @@ const OrderDetailModal = ({ order, onClose }) => {
             <ul className="list-disc list-inside">
               {discounts.map((d) => (
                 <li key={d.id || d._id}>
-                  {d.code} - {d.type === "PERCENT" ? `${d.discountPercent}%` : d.discountAmount.toLocaleString()}
+                  {d.code} -{" "}
+                  {d.type === "PERCENT"
+                    ? `${d.discountPercent}%`
+                    : d.discountAmount.toLocaleString()}
                 </li>
               ))}
             </ul>
@@ -91,10 +126,18 @@ const OrderDetailModal = ({ order, onClose }) => {
 
         {/* Summary */}
         <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4 text-gray-800 dark:text-gray-100 space-y-1">
-          <p><strong>Subtotal:</strong> {subtotal.toLocaleString()}</p>
-          <p><strong>Giảm giá:</strong> -{discountAmount.toLocaleString()}</p>
-          <p><strong>Phí vận chuyển:</strong> {shippingFee.toLocaleString()}</p>
-          <p className="text-lg font-bold"><strong>Tổng cộng:</strong> {total.toLocaleString()}</p>
+          <p>
+            <strong>Subtotal:</strong> {subtotal.toLocaleString()}
+          </p>
+          <p>
+            <strong>Giảm giá:</strong> -{discountAmount.toLocaleString()}
+          </p>
+          <p>
+            <strong>Phí vận chuyển:</strong> {shippingFee.toLocaleString()}
+          </p>
+          <p className="text-lg font-bold">
+            <strong>Tổng cộng:</strong> {total.toLocaleString()}
+          </p>
         </div>
       </div>
     </div>

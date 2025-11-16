@@ -7,11 +7,12 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 import FormInput from "./FormInput";
 import FormSelect from "./FormSelect";
 
-export default function AddUserForm({
+export default function EditUserForm({
+  user,
   formData,
   handleChange,
   handleAccountChange,
-  handleCreateUser,
+  handleUpdateUser,
   setShowForm,
 }) {
   const modalRef = useRef(null);
@@ -28,7 +29,6 @@ export default function AddUserForm({
     // Validate required fields
     if (
       !formData.account.username.trim() ||
-      !formData.account.password.trim() ||
       !formData.account.role.trim() ||
       !formData.firstName.trim() ||
       !formData.lastName.trim()
@@ -36,7 +36,7 @@ export default function AddUserForm({
       toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
       return;
     }
-    handleCreateUser(e);
+    handleUpdateUser(e);
   };
 
   return (
@@ -70,7 +70,7 @@ export default function AddUserForm({
             themeMode === "dark" ? "text-gray-100" : "text-gray-800"
           }`}
         >
-          Tạo người dùng mới
+          Chỉnh sửa người dùng
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -82,17 +82,6 @@ export default function AddUserForm({
               value={formData.account.username}
               onChange={handleAccountChange}
               placeholder="Tên đăng nhập"
-              required
-              className="cursor-text"
-            />
-
-            <FormInput
-              label="Mật khẩu"
-              type="password"
-              name="password"
-              value={formData.account.password}
-              onChange={handleAccountChange}
-              placeholder="Mật khẩu"
               required
               className="cursor-text"
             />
@@ -160,12 +149,40 @@ export default function AddUserForm({
           />
 
           <FormInput
+            label="Số điện thoại"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Số điện thoại"
+            className="cursor-text"
+          />
+
+          <FormInput
             label="Ngày sinh"
             name="dob"
             type="date"
             value={formData.dob}
             onChange={handleChange}
             className="cursor-pointer"
+          />
+
+          <FormInput
+            label="Thành phố"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            placeholder="Thành phố"
+            className="cursor-text"
+          />
+
+          <FormInput
+            label="Điểm"
+            name="point"
+            type="number"
+            value={formData.point}
+            onChange={handleChange}
+            placeholder="Điểm"
+            className="cursor-text"
           />
 
           {/* Buttons */}
@@ -183,9 +200,9 @@ export default function AddUserForm({
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer font-medium"
+              className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer font-medium"
             >
-              Thêm mới
+              Cập nhật
             </button>
           </div>
         </form>

@@ -19,6 +19,22 @@ export default function ProductDetails({ product }) {
       >
         Thông tin chi tiết
       </h2>
+      {/* Mô tả sản phẩm */}
+      {product.description && (
+        <div className="mb-6">
+          <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
+            <span className="font-semibold">Mô tả:</span>
+          </p>
+          <div
+            className={`leading-relaxed mt-2 ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
+            <div dangerouslySetInnerHTML={{ __html: product.description }} />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>

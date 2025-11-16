@@ -2,11 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
-export default function ProductDescription({
-  product,
-  showFull,
-  onToggleFull,
-}) {
+export default function ProductDescription({ product }) {
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
 
@@ -33,42 +29,7 @@ export default function ProductDescription({
             isDark ? "text-gray-300" : "text-gray-700"
           }`}
         >
-          {showFull ? (
-            <div dangerouslySetInnerHTML={{ __html: product.description }} />
-          ) : (
-            <div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: product.description.substring(0, 300) + "...",
-                }}
-              />
-              {product.description.length > 300 && (
-                <button
-                  onClick={() => onToggleFull(true)}
-                  className={`font-medium mt-2 transition-colors ${
-                    isDark
-                      ? "text-blue-400 hover:text-blue-300"
-                      : "text-blue-500 hover:text-blue-600"
-                  }`}
-                >
-                  Xem thêm
-                </button>
-              )}
-            </div>
-          )}
-
-          {showFull && product.description.length > 300 && (
-            <button
-              onClick={() => onToggleFull(false)}
-              className={`font-medium mt-2 transition-colors ${
-                isDark
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-500 hover:text-blue-600"
-              }`}
-            >
-              Thu gọn
-            </button>
-          )}
+          <div dangerouslySetInnerHTML={{ __html: product.description }} />
         </div>
       </div>
     </div>

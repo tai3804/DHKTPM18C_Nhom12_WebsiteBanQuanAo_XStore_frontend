@@ -8,11 +8,13 @@ import cartReduce from '../slices/CartSlice'
 import cartitemReduce from '../slices/CartItemSlice'
 import stockReducer from '../slices/StockSlice'
 import productReducer from "../slices/ProductSlice"
+import productInfoReducer from "../slices/ProductInfoSlice"
 import productTypeReducer from "../slices/ProductTypeSlice"
 import discountReducer from '../slices/DiscountSlice'
 import favouriteReducer from '../slices/FavouriteSlice'
 import themeReducer from '../slices/ThemeSlice'
 import orderReducer from '../slices/OrderSlice'
+import commentReducer from '../slices/CommentSlice'
 
 export const store = configureStore({
 
@@ -27,10 +29,12 @@ export const store = configureStore({
     cartitem: cartitemReduce,
     stock: stockReducer,
     product: productReducer,
+    productInfo: productInfoReducer,
     productType: productTypeReducer,
     discount: discountReducer,
     favourite: favouriteReducer,
     theme: themeReducer,
     order: orderReducer,
+    comment: commentReducer,
   },
 })
