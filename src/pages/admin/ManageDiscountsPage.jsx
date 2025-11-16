@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 const ManageDiscountsPage = () => {
   const dispatch = useDispatch();
   const { discounts = [] } = useSelector((state) => state.discount || {});
-  const loading = useSelector((state) => state.loading.active); // Lấy loading từ LoadingSlice
+  const loading = useSelector((state) => state.loading.active);
   const themeMode = useSelector(selectThemeMode);
 
   const [showForm, setShowForm] = useState(false);
@@ -104,6 +104,8 @@ const ManageDiscountsPage = () => {
   return (
     <div className="space-y-6 relative">
       {/* Breadcrumb */}
+      <div className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${themeMode === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+        <Link to="/admin/dashboard" className="hover:underline">Trang chủ</Link>
       <div
         className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${
           themeMode === "dark" ? "text-gray-400" : "text-gray-500"
@@ -145,28 +147,14 @@ const ManageDiscountsPage = () => {
           Đang tải danh sách giảm giá...
         </div>
       ) : filtered.length > 0 ? (
-        <div
-          className={`rounded-xl shadow-sm border **overflow-x-auto** transition-colors ${tableBgClass}`}
-        >
-          <table className="w-full text-left border-collapse **min-w-max**">
+        <div className={`rounded-xl shadow-sm border overflow-x-auto transition-colors ${tableBgClass}`}>
+          <table className="w-full text-left border-collapse min-w-max">
             <thead>
               <tr>
-                {[
-                  "ID",
-                  "Tên / Tiêu đề",
-                  "Mô tả",
-                  "Loại",
-                  "Giảm",
-                  "Bậc user",
-                  "Trạng thái",
-                  "Thời gian",
-                  "Hành động",
-                ].map((title, idx) => (
+                {["ID","Tên / Tiêu đề","Mô tả","Loại","Giảm","Trạng thái","Thời gian","Hành động"].map((title, idx) => (
                   <th
                     key={idx}
-                    className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${tableHeaderClass} ${
-                      title === "Hành động" ? "text-right" : ""
-                    }`}
+                    className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${tableHeaderClass} ${title === "Hành động" ? "text-right" : ""}`}
                   >
                     {title}
                   </th>
