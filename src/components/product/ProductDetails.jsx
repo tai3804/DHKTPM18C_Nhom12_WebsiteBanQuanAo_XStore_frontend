@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
-export default function ProductDetails({ product }) {
+export default function ProductDetails({ product, colors = [], sizes = [] }) {
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
 
@@ -19,22 +19,6 @@ export default function ProductDetails({ product }) {
       >
         Thông tin chi tiết
       </h2>
-      {/* Mô tả sản phẩm */}
-      {product.description && (
-        <div className="mb-6">
-          <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
-            <span className="font-semibold">Mô tả:</span>
-          </p>
-          <div
-            className={`leading-relaxed mt-2 ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            <div dangerouslySetInnerHTML={{ __html: product.description }} />
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
@@ -64,6 +48,21 @@ export default function ProductDetails({ product }) {
           <p className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
             <span className="font-semibold">Có sẵn:</span> Tại tất cả các kho
           </p>
+          {/* Mô tả sản phẩm */}
+          {product.description && (
+            <div className={`${isDark ? "text-gray-300" : "text-gray-700"}`}>
+              <span className="font-semibold">Mô tả:</span>
+              <div
+                className={`leading-relaxed mt-1 text-sm ${
+                  isDark ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                <div
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

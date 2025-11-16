@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import DeliveryInfo from "../components/checkout/DeliveryInfo";
 import ProductSummary from "../components/checkout/ProductSummary";
 import DiscountSelection from "../components/checkout/DiscountSelection";
@@ -233,184 +231,169 @@ export default function CheckoutPage() {
   // Loading state
   if (!user || !cart) {
     return (
-      <>
-        <Header />
-        <div
-          className={`min-h-screen transition-colors duration-300 ${
-            themeMode === "dark"
-              ? "bg-linear-to-b from-gray-900 to-gray-800"
-              : "bg-linear-to-b from-white to-gray-50"
-          }`}
-        >
-          <div className="container mx-auto px-4 py-16 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p
-              className={`transition-colors duration-300 ${
-                themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-              }`}
-            >
-              Đang tải thông tin checkout...
-            </p>
-          </div>
+      <div
+        className={`min-h-screen transition-colors duration-300 ${
+          themeMode === "dark"
+            ? "bg-linear-to-b from-gray-900 to-gray-800"
+            : "bg-linear-to-b from-white to-gray-50"
+        }`}
+      >
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p
+            className={`transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            Đang tải thông tin checkout...
+          </p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   // Empty cart check
   if (cart.cartItems?.length === 0) {
     return (
-      <>
-        <Header />
-        <div
-          className={`min-h-screen transition-colors duration-300 ${
-            themeMode === "dark"
-              ? "bg-linear-to-b from-gray-900 to-gray-800"
-              : "bg-linear-to-b from-white to-gray-50"
-          }`}
-        >
-          <div className="container mx-auto px-4 py-16 text-center">
-            <div className="text-6xl mb-4">🛒</div>
-            <h2 className="text-2xl font-bold mb-4">Giỏ hàng trống</h2>
-            <p
-              className={`mb-6 transition-colors duration-300 ${
-                themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán
-            </p>
-            <button
-              onClick={() => navigate("/products")}
-              className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              Mua sắm ngay
-            </button>
-          </div>
+      <div
+        className={`min-h-screen transition-colors duration-300 ${
+          themeMode === "dark"
+            ? "bg-linear-to-b from-gray-900 to-gray-800"
+            : "bg-linear-to-b from-white to-gray-50"
+        }`}
+      >
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="text-6xl mb-4">🛒</div>
+          <h2 className="text-2xl font-bold mb-4">Giỏ hàng trống</h2>
+          <p
+            className={`mb-6 transition-colors duration-300 ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán
+          </p>
+          <button
+            onClick={() => navigate("/products")}
+            className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+          >
+            Mua sắm ngay
+          </button>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Header />
-      <div
-        className={`min-h-screen transition-colors duration-300 ${
-          themeMode === "dark"
-            ? "bg-linear-to-b from-gray-900 to-gray-800 text-gray-100"
-            : "bg-linear-to-b from-white to-gray-50 text-gray-900"
-        }`}
-      >
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <button
-              onClick={() => navigate("/cart")}
-              className={`flex items-center gap-2 transition-colors ${
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        themeMode === "dark"
+          ? "bg-linear-to-b from-gray-900 to-gray-800 text-gray-100"
+          : "bg-linear-to-b from-white to-gray-50 text-gray-900"
+      }`}
+    >
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate("/cart")}
+            className={`flex items-center gap-2 transition-colors ${
+              themeMode === "dark"
+                ? "text-emerald-400 hover:text-emerald-300"
+                : "text-emerald-600 hover:text-emerald-700"
+            }`}
+          >
+            <ArrowLeft size={20} />
+            Quay lại giỏ hàng
+          </button>
+        </div>
+
+        <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
+          <span className="text-4xl">💳</span>
+          Thanh toán đơn hàng
+        </h1>
+
+        <div className="grid grid-cols-1 gap-8">
+          {/* Main Checkout Form */}
+          <div className="space-y-6">
+            {/* 1. Delivery Information */}
+            <DeliveryInfo
+              shipInfos={shipInfos}
+              selectedShipInfoId={selectedShipInfoId}
+              onSelectShipInfo={setSelectedShipInfoId}
+              onShipInfosUpdate={loadShipInfos}
+              loading={loadingShipInfos}
+            />
+
+            {/* 2. Product Summary */}
+            <ProductSummary cartItems={cart.cartItems} />
+
+            {/* 3. Discount Selection */}
+            <DiscountSelection
+              selectedDiscounts={selectedDiscounts}
+              selectedShippingDiscount={selectedShippingDiscount}
+              onSelectDiscount={handleSelectDiscount}
+              onSelectShippingDiscount={handleSelectShippingDiscount}
+              cartTotal={cart.cartItems.reduce(
+                (sum, item) =>
+                  sum + (item.salePrice || item.price || 0) * item.quantity,
+                0
+              )}
+            />
+
+            {/* 4. Payment Method */}
+            <PaymentMethod
+              selectedMethod={selectedPaymentMethod}
+              onSelectMethod={handleSelectPaymentMethod}
+            />
+
+            {/* 5. Order Notes */}
+            <OrderNotes notes={orderNotes} onNotesChange={handleNotesChange} />
+
+            {/* 6. Price Summary - Moved above checkout button */}
+            <PriceSummary
+              cartItems={cart.cartItems}
+              selectedDiscounts={selectedDiscounts}
+              selectedShippingDiscount={selectedShippingDiscount}
+              shippingFee={30000}
+              onTotalChange={handleTotalChange}
+            />
+
+            {/* Checkout Button */}
+            <div
+              className={`p-6 rounded-lg border transition-colors ${
                 themeMode === "dark"
-                  ? "text-emerald-400 hover:text-emerald-300"
-                  : "text-emerald-600 hover:text-emerald-700"
+                  ? "bg-gray-800 border-gray-700"
+                  : "bg-white border-gray-200"
               }`}
             >
-              <ArrowLeft size={20} />
-              Quay lại giỏ hàng
-            </button>
-          </div>
-
-          <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
-            <span className="text-4xl">💳</span>
-            Thanh toán đơn hàng
-          </h1>
-
-          <div className="grid grid-cols-1 gap-8">
-            {/* Main Checkout Form */}
-            <div className="space-y-6">
-              {/* 1. Delivery Information */}
-              <DeliveryInfo
-                shipInfos={shipInfos}
-                selectedShipInfoId={selectedShipInfoId}
-                onSelectShipInfo={setSelectedShipInfoId}
-                onShipInfosUpdate={loadShipInfos}
-                loading={loadingShipInfos}
-              />
-
-              {/* 2. Product Summary */}
-              <ProductSummary cartItems={cart.cartItems} />
-
-              {/* 3. Discount Selection */}
-              <DiscountSelection
-                selectedDiscounts={selectedDiscounts}
-                selectedShippingDiscount={selectedShippingDiscount}
-                onSelectDiscount={handleSelectDiscount}
-                onSelectShippingDiscount={handleSelectShippingDiscount}
-                cartTotal={cart.cartItems.reduce(
-                  (sum, item) =>
-                    sum + (item.salePrice || item.price || 0) * item.quantity,
-                  0
-                )}
-              />
-
-              {/* 4. Payment Method */}
-              <PaymentMethod
-                selectedMethod={selectedPaymentMethod}
-                onSelectMethod={handleSelectPaymentMethod}
-              />
-
-              {/* 5. Order Notes */}
-              <OrderNotes
-                notes={orderNotes}
-                onNotesChange={handleNotesChange}
-              />
-
-              {/* 6. Price Summary - Moved above checkout button */}
-              <PriceSummary
-                cartItems={cart.cartItems}
-                selectedDiscounts={selectedDiscounts}
-                selectedShippingDiscount={selectedShippingDiscount}
-                shippingFee={30000}
-                onTotalChange={handleTotalChange}
-              />
-
-              {/* Checkout Button */}
-              <div
-                className={`p-6 rounded-lg border transition-colors ${
-                  themeMode === "dark"
-                    ? "bg-gray-800 border-gray-700"
-                    : "bg-white border-gray-200"
-                }`}
+              <button
+                onClick={handleCheckout}
+                disabled={loading || !selectedShipInfoId}
+                className="w-full py-4 bg-linear-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
-                <button
-                  onClick={handleCheckout}
-                  disabled={loading || !selectedShipInfoId}
-                  className="w-full py-4 bg-linear-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-                      Đang xử lý...
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-2xl">✅</span>
-                      Hoàn tất đặt hàng (
-                      {(finalTotal || 0).toLocaleString("vi-VN")}đ)
-                    </>
-                  )}
-                </button>
-
-                {!selectedShipInfoId && (
-                  <p className="text-center text-red-500 text-sm mt-2">
-                    ⚠️ Vui lòng chọn địa chỉ giao hàng
-                  </p>
+                {loading ? (
+                  <>
+                    <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl">✅</span>
+                    Hoàn tất đặt hàng (
+                    {(finalTotal || 0).toLocaleString("vi-VN")}đ)
+                  </>
                 )}
-              </div>
+              </button>
+
+              {!selectedShipInfoId && (
+                <p className="text-center text-red-500 text-sm mt-2">
+                  ⚠️ Vui lòng chọn địa chỉ giao hàng
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }

@@ -5,8 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getCartByUser } from "../slices/CartSlice";
 import { getProductTypes } from "../slices/ProductTypeSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import ProductList from "../components/product/ProductList";
 import ProductFilter from "../components/product/ProductFilter";
 
@@ -180,7 +178,6 @@ export default function ProductsPage() {
           : "bg-white text-gray-900"
       }`}
     >
-      <Header />
       <main className="grow container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-6">
@@ -333,7 +330,6 @@ export default function ProductsPage() {
           )}
         </ProductFilter>
       </main>
-      <Footer />
     </div>
   );
 }

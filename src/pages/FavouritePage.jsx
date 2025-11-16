@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import ProductCard from "../components/product/ProductCard";
 import { getFavouritesByUser } from "../slices/FavouriteSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
@@ -34,7 +32,6 @@ export default function FavouritePage() {
             : "bg-linear-to-b from-white to-gray-50 text-gray-900"
         }`}
       >
-        <Header />
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <Heart
             className={`h-24 w-24 mx-auto mb-4 transition-colors duration-300 ${
@@ -66,7 +63,6 @@ export default function FavouritePage() {
             Đăng nhập ngay
           </button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -81,7 +77,6 @@ export default function FavouritePage() {
             : "bg-linear-to-b from-white to-gray-50 text-gray-900"
         }`}
       >
-        <Header />
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <Heart
             className={`h-24 w-24 mx-auto mb-4 transition-colors duration-300 ${
@@ -114,7 +109,6 @@ export default function FavouritePage() {
             Khám phá sản phẩm
           </button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -127,8 +121,6 @@ export default function FavouritePage() {
           : "bg-linear-to-b from-white to-gray-50 text-gray-900"
       }`}
     >
-      <Header />
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -182,7 +174,6 @@ export default function FavouritePage() {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

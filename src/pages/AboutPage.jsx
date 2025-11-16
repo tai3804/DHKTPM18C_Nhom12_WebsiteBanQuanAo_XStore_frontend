@@ -1,12 +1,9 @@
 import React from "react";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import { Award, Users, Target, Heart } from "lucide-react";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <Header />
       <main className="grow">
         {/* About Content */}
         <section className="py-20">
@@ -85,7 +82,6 @@ export default function AboutPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

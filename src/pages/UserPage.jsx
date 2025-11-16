@@ -4,8 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import { updateUser } from "../slices/UserSlice";
 import { setUser } from "../slices/AuthSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
@@ -104,9 +102,7 @@ export default function UserPage() {
           isDark ? "bg-gray-900 text-gray-200" : "bg-gray-50 text-gray-900"
         } min-h-screen`}
       >
-        <Header />
         <p className="text-center mt-10">Đang tải thông tin...</p>
-        <Footer />
       </div>
     );
   }
@@ -119,13 +115,14 @@ export default function UserPage() {
           : "bg-gradient-to-b from-white to-gray-50 text-gray-900"
       } min-h-screen transition-colors duration-300`}
     >
-      <Header />
       <div className="container mx-auto p-4 py-8 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Panel */}
         <div className="md:col-span-1 space-y-4">
           <div
             className={`p-6 rounded-lg shadow-sm border transition-colors duration-300 ${
-              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              isDark
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h2 className="text-xl font-bold mb-4">Tài khoản</h2>
@@ -143,7 +140,9 @@ export default function UserPage() {
 
           <div
             className={`p-6 rounded-lg shadow-sm border transition-colors duration-300 ${
-              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              isDark
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h2 className="text-xl font-bold mb-4">Thành viên</h2>
@@ -163,7 +162,9 @@ export default function UserPage() {
 
           <div
             className={`p-6 rounded-lg shadow-sm border space-y-2 transition-colors duration-300 ${
-              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              isDark
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h2 className="text-xl font-bold mb-4">Bảo mật</h2>
@@ -186,7 +187,9 @@ export default function UserPage() {
         <div className="md:col-span-2">
           <div
             className={`p-6 rounded-lg shadow-sm border transition-colors duration-300 ${
-              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+              isDark
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
             }`}
           >
             <h1 className="text-2xl font-bold mb-6">Chỉnh sửa thông tin</h1>
@@ -238,7 +241,11 @@ export default function UserPage() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { label: "Số nhà", name: "address.numOfHouse", type: "number" },
+                  {
+                    label: "Số nhà",
+                    name: "address.numOfHouse",
+                    type: "number",
+                  },
                   { label: "Đường", name: "address.street", type: "text" },
                   { label: "Thành phố", name: "address.city", type: "text" },
                   { label: "Quốc gia", name: "address.country", type: "text" },
@@ -319,8 +326,6 @@ export default function UserPage() {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }

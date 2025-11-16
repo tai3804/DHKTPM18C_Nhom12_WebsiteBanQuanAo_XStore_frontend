@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShoppingCart, Search, Bell, User, Settings } from "lucide-react";
+import { ShoppingCart, Search, Bell, User, Settings, Menu } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
@@ -13,7 +13,7 @@ import CartIcon from "./CartIcon.jsx";
 import NotiIcon from "./NotiIcon.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const { user } = useSelector((state) => state.auth);
   const themeMode = useSelector(selectThemeMode);
 
@@ -25,6 +25,25 @@ export default function Header() {
           : "bg-white border-b border-gray-200 shadow-sm"
       }`}
     >
+      {/* Mobile menu button */}
+      <button
+        onClick={onMenuClick}
+        className={`lg:hidden p-2 mr-2 rounded-full transition-all duration-200 border border-transparent ${
+          themeMode === "dark"
+            ? "hover:bg-gray-800 hover:border-gray-700"
+            : "hover:bg-gray-100 hover:border-gray-300"
+        }`}
+        title="Menu"
+      >
+        <Menu
+          className={`h-5 w-5 transition-colors ${
+            themeMode === "dark"
+              ? "text-gray-300 hover:text-white"
+              : "text-gray-700 hover:text-gray-800"
+          }`}
+        />
+      </button>
+
       <LogoMenu />
 
       {/* Navigation links */}

@@ -1,7 +1,5 @@
 import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import ProductCard from "../components/product/ProductCard";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
@@ -71,7 +69,6 @@ export default function SalePage() {
           : "bg-white text-gray-900"
       }`}
     >
-      <Header />
       <main className="grow">
         {/* Hero Section with minimal design */}
         <section className="pt-12 px-4">
@@ -220,7 +217,6 @@ export default function SalePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

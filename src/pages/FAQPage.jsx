@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function FAQPage() {
@@ -116,7 +114,6 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <Header />
       <main className="grow">
         {/* FAQ Content */}
         <section className="py-20">
@@ -195,7 +192,6 @@ export default function FAQPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

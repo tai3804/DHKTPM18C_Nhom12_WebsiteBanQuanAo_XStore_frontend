@@ -9,15 +9,12 @@ import {
   getFavouritesByUser,
 } from "../slices/FavouriteSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import ProductImageSection from "../components/product/ProductImageSection";
 import ProductPriceInfo from "../components/product/ProductPriceInfo";
 import ProductColorSelector from "../components/product/ProductColorSelector";
 import ProductSizeSelector from "../components/product/ProductSizeSelector";
 import ProductQuantitySelector from "../components/product/ProductQuantitySelector";
 import ProductActionButtons from "../components/product/ProductActionButtons";
-import ProductDescription from "../components/product/ProductDescription";
 import ProductDetails from "../components/product/ProductDetails";
 import RelatedProducts from "../components/product/RelatedProducts";
 import ProductComments from "../components/product/ProductComments";
@@ -56,7 +53,6 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
@@ -347,11 +343,9 @@ export default function ProductDetailPage() {
   if (loading) {
     return (
       <div className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-        <Header />
         <div className="flex items-center justify-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -359,7 +353,6 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1
@@ -381,141 +374,132 @@ export default function ProductDetailPage() {
             </button>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-      <Header />
-
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav
-          className={`flex mb-6 text-sm rounded-lg px-4 py-3 shadow-sm ${
+        {/* Product Detail Container */}
+        <div
+          className={`rounded-lg p-6 shadow-sm mb-8 ${
             isDark ? "bg-gray-800" : "bg-white"
           }`}
         >
-          <button
-            onClick={() => navigate("/")}
-            className={`transition-colors ${
-              isDark
-                ? "text-gray-400 hover:text-blue-400"
-                : "text-gray-500 hover:text-blue-600"
-            }`}
-          >
-            Trang chủ
-          </button>
-          <span
-            className={`mx-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}
-          >
-            /
-          </span>
-          <button
-            onClick={() => navigate("/products")}
-            className={`transition-colors ${
-              isDark
-                ? "text-gray-400 hover:text-blue-400"
-                : "text-gray-500 hover:text-blue-600"
-            }`}
-          >
-            Sản phẩm
-          </button>
-          <span
-            className={`mx-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}
-          >
-            /
-          </span>
-          <span
-            className={`font-medium ${isDark ? "text-white" : "text-gray-800"}`}
-          >
-            {product.name}
-          </span>
-        </nav>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Hình ảnh sản phẩm */}
-          <ProductImageSection
-            product={product}
-            isFavourite={isFavourite}
-            onToggleFavourite={handleToggleFavourite}
-          />
-
-          {/* Thông tin sản phẩm */}
-          <div
-            className={`rounded-lg p-6 shadow-sm ${
-              isDark ? "bg-gray-800" : "bg-white"
-            }`}
-          >
-            <div className="mb-4">
-              <h1
-                className={`text-3xl font-bold mb-2 ${
-                  isDark ? "text-white" : "text-gray-800"
-                }`}
-              >
-                {product.name}
-              </h1>
-              <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                Danh mục:{" "}
-                <span className="font-medium">
-                  {product.productType?.name || product.type?.name}
-                </span>
-              </p>
-            </div>
-
-            {/* Giá */}
-            <ProductPriceInfo product={product} formatPrice={formatPrice} />
-
-            {/* Chọn màu sắc */}
-            <ProductColorSelector
-              productColors={colors}
-              selectedColor={selectedColor}
-              onSelectColor={setSelectedColor}
-            />
-
-            {/* Chọn kích thước */}
-            <ProductSizeSelector
-              productSizes={sizes}
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
-            />
-
-            {/* Hiển thị số lượng còn lại */}
-            <div
-              className={`mb-6 p-4 rounded-lg ${
-                isDark ? "bg-gray-700" : "bg-gray-50"
+          {/* Breadcrumb */}
+          <nav className="flex mb-6 text-sm px-4 py-3">
+            <button
+              onClick={() => navigate("/")}
+              className={`transition-colors ${
+                isDark
+                  ? "text-gray-400 hover:text-blue-400"
+                  : "text-gray-500 hover:text-blue-600"
               }`}
             >
-              <p className={`${isDark ? "text-white" : "text-gray-800"}`}>
-                Số lượng còn lại:{" "}
-                <strong>{availableInSelectedStock ?? 0}</strong>
-              </p>
+              Trang chủ
+            </button>
+            <span
+              className={`mx-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}
+            >
+              /
+            </span>
+            <button
+              onClick={() => navigate("/products")}
+              className={`transition-colors ${
+                isDark
+                  ? "text-gray-400 hover:text-blue-400"
+                  : "text-gray-500 hover:text-blue-600"
+              }`}
+            >
+              Sản phẩm
+            </button>
+            <span
+              className={`mx-2 ${isDark ? "text-gray-500" : "text-gray-400"}`}
+            >
+              /
+            </span>
+            <span
+              className={`font-medium ${
+                isDark ? "text-white" : "text-gray-800"
+              }`}
+            >
+              {product.name}
+            </span>
+          </nav>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Hình ảnh sản phẩm */}
+            <ProductImageSection
+              product={product}
+              selectedColor={selectedColor}
+              selectedInfo={selectedInfo}
+              infos={infos}
+              isFavourite={isFavourite}
+              onToggleFavourite={handleToggleFavourite}
+              onColorSelect={setSelectedColor}
+            />
+
+            {/* Thông tin sản phẩm */}
+            <div>
+              <div className="mb-4">
+                <h1
+                  className={`text-3xl font-bold mb-2 ${
+                    isDark ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {product.name}
+                </h1>
+                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  Danh mục:{" "}
+                  <span className="font-medium">
+                    {product.productType?.name || product.type?.name}
+                  </span>
+                </p>
+              </div>
+
+              {/* Giá */}
+              <ProductPriceInfo product={product} formatPrice={formatPrice} />
+
+              {/* Chọn màu sắc */}
+              <ProductColorSelector
+                productColors={colors}
+                selectedColor={selectedColor}
+                onSelectColor={setSelectedColor}
+              />
+
+              {/* Chọn kích thước */}
+              <ProductSizeSelector
+                productSizes={sizes}
+                selectedSize={selectedSize}
+                onSelectSize={setSelectedSize}
+              />
+
+              {/* Hiển thị số lượng còn lại */}
+              <div className="mb-6 p-4">
+                <p className={`${isDark ? "text-white" : "text-gray-800"}`}>
+                  Số lượng còn lại:{" "}
+                  <strong>{availableInSelectedStock ?? 0}</strong>
+                </p>
+              </div>
+
+              {/* Chọn số lượng */}
+              <ProductQuantitySelector
+                quantity={quantity}
+                onQuantityChange={handleQuantityChange}
+                maxQuantity={availableInSelectedStock || 1}
+              />
+
+              {/* Nút thêm vào giỏ hàng và mua ngay */}
+              <ProductActionButtons
+                isAddingToCart={isAddingToCart}
+                isBuying={isBuying}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+              />
             </div>
-
-            {/* Chọn số lượng */}
-            <ProductQuantitySelector
-              quantity={quantity}
-              onQuantityChange={handleQuantityChange}
-              maxQuantity={availableInSelectedStock || 1}
-            />
-
-            {/* Nút thêm vào giỏ hàng và mua ngay */}
-            <ProductActionButtons
-              isAddingToCart={isAddingToCart}
-              isBuying={isBuying}
-              onAddToCart={handleAddToCart}
-              onBuyNow={handleBuyNow}
-            />
           </div>
         </div>
-
-        {/* Mô tả sản phẩm */}
-        <ProductDescription
-          product={product}
-          showFull={showFullDescription}
-          onToggleFull={setShowFullDescription}
-        />
 
         {/* Thông tin chi tiết */}
         <ProductDetails product={product} />
@@ -526,8 +510,6 @@ export default function ProductDetailPage() {
         {/* Sản phẩm liên quan */}
         <RelatedProducts />
       </div>
-
-      <Footer />
     </div>
   );
 }

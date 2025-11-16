@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers } from "../../slices/UserSlice";
 import { getProducts, getAllProductVariants } from "../../slices/ProductSlice";
+import { getDiscounts } from "../../slices/DiscountSlice";
+import { fetchAllOrders } from "../../slices/OrderSlice";
+import { getProductTypes } from "../../slices/ProductTypeSlice";
+import { getStocks } from "../../slices/StockSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import {
   LayoutDashboard,
@@ -24,27 +28,66 @@ export default function AdminLayout() {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.user.users);
   const products = useSelector((state) => state.product.products);
+  const discounts = useSelector((state) => state.discount.discounts);
+  const orders = useSelector((state) => state.order.orders);
+  const productTypes = useSelector((state) => state.productType.productTypes);
+  const stocks = useSelector((state) => state.stock.stocks);
   const themeMode = useSelector(selectThemeMode);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openProducts, setOpenProducts] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const preloadAdminData = async () => {
       try {
-        if (!users || users.length === 0) await dispatch(getUsers()).unwrap();
+        // Preload tất cả dữ liệu cần thiết cho admin
+        const preloadPromises = [];
 
-        // Load products và variants nếu chưa có
-        if (!products || products.length === 0) {
-          await dispatch(getProducts()).unwrap();
-          // Sau khi load products, load variants
-          await dispatch(getAllProductVariants()).unwrap();
+        // Users
+        if (!users || users.length === 0) {
+          preloadPromises.push(dispatch(getUsers()));
         }
+
+        // Products
+        if (!products || products.length === 0) {
+          preloadPromises.push(dispatch(getProducts()));
+        }
+
+        // Discounts
+        if (!discounts || discounts.length === 0) {
+          preloadPromises.push(dispatch(getDiscounts()));
+        }
+
+        // Orders
+        if (!orders || orders.length === 0) {
+          preloadPromises.push(dispatch(fetchAllOrders()));
+        }
+
+        // Product Types
+        if (!productTypes || productTypes.length === 0) {
+          preloadPromises.push(dispatch(getProductTypes()));
+        }
+
+        // Stocks
+        if (!stocks || stocks.length === 0) {
+          preloadPromises.push(dispatch(getStocks()));
+        }
+
+        // Đợi tất cả preload hoàn thành
+        await Promise.all(preloadPromises);
+
+        // Load product variants sau khi products đã được load
+        if (products && products.length > 0) {
+          await dispatch(getAllProductVariants());
+        }
+
+        console.log("Admin data preloaded successfully");
       } catch (err) {
-        console.error("Lỗi khi tải dữ liệu admin:", err);
+        console.error("Lỗi khi preload dữ liệu admin:", err);
       }
     };
-    fetchData();
-  }, [dispatch, users, products]);
+
+    preloadAdminData();
+  }, [dispatch, users, products, discounts, orders, productTypes, stocks]);
 
   // Khi sidebar thu gọn thì dropdown luôn đóng
   useEffect(() => {

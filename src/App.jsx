@@ -28,6 +28,7 @@ import ShoppingGuidePage from "./pages/ShoppingGuidePage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
+import UserLayout from "./components/common/UserLayout";
 import DashboardPage from "./pages/admin/DashboardPage";
 import UsersPage from "./pages/admin/ManageUsersPage";
 import ProductsAdminPage from "./pages/admin/ManageProductsPage";
@@ -95,42 +96,45 @@ export default function App() {
   return (
     <div>
       <Routes>
-        {/* Routes public */}
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route
-          path="/order-confirmation/:orderId"
-          element={<OrderConfirmationPage />}
-        />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/orders/:orderId" element={<OrderDetailPage />} />
-        <Route
-          path="/orders/:orderId/tracking"
-          element={<OrderTrackingPage />}
-        />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-        <Route path="/refund-policy" element={<RefundPolicyPage />} />
-        <Route path="/faq" element={<FAQPage />} />
-        <Route path="/shopping-guide" element={<ShoppingGuidePage />} />
-        <Route path="/sale" element={<SalePage />} />
-        <Route path="/hot" element={<HotPage />} />
-        <Route path="/user" element={<UserPage />} />
+        {/* Routes không cần layout (auth pages) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/send-otp" element={<SendOtpPage />} />
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         <Route path="/register-info" element={<RegisterInfoPage />} />
-        <Route path="/favourite" element={<FavouritePage />} />
-        <Route path="/debug" element={<DebugPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* Routes user với layout */}
+        <Route path="/" element={<UserLayout />}>
+          <Route index element={<Home />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route path="cart" element={<Cart />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route
+            path="order-confirmation/:orderId"
+            element={<OrderConfirmationPage />}
+          />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/:orderId" element={<OrderDetailPage />} />
+          <Route
+            path="orders/:orderId/tracking"
+            element={<OrderTrackingPage />}
+          />
+          <Route path="contact" element={<Contact />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="refund-policy" element={<RefundPolicyPage />} />
+          <Route path="faq" element={<FAQPage />} />
+          <Route path="shopping-guide" element={<ShoppingGuidePage />} />
+          <Route path="sale" element={<SalePage />} />
+          <Route path="hot" element={<HotPage />} />
+          <Route path="user" element={<UserPage />} />
+          <Route path="favourite" element={<FavouritePage />} />
+          <Route path="debug" element={<DebugPage />} />
+        </Route>
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}
         <Route

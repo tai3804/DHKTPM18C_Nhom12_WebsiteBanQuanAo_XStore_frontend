@@ -4,11 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Trash2 } from "lucide-react";
 
-import {
-  getStockItems,
-  setItemQuantity,
-  deleteStockItem,
-} from "../../slices/StockSlice";
+import { getStockItems, deleteStockItem } from "../../slices/StockSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import SearchBar from "../../components/admin/SearchBar";
 
@@ -17,25 +13,15 @@ export default function StockItemList() {
   const dispatch = useDispatch();
   const themeMode = useSelector(selectThemeMode);
   const { stockItems, loading } = useSelector((state) => state.stock);
+  const { allProductVariants } = useSelector((state) => state.product);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [editQuantities, setEditQuantities] = useState({}); // Local state cho input
 
   useEffect(() => {
     if (stockId) {
       dispatch(getStockItems(stockId))
         .unwrap()
-        .then((data) => {
-          // Khởi tạo editQuantities
-          const init = {};
-          data.forEach((item) => {
-            init[item.productId] = item.quantity;
-          });
-          setEditQuantities(init);
-        })
-        .catch((err) =>
-          toast.error("Không thể tải sản phẩm: " + err.message)
-        );
+        .catch((err) => toast.error("Không thể tải sản phẩm: " + err.message));
     }
   }, [stockId, dispatch]);
 
@@ -134,7 +120,9 @@ export default function StockItemList() {
       ) : filteredItems.length > 0 ? (
         <div
           className={`rounded-xl shadow-sm border overflow-x-auto ${
-            themeMode === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
+            themeMode === "dark"
+              ? "bg-gray-800 border-gray-700"
+              : "bg-white border-gray-100"
           }`}
         >
           <table className="w-full text-left border-collapse min-w-max">
@@ -198,15 +186,16 @@ export default function StockItemList() {
 
                     {/* Màu sắc */}
                     <td className="px-4 py-3 align-middle">
-                      {p.colors && p.colors.length > 0 ? (
+                      {allProductVariants[p.id]?.colors &&
+                      allProductVariants[p.id].colors.length > 0 ? (
                         <div className="flex flex-wrap gap-1 max-w-[120px]">
-                          {p.colors.map((c, idx) => (
+                          {allProductVariants[p.id].colors.map((c, idx) => (
                             <div
                               key={idx}
-                              title={typeof c === "object" ? c.name : c}
+                              title={c.name}
                               className="w-5 h-5 rounded-full border"
                               style={{
-                                backgroundColor: typeof c === "object" ? c.hexCode : c,
+                                backgroundColor: c.hexCode,
                               }}
                             />
                           ))}
@@ -218,9 +207,10 @@ export default function StockItemList() {
 
                     {/* Kích cỡ */}
                     <td className="px-4 py-3 align-middle">
-                      {p.sizes && p.sizes.length > 0 ? (
+                      {allProductVariants[p.id]?.sizes &&
+                      allProductVariants[p.id].sizes.length > 0 ? (
                         <div className="flex flex-wrap gap-1 max-w-[120px]">
-                          {p.sizes.map((s, idx) => (
+                          {allProductVariants[p.id].sizes.map((s, idx) => (
                             <span
                               key={idx}
                               className={`px-2 py-1 text-xs rounded whitespace-nowrap ${
@@ -229,7 +219,7 @@ export default function StockItemList() {
                                   : "bg-gray-200 text-gray-700"
                               }`}
                             >
-                              {typeof s === "object" ? s.name : s}
+                              {s}
                             </span>
                           ))}
                         </div>
@@ -238,45 +228,18 @@ export default function StockItemList() {
                       )}
                     </td>
 
-                    {/* Số lượng editable */}
-                    <td className="px-4 py-3 flex items-center gap-2">
-                    <input
-                        type="number"
-                        min="0"
-                        value={
-                        editQuantities[item.productId ?? item.product.id] ?? item.quantity
-                        }
-                        className="w-16 p-1 border rounded text-center"
-                        onChange={(e) =>
-                        setEditQuantities({
-                            ...editQuantities,
-                            [item.productId ?? item.product.id]: parseInt(e.target.value) || 0,
-                        })
-                        }
-                    />
-                    <button
-                        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        onClick={() => {
-                        const key = item.productId ?? item.product.id;
-                        const val = editQuantities[key];
-                        if (val >= 0) {
-                            dispatch(
-                            setItemQuantity({
-                                stockId,
-                                productId: key,
-                                quantity: val,
-                            })
-                            )
-                            .unwrap()
-                            .then(() => toast.success("Cập nhật số lượng thành công!"))
-                            .catch((err) => toast.error(err.message || err));
-                        }
-                        }}
-                    >
-                        Cập nhật
-                    </button>
+                    {/* Số lượng */}
+                    <td className="px-4 py-3">
+                      <span
+                        className={`font-medium ${
+                          themeMode === "dark"
+                            ? "text-gray-100"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {item.quantity}
+                      </span>
                     </td>
-
 
                     {/* Hành động */}
                     <td className="px-4 py-3 text-right">
@@ -296,7 +259,9 @@ export default function StockItemList() {
             themeMode === "dark" ? "text-gray-400" : "text-gray-500"
           }`}
         >
-          {searchQuery ? "Không tìm thấy sản phẩm nào." : "Kho chưa có sản phẩm."}
+          {searchQuery
+            ? "Không tìm thấy sản phẩm nào."
+            : "Kho chưa có sản phẩm."}
         </div>
       )}
     </div>

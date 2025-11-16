@@ -1,6 +1,4 @@
 import React from "react";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 import { ShoppingBag, Search, CreditCard, Package } from "lucide-react";
 
 export default function ShoppingGuidePage() {
@@ -57,7 +55,6 @@ export default function ShoppingGuidePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
       <main className="grow">
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-5xl">
@@ -263,7 +260,6 @@ export default function ShoppingGuidePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

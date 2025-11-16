@@ -1,11 +1,8 @@
 import React from "react";
-import Header from "../components/header/Header";
-import Footer from "../components/common/Footer";
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Header />
       <main className="grow">
         {/* Content */}
         <section className="py-20">
@@ -74,7 +71,6 @@ export default function PrivacyPolicyPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }
