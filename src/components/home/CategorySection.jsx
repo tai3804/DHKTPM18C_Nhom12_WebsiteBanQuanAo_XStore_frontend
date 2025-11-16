@@ -1,63 +1,46 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { ShoppingBag, Shirt, Tag, Grid3x3 } from "lucide-react";
+import { ShoppingBag, Flame, Tag, Watch } from "lucide-react";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
-export default function CategorySection({ productTypes = [] }) {
+export default function CategorySection() {
   const navigate = useNavigate();
   const themeMode = useSelector(selectThemeMode);
 
-  // Map icon cho các loại sản phẩm
-  const getCategoryIcon = (typeName) => {
-    const name = typeName?.toLowerCase() || "";
-    if (name.includes("áo thun") || name.includes("t-shirt")) return "👕";
-    if (name.includes("áo sơ mi") || name.includes("shirt")) return "👔";
-    if (name.includes("quần jeans") || name.includes("jean")) return "👖";
-    if (name.includes("quần short") || name.includes("short")) return "🩳";
-    if (name.includes("áo khoác") || name.includes("jacket")) return "🧥";
-    if (name.includes("váy") || name.includes("dress")) return "�";
-    return "👔"; // Default icon
-  };
-
-  // Tạo danh sách categories từ productTypes
-  const categories = useMemo(() => {
-    const dynamicCategories = productTypes.map((type) => ({
-      name: type.name,
-      icon: getCategoryIcon(type.name),
-      desc: type.description || `Xem tất cả ${type.name}`,
-      productType: type.name,
-      id: type.id,
-    }));
-
-    // Thêm các category cố định - Tất cả, Hot, Sale ở đầu
-    return [
-      {
-        name: "Tất Cả",
-        icon: "🛒",
-        desc: "Xem toàn bộ sản phẩm",
-        productType: "all",
-        id: "all",
-      },
-      {
-        name: "HOT",
-        icon: "🔥",
-        desc: "Sản phẩm HOT nhất",
-        productType: "hot",
-        id: "hot",
-        animate: true,
-      },
-      {
-        name: "Sale",
-        icon: "🏷️",
-        desc: "Ưu đãi đặc biệt",
-        productType: "sale",
-        id: "sale",
-      },
-      ...dynamicCategories,
-    ];
-  }, [productTypes]);
+  // Danh sách 4 categories cố định
+  const categories = [
+    {
+      name: "Tất Cả",
+      icon: ShoppingBag,
+      desc: "Xem toàn bộ sản phẩm",
+      productType: "all",
+      id: "all",
+    },
+    {
+      name: "HOT",
+      icon: Flame,
+      desc: "Sản phẩm HOT nhất",
+      productType: "hot",
+      id: "hot",
+      animate: true,
+    },
+    {
+      name: "Sale",
+      icon: Tag,
+      desc: "Ưu đãi đặc biệt",
+      productType: "sale",
+      id: "sale",
+    },
+    {
+      name: "Phụ Kiện",
+      icon: Watch,
+      desc: "Phụ kiện thời trang",
+      productType: "phu-kien",
+      id: "phu-kien",
+    },
+  ];
 
   const handleCategoryClick = (productType) => {
     if (productType === "all") {
@@ -95,7 +78,7 @@ export default function CategorySection({ productTypes = [] }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mb-16">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
         {categories.map((category, index) => (
           <motion.div
             key={category.id || category.name}
@@ -127,13 +110,28 @@ export default function CategorySection({ productTypes = [] }) {
               }`}
             >
               <div
-                className={`text-4xl md:text-5xl mb-3 transition-transform ${
+                className={`mb-3 transition-transform ${
                   category.animate
                     ? "group-hover:scale-110 animate-pulse"
                     : "group-hover:scale-110"
                 }`}
               >
-                {category.icon}
+                <category.icon
+                  size={48}
+                  className={`transition-colors duration-300 ${
+                    category.productType === "hot"
+                      ? themeMode === "dark"
+                        ? "text-orange-400"
+                        : "text-orange-600"
+                      : category.productType === "sale"
+                      ? themeMode === "dark"
+                        ? "text-green-400"
+                        : "text-green-600"
+                      : themeMode === "dark"
+                      ? "text-blue-400"
+                      : "text-blue-600"
+                  }`}
+                />
               </div>
               <h3
                 className={`font-semibold text-sm md:text-base mb-1 transition-colors duration-300 ${

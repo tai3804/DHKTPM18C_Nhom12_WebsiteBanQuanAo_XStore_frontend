@@ -48,6 +48,7 @@ import ManageDiscountsPage from "./pages/admin/ManageDiscountsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import StockItemList from "./components/admin/StockItemList";
+import ChatManagementPage from "./pages/admin/ChatManagementPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -153,6 +154,7 @@ export default function App() {
           <Route path="stocks/:stockId/items" element={<StockItemList />} />
           <Route path="discounts" element={<ManageDiscountsPage />} />
           <Route path="orders" element={<ManageOrdersPage />} />
+          <Route path="chat" element={<ChatManagementPage />} />
         </Route>
       </Routes>
 

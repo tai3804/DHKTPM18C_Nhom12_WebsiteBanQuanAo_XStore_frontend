@@ -1,4 +1,5 @@
 import { Outlet, NavLink } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Header from "./Header";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +23,7 @@ import {
   ChevronUp,
   Warehouse,
   CreditCard,
+  MessageCircle,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -35,6 +37,7 @@ export default function AdminLayout() {
   const themeMode = useSelector(selectThemeMode);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openProducts, setOpenProducts] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const preloadAdminData = async () => {
@@ -87,12 +90,14 @@ export default function AdminLayout() {
     };
 
     preloadAdminData();
-  }, [dispatch, users, products, discounts, orders, productTypes, stocks]);
+  }, [dispatch]);
 
   // Khi sidebar thu gọn thì dropdown luôn đóng
   useEffect(() => {
     if (!sidebarOpen) setOpenProducts(false);
   }, [sidebarOpen]);
+
+  const isChatPage = location.pathname === "/admin/chat";
 
   return (
     <div
@@ -298,12 +303,31 @@ export default function AdminLayout() {
               <CreditCard size={18} />
               {sidebarOpen && <span>Đơn hàng</span>}
             </NavLink>
+
+            {/* Chat */}
+            <NavLink
+              to="/admin/chat"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <MessageCircle size={18} />
+              {sidebarOpen && <span>Chat</span>}
+            </NavLink>
           </nav>
         </aside>
 
         {/* Nội dung chính */}
         <main
-          className={`flex-1 p-8 transition-colors duration-300 ${
+          className={`flex-1 ${
+            isChatPage ? "" : "p-8"
+          } transition-colors duration-300 ${
             themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"
           }`}
         >

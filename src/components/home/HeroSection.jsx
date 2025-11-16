@@ -155,11 +155,11 @@ export default function HeroSection() {
             </div>
 
             {/* Floating Badge */}
-            <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl animate-bounce">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl animate-bounce transition-colors duration-300">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white transition-colors duration-300">
                 🔥 Bộ Sưu Tập Mới
               </p>
-              <p className="text-xs text-gray-700 dark:text-gray-400">
+              <p className="text-xs text-gray-700 dark:text-gray-400 transition-colors duration-300">
                 Đã Lên Kệ
               </p>
             </div>

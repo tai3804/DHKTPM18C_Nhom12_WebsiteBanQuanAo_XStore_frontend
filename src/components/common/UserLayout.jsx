@@ -1,6 +1,8 @@
 import { Outlet, NavLink } from "react-router-dom";
 import Header from "../header/Header";
 import Footer from "../common/Footer";
+import ChatbotAI from "./ChatbotAI";
+import ChatbotStaff from "./ChatbotStaff";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
@@ -60,6 +62,10 @@ export default function UserLayout() {
       </div>
 
       <Footer />
+
+      {/* Chatbots */}
+      <ChatbotAI />
+      <ChatbotStaff />
     </div>
   );
 }

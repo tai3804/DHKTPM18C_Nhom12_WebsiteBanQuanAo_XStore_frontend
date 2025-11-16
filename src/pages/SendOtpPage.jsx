@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { ChevronLeft } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../config/api";
 
 function SendOtpPage() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function SendOtpPage() {
           ? "/api/otp/register"
           : "/api/otp/register-phone";
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contact),
