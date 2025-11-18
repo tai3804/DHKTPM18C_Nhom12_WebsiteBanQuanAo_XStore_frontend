@@ -133,7 +133,7 @@ export default function StockSelector() {
                               : "text-gray-500"
                           }`}
                         >
-                          {stock.address}
+                          {stock.address.fullAddress || stock.address}
                         </div>
                       )}
                     </div>

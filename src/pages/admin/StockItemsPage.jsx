@@ -304,7 +304,7 @@ const StockItemsPage = () => {
                       themeMode === "dark" ? "text-gray-200" : "text-gray-800"
                     }`}
                   >
-                    {stock.address || "N/A"}
+                    {stock.address?.fullAddress || "N/A"}
                   </p>
                 </div>
               </div>

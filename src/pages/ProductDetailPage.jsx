@@ -67,6 +67,7 @@ export default function ProductDetailPage() {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
   const [stockQuantities, setStockQuantities] = useState({});
+  const [selectedStockQuantities, setSelectedStockQuantities] = useState({});
   const [isFavourite, setIsFavourite] = useState(false);
 
   // selected variant info
@@ -80,13 +81,21 @@ export default function ProductDetailPage() {
     });
   }, [infos, selectedColor, selectedSize]);
 
-  // Available quantity: hiển thị số lượng của variant trong kho đã chọn
-  const availableInSelectedStock = useMemo(() => {
-    if (selectedInfo && selectedStock) {
+  // Available quantity: hiển thị số lượng tổng từ tất cả kho
+  const availableQuantity = useMemo(() => {
+    if (selectedInfo) {
       return stockQuantities[selectedInfo.id] || 0;
     }
     return 0;
-  }, [selectedInfo, selectedStock, stockQuantities]);
+  }, [selectedInfo, stockQuantities]);
+
+  // Available in selected stock
+  const availableInSelectedStock = useMemo(() => {
+    if (selectedInfo && selectedStock) {
+      return selectedStockQuantities[selectedInfo.id] || 0;
+    }
+    return 0;
+  }, [selectedInfo, selectedStock, selectedStockQuantities]);
 
   useEffect(() => {
     if (id) {
@@ -128,12 +137,38 @@ export default function ProductDetailPage() {
   }, [colors]);
 
   useEffect(() => {
-    if (selectedStock?.id && product?.id) {
-      fetchStockQuantities();
+    if (product?.id) {
+      fetchTotalQuantities();
     }
-  }, [selectedStock, product]);
+    if (selectedStock?.id && product?.id) {
+      fetchSelectedStockQuantities();
+    }
+  }, [product, selectedStock]);
 
-  const fetchStockQuantities = async () => {
+  const fetchTotalQuantities = async () => {
+    if (!product?.id) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/api/stocks/products/${product.id}/total-quantities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setStockQuantities(data.result || {});
+      }
+    } catch (error) {
+      console.error("Error fetching stock quantities:", error);
+    }
+  };
+
+  const fetchSelectedStockQuantities = async () => {
     if (!selectedStock?.id || !product?.id) return;
 
     try {
@@ -150,13 +185,17 @@ export default function ProductDetailPage() {
       if (response.ok) {
         const data = await response.json();
         const quantities = {};
-        (data.result || []).forEach((item) => {
-          quantities[item.productInfo.id] = item.quantity;
+        (data.result || []).forEach((product) => {
+          (product.variants || []).forEach((variant) => {
+            if (variant.id) {
+              quantities[variant.id] = variant.quantity;
+            }
+          });
         });
-        setStockQuantities(quantities);
+        setSelectedStockQuantities(quantities);
       }
     } catch (error) {
-      console.error("Error fetching stock quantities:", error);
+      console.error("Error fetching selected stock quantities:", error);
     }
   };
 
@@ -169,8 +208,16 @@ export default function ProductDetailPage() {
 
   // Ensure quantity không vượt quá available
   useEffect(() => {
-    setQuantity((q) => Math.max(1, Math.min(q, availableInSelectedStock || 1)));
-  }, [availableInSelectedStock]);
+    setQuantity((q) =>
+      Math.max(
+        1,
+        Math.min(
+          q,
+          (selectedStock ? availableInSelectedStock : availableQuantity) || 1
+        )
+      )
+    );
+  }, [selectedStock, availableInSelectedStock, availableQuantity]);
 
   const handleAddToCart = async () => {
     // Prevent multiple calls
@@ -207,7 +254,9 @@ export default function ProductDetailPage() {
       return;
     }
 
-    if (quantity > availableInSelectedStock) {
+    if (
+      quantity > (selectedStock ? availableInSelectedStock : availableQuantity)
+    ) {
       return;
     }
 
@@ -264,7 +313,9 @@ export default function ProductDetailPage() {
       return;
     }
 
-    if (quantity > availableInSelectedStock) {
+    if (
+      quantity > (selectedStock ? availableInSelectedStock : availableQuantity)
+    ) {
       return;
     }
 
@@ -320,7 +371,10 @@ export default function ProductDetailPage() {
   const handleQuantityChange = (newQuantity) => {
     const validQuantity = Math.max(
       1,
-      Math.min(newQuantity, availableInSelectedStock || 1)
+      Math.min(
+        newQuantity,
+        (selectedStock ? availableInSelectedStock : availableQuantity) || 1
+      )
     );
     setQuantity(validQuantity);
   };
@@ -518,7 +572,11 @@ export default function ProductDetailPage() {
               <div className="mb-6 p-4">
                 <p className={`${isDark ? "text-white" : "text-gray-800"}`}>
                   Số lượng còn lại:{" "}
-                  <strong>{availableInSelectedStock ?? 0}</strong>
+                  <strong>
+                    {(selectedStock
+                      ? availableInSelectedStock
+                      : availableQuantity) ?? 0}
+                  </strong>
                 </p>
               </div>
 
@@ -526,7 +584,11 @@ export default function ProductDetailPage() {
               <ProductQuantitySelector
                 quantity={quantity}
                 onQuantityChange={handleQuantityChange}
-                maxQuantity={availableInSelectedStock || 1}
+                maxQuantity={
+                  (selectedStock
+                    ? availableInSelectedStock
+                    : availableQuantity) || 1
+                }
               />
 
               {/* Nút thêm vào giỏ hàng và mua ngay */}

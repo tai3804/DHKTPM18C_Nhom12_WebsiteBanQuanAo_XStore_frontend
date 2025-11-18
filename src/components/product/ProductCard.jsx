@@ -34,7 +34,8 @@ export default function ProductCard({ product }) {
   const [selectedColor, setSelectedColor] = useState("");
   const [actionType, setActionType] = useState(""); // "addToCart" or "buyNow"
   const [variantStock, setVariantStock] = useState({}); // Lưu stock cho từng variant
-  const [stockQuantities, setStockQuantities] = useState({}); // Stock quantities từ API
+  const [totalQuantities, setTotalQuantities] = useState({}); // Total quantities from all stocks
+  const [selectedStockQuantities, setSelectedStockQuantities] = useState({}); // Quantities from selected stock
 
   console.log(
     "ProductCard render - selectedStock:",
@@ -53,16 +54,14 @@ export default function ProductCard({ product }) {
     }
   }, [favourites, product]);
 
-  // Fetch stock information khi component mount hoặc selectedStock thay đổi
+  // Fetch stock information khi component mount hoặc product thay đổi
   useEffect(() => {
+    if (product?.id) {
+      console.log("Fetching total stock for product:", product.id);
+      fetchTotalQuantities();
+    }
     if (product?.id && selectedStock?.id) {
-      console.log(
-        "Fetching stock for product:",
-        product.id,
-        "stock:",
-        selectedStock.id
-      );
-      fetchStockQuantities();
+      fetchSelectedStockQuantities();
     }
   }, [product?.id, selectedStock?.id, dispatch]);
 
@@ -84,7 +83,31 @@ export default function ProductCard({ product }) {
     }
   }, [productStocks, selectedStock]);
 
-  const fetchStockQuantities = async () => {
+  const fetchTotalQuantities = async () => {
+    if (!product?.id) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/api/stocks/products/${product.id}/total-quantities`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setTotalQuantities(data.result || {});
+        console.log("Fetched total stock quantities:", data.result);
+      }
+    } catch (error) {
+      console.error("Error fetching total stock quantities:", error);
+    }
+  };
+
+  const fetchSelectedStockQuantities = async () => {
     if (!selectedStock?.id || !product?.id) return;
 
     try {
@@ -101,14 +124,18 @@ export default function ProductCard({ product }) {
       if (response.ok) {
         const data = await response.json();
         const quantities = {};
-        (data.result || []).forEach((item) => {
-          quantities[item.productInfo.id] = item.quantity;
+        (data.result || []).forEach((product) => {
+          (product.variants || []).forEach((variant) => {
+            if (variant.id) {
+              quantities[variant.id] = variant.quantity;
+            }
+          });
         });
-        setStockQuantities(quantities);
-        console.log("Fetched stock quantities:", quantities);
+        setSelectedStockQuantities(quantities);
+        console.log("Fetched selected stock quantities:", quantities);
       }
     } catch (error) {
-      console.error("Error fetching stock quantities:", error);
+      console.error("Error fetching selected stock quantities:", error);
     }
   };
 
@@ -257,11 +284,14 @@ export default function ProductCard({ product }) {
       return;
     }
 
-    // Kiểm tra stock availability
-    if (selectedStock && Object.keys(stockQuantities).length > 0) {
-      const stockQuantity = getVariantStock(selectedSize, selectedColor);
+    // Kiểm tra stock availability trong kho đã chọn
+    if (selectedStock && Object.keys(selectedStockQuantities).length > 0) {
+      const stockQuantity = getSelectedStockQuantity(
+        selectedSize,
+        selectedColor
+      );
       if (stockQuantity <= 0) {
-        toast.error("Variant này đã hết hàng!");
+        toast.error("Variant này đã hết hàng trong khu vực đã chọn!");
         return;
       }
     }
@@ -395,7 +425,7 @@ export default function ProductCard({ product }) {
 
   const { average: averageRating, total: totalComments } = calculateRating();
 
-  // Lấy stock quantity cho một variant cụ thể
+  // Lấy stock quantity cho một variant cụ thể (tổng từ tất cả kho)
   const getVariantStock = (sizeName, colorName) => {
     // Tìm productInfo phù hợp
     const selectedProductInfo = product.productInfos?.find(
@@ -403,18 +433,39 @@ export default function ProductCard({ product }) {
     );
     if (
       selectedProductInfo &&
-      stockQuantities[selectedProductInfo.id] !== undefined
+      totalQuantities[selectedProductInfo.id] !== undefined
     ) {
-      return stockQuantities[selectedProductInfo.id] || 0;
+      return totalQuantities[selectedProductInfo.id] || 0;
     }
     // Nếu không có data, hiển thị 0
     return 0;
   };
 
-  // Kiểm tra variant có còn stock không
+  // Lấy stock quantity từ kho đã chọn
+  const getSelectedStockQuantity = (sizeName, colorName) => {
+    // Tìm productInfo phù hợp
+    const selectedProductInfo = product.productInfos?.find(
+      (info) => info.sizeName === sizeName && info.colorName === colorName
+    );
+    if (
+      selectedProductInfo &&
+      selectedStockQuantities[selectedProductInfo.id] !== undefined
+    ) {
+      return selectedStockQuantities[selectedProductInfo.id] || 0;
+    }
+    // Nếu không có data, hiển thị 0
+    return 0;
+  };
+
+  // Kiểm tra variant có còn stock không (dùng theo kho đã chọn nếu có, ngược lại dùng tổng)
   const isVariantAvailable = (sizeName, colorName) => {
-    const stock = getVariantStock(sizeName, colorName);
-    return stock > 0;
+    if (selectedStock) {
+      const stock = getSelectedStockQuantity(sizeName, colorName);
+      return stock > 0;
+    } else {
+      const stock = getVariantStock(sizeName, colorName);
+      return stock > 0;
+    }
   };
 
   const discount = calculateDiscount();
@@ -672,7 +723,8 @@ export default function ProductCard({ product }) {
                             : "text-blue-600"
                         }`}
                       >
-                        Còn lại: {getVariantStock(selectedSize, selectedColor)}{" "}
+                        Còn lại:{" "}
+                        {getSelectedStockQuantity(selectedSize, selectedColor)}{" "}
                         sản phẩm
                       </p>
                     </div>

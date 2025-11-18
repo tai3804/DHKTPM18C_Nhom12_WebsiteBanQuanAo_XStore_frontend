@@ -99,7 +99,7 @@ const ChatManagement = () => {
     : [];
 
   return (
-    <div className="flex max-h-[92vh] rounded-4xl">
+    <div className="flex h-[92vh] rounded-4xl">
       {/* Chat Rooms List */}
       <div
         className={`hidden md:flex w-1/3 min-w-[300px] border-r flex-col ${
