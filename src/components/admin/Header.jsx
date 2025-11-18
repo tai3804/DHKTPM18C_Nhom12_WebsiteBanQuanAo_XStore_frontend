@@ -21,7 +21,12 @@ export default function Header() {
       {/* Left: Logo + Title */}
       <div className="flex items-center gap-3">
         <div className="w-20 h-fit rounded-md">
-          <img src="../../../../public/logo.png" alt="" />
+          <NavLink
+            className="h-20 w-20  rounded-lg flex items-center justify-center font-bold text-primary"
+            to={"/admin/dashboard"}
+          >
+            <img src="/logo.png" alt="" />
+          </NavLink>
         </div>
       </div>
       <h1
