@@ -102,6 +102,17 @@ export default function UserIcon() {
             </button>
 
             <button
+              onClick={() => handleNavigate("/orders/tracking")}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${
+                themeMode === "dark"
+                  ? "text-gray-300 hover:bg-gray-700 hover:text-blue-400"
+                  : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+              }`}
+            >
+              Theo dõi đơn hàng
+            </button>
+
+            <button
               onClick={handleLogout}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer last:rounded-b-lg border-t ${
                 themeMode === "dark"

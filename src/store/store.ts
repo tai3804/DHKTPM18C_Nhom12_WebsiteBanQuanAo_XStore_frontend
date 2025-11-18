@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import loadingReducer from '../slices/LoadingSlice'
 import errorReducer from '../slices/ErrorSlice'
+import successReducer from '../slices/SuccessSlice'
 import userReducer from '../slices/UserSlice'
 import accountReducer from '../slices/AccountSlice'
 import authReducer from '../slices/AuthSlice'
@@ -16,12 +17,14 @@ import themeReducer from '../slices/ThemeSlice'
 import orderReducer from '../slices/OrderSlice'
 import commentReducer from '../slices/CommentSlice'
 import productSalesReducer from '../slices/ProductSalesSlice'
+import chatReducer from '../slices/ChatSlice'
 
 export const store = configureStore({
 
 
   reducer: {
     error: errorReducer,
+    success: successReducer,
     loading: loadingReducer,
     user: userReducer,
     account: accountReducer,
@@ -38,5 +41,6 @@ export const store = configureStore({
     order: orderReducer,
     comment: commentReducer,
     productSales: productSalesReducer,
+    chat: chatReducer,
   },
 })

@@ -19,6 +19,7 @@ export default function CheckoutPage() {
   const themeMode = useSelector(selectThemeMode);
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
+  const { productSales } = useSelector((state) => state.productSales);
 
   // Loading states
   const [loading, setLoading] = useState(false);
@@ -121,6 +122,15 @@ export default function CheckoutPage() {
       toast.error("Vui lòng chọn địa chỉ giao hàng");
       return false;
     }
+    const selectedShipInfo = shipInfos.find((s) => s.id === selectedShipInfoId);
+    if (!selectedShipInfo?.recipientName) {
+      toast.error("Địa chỉ giao hàng phải có tên người nhận");
+      return false;
+    }
+    if (!selectedShipInfo?.recipientPhone) {
+      toast.error("Địa chỉ giao hàng phải có số điện thoại người nhận");
+      return false;
+    }
     if (!selectedPaymentMethod) {
       toast.error("Vui lòng chọn phương thức thanh toán");
       return false;
@@ -142,25 +152,6 @@ export default function CheckoutPage() {
       const selectedShipInfo = shipInfos.find(
         (s) => s.id === selectedShipInfoId
       );
-      const subtotal = cart.cartItems.reduce(
-        (sum, item) =>
-          sum + (item.salePrice || item.price || 0) * item.quantity,
-        0
-      );
-
-      // Calculate discount amount from selected discounts
-      let discountAmount = 0;
-      if (selectedDiscounts.length > 0 && subtotal > 0) {
-        discountAmount = selectedDiscounts.reduce((total, discount) => {
-          if (discount.type === "PERCENT") {
-            const amount = subtotal * (discount.discountPercent / 100);
-            return total + Math.min(amount, discount.discountAmount || amount);
-          } else if (discount.type === "FIXED") {
-            return total + Math.min(discount.discountAmount, subtotal);
-          }
-          return total;
-        }, 0);
-      }
 
       const checkoutRequest = {
         userId: user.id,
@@ -169,7 +160,14 @@ export default function CheckoutPage() {
           cartItemId: item.id,
           productId: item.product?.id || item.productId,
           quantity: item.quantity,
-          price: item.salePrice || item.price || 0,
+          price: (() => {
+            const productSale = productSales?.find(
+              (ps) => ps.product?.id === item.product?.id
+            );
+            return productSale
+              ? productSale.discountedPrice
+              : item.product?.price || 0;
+          })(),
         })),
         paymentMethod: selectedPaymentMethod,
         shipInfoId: selectedShipInfoId,
@@ -184,11 +182,9 @@ export default function CheckoutPage() {
               selectedShipInfo.ward ? selectedShipInfo.ward + ", " : ""
             }${selectedShipInfo.district}, ${selectedShipInfo.city}`
           : "",
-        phoneNumber: selectedShipInfo?.recipientPhone || user?.phone || "",
+        phoneNumber: selectedShipInfo?.recipientPhone || "",
         notes: orderNotes,
-        discountAmount: discountAmount,
-        discountId:
-          selectedDiscounts.length > 0 ? selectedDiscounts[0].id : null, // Use first discount ID for now
+        discountIds: selectedDiscounts.map((d) => d.id), // Gửi danh sách ID discount cho hoá đơn
         shippingDiscountId: selectedShippingDiscount?.id || null,
       };
 
@@ -333,11 +329,15 @@ export default function CheckoutPage() {
               selectedShippingDiscount={selectedShippingDiscount}
               onSelectDiscount={handleSelectDiscount}
               onSelectShippingDiscount={handleSelectShippingDiscount}
-              cartTotal={cart.cartItems.reduce(
-                (sum, item) =>
-                  sum + (item.salePrice || item.price || 0) * item.quantity,
-                0
-              )}
+              cartTotal={cart.cartItems.reduce((sum, item) => {
+                const productSale = productSales?.find(
+                  (ps) => ps.product?.id === item.product?.id
+                );
+                const itemPrice = productSale
+                  ? productSale.discountedPrice
+                  : item.product?.price || 0;
+                return sum + itemPrice * item.quantity;
+              }, 0)}
             />
 
             {/* 4. Payment Method */}

@@ -324,7 +324,9 @@ const ManageOrdersPage = () => {
                 >
                   <td className="px-4 py-3">{o.id}</td>
                   <td className="px-4 py-3">
-                    {o.user?.account?.username || "—"}
+                    {o.user?.firstName && o.user?.lastName
+                      ? `${o.user.firstName} ${o.user.lastName}`
+                      : o.user?.account?.username || "—"}
                   </td>
                   <td className="px-4 py-3">{o.phoneNumber || "—"}</td>
                   <td className="px-4 py-3">{o.shippingAddress || "—"}</td>

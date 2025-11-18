@@ -24,6 +24,7 @@ import {
   Warehouse,
   CreditCard,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -135,7 +136,7 @@ export default function AdminLayout() {
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside
-          className={`border-r transition-all duration-300 flex flex-col relative ${
+          className={`border-r transition-all duration-300 flex flex-col relative h-full ${
             themeMode === "dark"
               ? "bg-gray-800 border-gray-700"
               : "bg-white border-gray-200"
@@ -344,6 +345,23 @@ export default function AdminLayout() {
               {sidebarOpen && <span>Đơn hàng</span>}
             </NavLink>
 
+            {/* Yêu cầu khách hàng */}
+            <NavLink
+              to="/admin/requests"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
+                    : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <FileText size={18} />
+              {sidebarOpen && <span>Yêu cầu khách hàng</span>}
+            </NavLink>
+
             {/* Chat */}
             <NavLink
               to="/admin/chat"
@@ -365,7 +383,7 @@ export default function AdminLayout() {
 
         {/* Nội dung chính */}
         <main
-          className={`flex-1 ${
+          className={`flex-1 h-full ${
             isChatPage ? "" : "p-8"
           } transition-colors duration-300 ${
             themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"

@@ -64,8 +64,6 @@ function SendOtpPage() {
       const data = await res.json();
 
       if (res.ok && data.code === 200) {
-        toast.success(`Mã OTP đã được gửi đến ${contact}!`);
-
         // Chuyển hướng đến trang xác thực OTP
         navigate("/verify-otp", {
           state: {

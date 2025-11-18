@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft } from "lucide-react";
 import { verifyOtp } from "../slices/AuthSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
-import { toast } from "react-toastify";
 
 export default function VerifyOtpPage() {
   const location = useLocation();
@@ -78,9 +77,6 @@ export default function VerifyOtpPage() {
       ).unwrap();
 
       if (verifyRes.code === 200) {
-        // Toast đã được handle trong Redux slice, không cần duplicate
-        // toast.success("Xác thực OTP thành công!");
-
         // Chuyển hướng tới trang nhập thông tin đăng ký
         navigate("/register-info", {
           state: {

@@ -129,20 +129,10 @@ export default function ManageUsersPage() {
     setShowEditForm(true);
   };
 
-  const handleUpdateUser = async (e) => {
-    e.preventDefault();
-
+  const handleDeleteUser = async (id) => {
     try {
-      await dispatch(
-        updateUser({
-          id: editingUser.id,
-          userData: editFormData,
-          token: user.token,
-        })
-      ).unwrap();
-      toast.success("Cập nhật người dùng thành công!");
-      setShowEditForm(false);
-      setEditingUser(null);
+      await dispatch(deleteUser(id)).unwrap();
+      toast.success("Xóa người dùng thành công!");
       dispatch(getUsers());
     } catch (err) {
       toast.error(err);
@@ -588,7 +578,7 @@ export default function ManageUsersPage() {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => dispatch(deleteUser(u.id))}
+                          onClick={() => handleDeleteUser(u.id)}
                           className="text-red-600 hover:text-red-800 transition cursor-pointer"
                           title="Xóa người dùng"
                         >

@@ -18,6 +18,25 @@ export default function CartPage() {
   const { cart } = useSelector((state) => state.cart);
   const loading = useSelector((state) => state.loading.isLoading);
   const themeMode = useSelector(selectThemeMode);
+  const { productSales } = useSelector((state) => state.productSales);
+
+  // Helper function to get product price (sale price or regular price)
+  const getProductPrice = (product) => {
+    if (!product) return 0;
+    const productSale = productSales?.find(
+      (ps) => ps.product?.id === product.id
+    );
+    return productSale ? productSale.discountedPrice : product.price || 0;
+  };
+
+  // Helper function to get original price (for showing strikethrough)
+  const getOriginalPrice = (product) => {
+    if (!product) return 0;
+    const productSale = productSales?.find(
+      (ps) => ps.product?.id === product.id
+    );
+    return productSale ? productSale.originalPrice : product.price || 0;
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -219,15 +238,51 @@ export default function CartPage() {
                       themeMode === "dark" ? "text-gray-300" : "text-gray-700"
                     }`}
                   >
-                    {item.product?.brand} • {item.size} • {item.color}
+                    {item.product?.brand} • {item.productInfo?.sizeName} •{" "}
+                    {item.productInfo?.colorName}
                   </p>
-                  <p
-                    className={`text-lg font-bold transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  >
-                    {item.product?.price?.toLocaleString("vi-VN")}đ
-                  </p>
+                  <div className="mb-2">
+                    {getProductPrice(item.product) !==
+                    getOriginalPrice(item.product) ? (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-lg font-bold transition-colors duration-300 ${
+                            themeMode === "dark"
+                              ? "text-blue-400"
+                              : "text-blue-600"
+                          }`}
+                        >
+                          {getProductPrice(item.product)?.toLocaleString(
+                            "vi-VN"
+                          )}
+                          đ
+                        </span>
+                        <span
+                          className={`text-sm line-through transition-colors duration-300 ${
+                            themeMode === "dark"
+                              ? "text-gray-500"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {getOriginalPrice(item.product)?.toLocaleString(
+                            "vi-VN"
+                          )}
+                          đ
+                        </span>
+                      </div>
+                    ) : (
+                      <p
+                        className={`text-lg font-bold transition-colors duration-300 ${
+                          themeMode === "dark"
+                            ? "text-blue-400"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {getProductPrice(item.product)?.toLocaleString("vi-VN")}
+                        đ
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col items-end justify-between">
                   <button
@@ -296,7 +351,10 @@ export default function CartPage() {
                       themeMode === "dark" ? "text-gray-100" : "text-gray-900"
                     }`}
                   >
-                    {item.subTotal?.toLocaleString("vi-VN")}đ
+                    {(
+                      getProductPrice(item.product) * item.quantity
+                    )?.toLocaleString("vi-VN")}
+                    đ
                   </p>
                 </div>
               </div>
@@ -327,7 +385,16 @@ export default function CartPage() {
               >
                 <div className="flex justify-between">
                   <span>Tạm tính:</span>
-                  <span>{cart.total?.toLocaleString("vi-VN")}đ</span>
+                  <span>
+                    {cart.cartItems
+                      ?.reduce(
+                        (total, item) =>
+                          total + getProductPrice(item.product) * item.quantity,
+                        0
+                      )
+                      ?.toLocaleString("vi-VN")}
+                    đ
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Phí vận chuyển:</span>
@@ -355,7 +422,14 @@ export default function CartPage() {
                       themeMode === "dark" ? "text-blue-400" : "text-blue-600"
                     }`}
                   >
-                    {cart.total?.toLocaleString("vi-VN")}đ
+                    {cart.cartItems
+                      ?.reduce(
+                        (total, item) =>
+                          total + getProductPrice(item.product) * item.quantity,
+                        0
+                      )
+                      ?.toLocaleString("vi-VN")}
+                    đ
                   </span>
                 </div>
               </div>

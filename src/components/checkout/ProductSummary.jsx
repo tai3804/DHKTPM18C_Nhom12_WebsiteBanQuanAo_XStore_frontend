@@ -4,6 +4,25 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 
 const ProductSummary = ({ cartItems }) => {
   const themeMode = useSelector(selectThemeMode);
+  const { productSales } = useSelector((state) => state.productSales);
+
+  // Helper function to get product price (sale price or regular price)
+  const getProductPrice = (product) => {
+    if (!product) return 0;
+    const productSale = productSales?.find(
+      (ps) => ps.product?.id === product.id
+    );
+    return productSale ? productSale.discountedPrice : product.price || 0;
+  };
+
+  // Helper function to get original price (for showing strikethrough)
+  const getOriginalPrice = (product) => {
+    if (!product) return 0;
+    const productSale = productSales?.find(
+      (ps) => ps.product?.id === product.id
+    );
+    return productSale ? productSale.originalPrice : product.price || 0;
+  };
 
   if (!cartItems || cartItems.length === 0) {
     return (
@@ -47,94 +66,86 @@ const ProductSummary = ({ cartItems }) => {
         {cartItems.map((item, index) => (
           <div
             key={item.id || index}
-            className={`flex gap-4 p-4 rounded-lg border transition-colors ${
+            className={`border rounded-lg p-4 flex gap-4 shadow-sm hover:shadow-md transition-all ${
               themeMode === "dark"
-                ? "bg-gray-900/50 border-gray-700"
-                : "bg-gray-50 border-gray-200"
+                ? "border-gray-700 bg-gray-800"
+                : "border-gray-200 bg-white"
             }`}
           >
-            {/* Product Image */}
-            <div className="shrink-0">
-              <img
-                src={item.product?.image || "/placeholder-image.jpg"}
-                alt={item.product?.name || "Sản phẩm"}
-                className="w-20 h-20 object-cover rounded-lg border"
-                onError={(e) => {
-                  e.target.src = "/placeholder-image.jpg";
-                }}
-              />
-            </div>
-
-            {/* Product Details */}
-            <div className="flex-1 min-w-0">
+            <img
+              src={item.product?.image || "/placeholder-image.jpg"}
+              alt={item.product?.name || "Sản phẩm"}
+              className="w-24 h-24 object-contain rounded"
+              onError={(e) => {
+                e.target.src = "/placeholder-image.jpg";
+              }}
+            />
+            <div className="flex-1">
               <h4
-                className={`font-semibold text-sm mb-2 line-clamp-2 ${
-                  themeMode === "dark" ? "text-gray-200" : "text-gray-800"
+                className={`font-semibold text-lg mb-1 transition-colors duration-300 ${
+                  themeMode === "dark" ? "text-gray-100" : "text-gray-900"
                 }`}
               >
                 {item.product?.name}
               </h4>
-
-              {/* Product Variants */}
-              <div
-                className={`flex flex-wrap gap-3 mb-2 text-xs ${
+              <p
+                className={`text-sm mb-2 transition-colors duration-300 ${
+                  themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                {item.product?.brand} • {item.productInfo?.sizeName} •{" "}
+                {item.productInfo?.colorName}
+              </p>
+              <div className="mb-2">
+                {getProductPrice(item.product) !==
+                getOriginalPrice(item.product) ? (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-lg font-bold transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-blue-400" : "text-blue-600"
+                      }`}
+                    >
+                      {getProductPrice(item.product)?.toLocaleString("vi-VN")}đ
+                    </span>
+                    <span
+                      className={`text-sm line-through transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-500" : "text-gray-400"
+                      }`}
+                    >
+                      {getOriginalPrice(item.product)?.toLocaleString("vi-VN")}đ
+                    </span>
+                  </div>
+                ) : (
+                  <p
+                    className={`text-lg font-bold transition-colors duration-300 ${
+                      themeMode === "dark" ? "text-blue-400" : "text-blue-600"
+                    }`}
+                  >
+                    {getProductPrice(item.product)?.toLocaleString("vi-VN")}đ
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-sm font-semibold transition-colors duration-300 ${
                   themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                {item.color && (
-                  <span
-                    className={`px-2 py-1 rounded-full ${
-                      themeMode === "dark" ? "bg-gray-700" : "bg-gray-200"
-                    }`}
-                  >
-                    Màu: {item.color}
-                  </span>
-                )}
-                {item.size && (
-                  <span
-                    className={`px-2 py-1 rounded-full ${
-                      themeMode === "dark" ? "bg-gray-700" : "bg-gray-200"
-                    }`}
-                  >
-                    Size: {item.size}
-                  </span>
-                )}
-              </div>
-
-              {/* Quantity & Price */}
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-sm ${
-                    themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  Số lượng:{" "}
-                  <span className="font-semibold">{item.quantity}</span>
-                </span>
-
-                <div className="text-right">
-                  <div
-                    className={`text-sm ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {(item.product?.price || 0).toLocaleString("vi-VN")}đ ×{" "}
-                    {item.quantity}
-                  </div>
-                  <div
-                    className={`font-bold ${
-                      themeMode === "dark"
-                        ? "text-indigo-400"
-                        : "text-indigo-600"
-                    }`}
-                  >
-                    {(
-                      (item.product?.price || 0) * item.quantity
-                    ).toLocaleString("vi-VN")}
-                    đ
-                  </div>
-                </div>
-              </div>
+                x{item.quantity}
+              </span>
+              <span
+                className={`text-xl font-bold px-2 py-1 rounded transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "text-green-300  border-green-700"
+                    : "text-green-700 border-green-300"
+                }`}
+              >
+                {(
+                  getProductPrice(item.product) * item.quantity
+                )?.toLocaleString("vi-VN")}
+                đ
+              </span>
             </div>
           </div>
         ))}
@@ -161,7 +172,8 @@ const ProductSummary = ({ cartItems }) => {
           >
             {cartItems
               .reduce(
-                (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+                (sum, item) =>
+                  sum + getProductPrice(item.product) * item.quantity,
                 0
               )
               .toLocaleString("vi-VN")}

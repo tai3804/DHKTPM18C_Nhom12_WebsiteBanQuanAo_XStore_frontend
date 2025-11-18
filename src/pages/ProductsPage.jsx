@@ -28,12 +28,33 @@ export default function ProductsPage() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
+  const productsPerPage = 12; // Number of products per page
 
-  // Load product types
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Handle scroll to hide/show header
   useEffect(() => {
-    dispatch(getProductTypes());
-  }, [dispatch]);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past 100px
+        setIsHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsHeaderVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
 
   // Update filters when URL category changes
   useEffect(() => {
@@ -180,7 +201,13 @@ export default function ProductsPage() {
     >
       <main className="grow container mx-auto px-4 py-8">
         {/* Page Header */}
-        <div className="mb-6">
+        <div
+          className={`mb-6 mx-20 px-4 transition-all duration-300 ease-in-out ${
+            isHeaderVisible
+              ? "opacity-100 transform translate-y-0"
+              : "opacity-0 transform -translate-y-full pointer-events-none"
+          }`}
+        >
           <h1
             className={`text-3xl font-bold mb-2 transition-colors ${
               themeMode === "dark" ? "text-gray-100" : "text-gray-900"

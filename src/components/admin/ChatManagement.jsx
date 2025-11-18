@@ -1,487 +1,285 @@
-import React, { useState, useEffect, useRef } from "react";
-import { MessageCircle, Send, User, Clock, CheckCircle } from "lucide-react";
-import { API_BASE_URL } from "../../config/api";
-import { useSelector } from "react-redux";
-import { selectAuthToken } from "../../slices/AuthSlice";
+import React, { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllChatRooms,
+  getChatHistory,
+  sendAdminMessage,
+  markChatRoomAsRead,
+  setSelectedChatRoom,
+  getUnreadCount,
+} from "../../slices/ChatSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
-import SearchBar from "../../components/admin/SearchBar";
-import { Link } from "react-router-dom";
+import { Send, MessageCircle, User } from "lucide-react";
 
 const ChatManagement = () => {
-  const [chatRooms, setChatRooms] = useState([]);
-  const [selectedChatRoomId, setSelectedChatRoomId] = useState(null);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [responseMessage, setResponseMessage] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const authToken = useSelector(selectAuthToken);
+  const dispatch = useDispatch();
   const themeMode = useSelector(selectThemeMode);
-  const textareaRef = useRef(null);
-  const messagesRef = useRef(null);
-
-  // Filter chatRooms based on search term
-  const filteredChatRooms = chatRooms.filter((room) =>
-    room.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const { chatRooms, chatHistory, selectedChatRoom, unreadCount } = useSelector(
+    (state) => state.chat
   );
+  const [message, setMessage] = useState("");
+  const messagesEndRef = useRef(null);
 
-  // Helper function để tạo headers với JWT token
-  const getHeaders = () => {
-    const headers = {
-      "Content-Type": "application/json",
+  useEffect(() => {
+    // Preload chat data
+    const preloadChatData = async () => {
+      try {
+        await dispatch(getAllChatRooms());
+        await dispatch(getUnreadCount());
+      } catch (err) {
+        console.error("Lỗi khi preload dữ liệu chat:", err);
+      }
     };
-    if (authToken) {
-      headers["Authorization"] = `Bearer ${authToken}`;
-    }
-    return headers;
-  };
 
-  // Load danh sách chatRooms
+    preloadChatData();
+  }, [dispatch]);
+
   useEffect(() => {
-    loadChatRooms();
-    loadUnreadCount();
-  }, []);
+    if (selectedChatRoom) {
+      dispatch(getChatHistory(selectedChatRoom.id));
+      dispatch(markChatRoomAsRead(selectedChatRoom.id));
+    }
+  }, [dispatch, selectedChatRoom]);
 
-  // Load lịch sử chat khi chọn chatRoom
   useEffect(() => {
-    if (selectedChatRoomId) {
-      loadChatHistory(selectedChatRoomId);
-      // Tự động đánh dấu đã đọc khi chọn conversation
-      markChatRoomAsRead(selectedChatRoomId);
-    }
-  }, [selectedChatRoomId]);
+    scrollToBottom();
+  }, [chatHistory, selectedChatRoom]);
 
-  // Scroll to bottom when chatHistory changes
-  useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  const loadChatRooms = async () => {
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!message.trim() || !selectedChatRoom) return;
+
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/chat/admin/chat-rooms`,
-        {
-          headers: getHeaders(),
-        }
+      await dispatch(
+        sendAdminMessage({
+          chatRoomId: selectedChatRoom.id,
+          message: message.trim(),
+        })
       );
-      if (response.ok) {
-        const rooms = await response.json();
-        setChatRooms(rooms);
-        // Calculate total unread count from all rooms
-        const totalUnread = rooms.reduce(
-          (sum, room) => sum + (room.unreadCount || 0),
-          0
-        );
-        setUnreadCount(totalUnread);
-      }
+      setMessage("");
     } catch (error) {
-      console.error("Error loading chat rooms:", error);
+      console.error("Error sending message:", error);
     }
   };
 
-  const loadUnreadCount = async () => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/chat/admin/unread-count`,
-        {
-          headers: getHeaders(),
-        }
-      );
-      if (response.ok) {
-        const count = await response.json();
-        setUnreadCount(count);
-      }
-    } catch (error) {
-      console.error("Error loading unread count:", error);
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Hôm nay";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Hôm qua";
+    } else {
+      return date.toLocaleDateString("vi-VN");
     }
   };
 
-  const loadChatHistory = async (chatRoomId) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/chat/history/${chatRoomId}`,
-        {
-          headers: getHeaders(),
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setChatHistory(data);
-      }
-    } catch (error) {
-      console.error("Error loading chat history:", error);
-    }
-  };
-
-  const sendResponse = async (chatRoomId) => {
-    if (!responseMessage.trim()) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/chat/admin/send/${chatRoomId}`,
-        {
-          method: "POST",
-          headers: getHeaders(),
-          body: JSON.stringify({
-            message: responseMessage,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        setResponseMessage("");
-        textareaRef.current?.focus();
-        // Reload chat history
-        if (selectedChatRoomId) {
-          loadChatHistory(selectedChatRoomId);
-          loadChatRooms(); // Reload để cập nhật
-        }
-        loadUnreadCount();
-      }
-    } catch (error) {
-      console.error("Error sending response:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const markChatRoomAsRead = async (chatRoomId) => {
-    try {
-      await fetch(
-        `${API_BASE_URL}/api/chat/admin/mark-read/chat-room/${chatRoomId}`,
-        {
-          method: "PUT",
-          headers: getHeaders(),
-        }
-      );
-      loadUnreadCount();
-      loadChatRooms(); // Reload để cập nhật unread count
-      if (selectedChatRoomId) {
-        loadChatHistory(selectedChatRoomId);
-      }
-    } catch (error) {
-      console.error("Error marking as read:", error);
-    }
-  };
+  const currentHistory = selectedChatRoom
+    ? chatHistory[selectedChatRoom.id] || []
+    : [];
 
   return (
     <div
-      className={`flex h-full min-h-full ${
+      className={`flex h-full overflow-hidden ${
         themeMode === "dark"
           ? "bg-gray-900 text-gray-100"
-          : "bg-gray-100 text-gray-900"
+          : "bg-gray-50 text-gray-900"
       }`}
     >
-      {/* Sidebar - Danh sách sessions */}
+      {/* Chat Rooms List */}
       <div
-        className={`w-80 ${
+        className={`w-1/3 border-r flex flex-col h-full ${
           themeMode === "dark"
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-200"
-        } border-r flex flex-col rounded-lg shadow-sm h-full`}
+            ? "border-gray-700 bg-gray-800"
+            : "border-gray-200 bg-white"
+        }`}
       >
         <div
-          className={`p-4 ${
+          className={`p-4 border-b ${
             themeMode === "dark" ? "border-gray-700" : "border-gray-200"
-          } border-b`}
+          }`}
         >
-          {/* Breadcrumb */}
-          <div
-            className={`text-sm mb-2 flex items-center gap-1 transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-            }`}
-          >
-            <Link to="/admin/dashboard" className="hover:underline">
-              Trang chủ
-            </Link>
-            <span>/</span>
-            <span
-              className={`transition-colors ${
-                themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              Chat
-            </span>
-          </div>
-          <h2
-            className={`text-lg font-semibold ${
-              themeMode === "dark" ? "text-gray-100" : "text-gray-800"
-            } flex items-center gap-2`}
-          >
+          <h2 className="text-lg font-semibold flex items-center gap-2">
             <MessageCircle size={20} />
-            Quản lý Chat
-            {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {unreadCount}
-              </span>
-            )}
+            Phòng Chat ({chatRooms.length})
           </h2>
         </div>
-
-        {/* Search input - moved to top */}
-        <div
-          className={`p-4 ${
-            themeMode === "dark"
-              ? "border-gray-700 bg-gray-800"
-              : "border-gray-200 bg-white"
-          } border-b`}
-        >
-          <SearchBar
-            searchQuery={searchTerm}
-            onSearchChange={setSearchTerm}
-            placeholder="Tìm kiếm khách hàng..."
-            onClear={() => setSearchTerm("")}
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {filteredChatRooms.map((room) => (
-            <div
-              key={room.id}
-              onClick={() => setSelectedChatRoomId(room.id)}
-              className={`p-4 ${
-                themeMode === "dark"
-                  ? "border-gray-700 hover:bg-gray-700"
-                  : "border-gray-100 hover:bg-gray-50"
-              } border-b cursor-pointer ${
-                selectedChatRoomId === room.id
-                  ? `${
-                      themeMode === "dark"
-                        ? "bg-gray-700 border-r-blue-500"
-                        : "bg-blue-50 border-r-blue-500"
-                    } border-r-2`
-                  : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <User
-                    size={16}
-                    className={
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-                    }
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-medium ${
-                          themeMode === "dark"
-                            ? "text-gray-100"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        {room.name}
-                      </span>
-                      {room.unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                          {room.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                    <p
-                      className={`text-xs ${
-                        themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-                      } truncate max-w-40`}
-                    >
-                      {room.lastMessage?.message ||
-                        (room.userId
-                          ? `User ${room.userId}`
-                          : `Session ${room.sessionId}`)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  {room.unreadCount > 0 ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-red-500 font-medium">
-                        Chưa xem
-                      </span>
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span
-                        className={`text-xs ${
-                          themeMode === "dark"
-                            ? "text-gray-500"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        Đã xem
-                      </span>
-                      <CheckCircle size={12} className="text-green-500" />
-                    </div>
-                  )}
-                  <Clock
-                    size={14}
-                    className={
-                      themeMode === "dark" ? "text-gray-500" : "text-gray-400"
-                    }
-                  />
-                </div>
-              </div>
+        <div className="overflow-y-auto flex-1 min-h-0">
+          {chatRooms.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              Chưa có phòng chat nào
             </div>
-          ))}
+          ) : (
+            chatRooms.map((room) => (
+              <div
+                key={room.id}
+                onClick={() => dispatch(setSelectedChatRoom(room))}
+                className={`p-4 border-b cursor-pointer transition-colors ${
+                  selectedChatRoom?.id === room.id
+                    ? themeMode === "dark"
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-blue-50 border-blue-200"
+                    : themeMode === "dark"
+                    ? "border-gray-700 hover:bg-gray-700"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <User size={16} />
+                    <span className="font-medium truncate">{room.name}</span>
+                  </div>
+                  {room.unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {room.unreadCount}
+                    </span>
+                  )}
+                </div>
+                {room.lastMessage && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                    {room.lastMessage.message}
+                  </div>
+                )}
+                {room.lastMessage && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {formatTime(room.lastMessage.timestamp)}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Main content - Chat history */}
-      <div className="flex-1 flex flex-col h-full min-h-full">
-        {selectedChatRoomId ? (
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col h-full">
+        {selectedChatRoom ? (
           <>
-            {/* Chat header */}
+            {/* Chat Header */}
             <div
-              className={`p-4 ${
+              className={`p-4 border-b ${
                 themeMode === "dark"
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              } border-b`}
+                  ? "border-gray-700 bg-gray-800"
+                  : "border-gray-200 bg-white"
+              }`}
             >
-              <h3
-                className={`text-lg font-semibold ${
-                  themeMode === "dark" ? "text-gray-100" : "text-gray-800"
-                }`}
-              >
-                Chat với khách hàng -{" "}
-                {chatRooms.find((r) => r.id === selectedChatRoomId)?.name ||
-                  `Chat Room ${selectedChatRoomId}`}
-              </h3>
+              <div className="flex items-center gap-2">
+                <User size={20} />
+                <h3 className="text-lg font-semibold">
+                  {selectedChatRoom.name}
+                </h3>
+              </div>
             </div>
 
             {/* Messages */}
             <div
-              ref={messagesRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 max-h-screen"
+              className={`flex-1 max-h-[calc(100vh-13rem)] overflow-y-scroll p-4 space-y-4 min-h-0 ${
+                themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"
+              }`}
             >
-              {chatHistory.map((chat) => (
-                <div key={chat.id} className="space-y-2">
-                  {/* Message */}
-                  <div
-                    className={`flex ${
-                      chat.sender === 0 ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-md p-3 rounded-lg ${
-                        chat.sender === 0
-                          ? themeMode === "dark"
-                            ? "bg-green-900 text-green-100"
-                            : "bg-green-100 text-gray-800"
-                          : themeMode === "dark"
-                          ? "bg-blue-900 text-blue-100"
-                          : "bg-blue-100 text-gray-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        {chat.sender === 0 ? (
-                          <CheckCircle
-                            size={14}
-                            className={
-                              themeMode === "dark"
-                                ? "text-green-300"
-                                : "text-green-600"
-                            }
-                          />
-                        ) : (
-                          <User
-                            size={14}
-                            className={
-                              themeMode === "dark"
-                                ? "text-blue-300"
-                                : "text-blue-600"
-                            }
-                          />
-                        )}
-                        <span
-                          className={`text-xs font-medium ${
-                            chat.sender === 0
+              {currentHistory.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  Chưa có tin nhắn nào
+                </div>
+              ) : (
+                currentHistory.map((msg, index) => {
+                  const isAdmin = msg.sender === 0;
+                  const showDate =
+                    index === 0 ||
+                    formatDate(msg.timestamp) !==
+                      formatDate(currentHistory[index - 1].timestamp);
+
+                  return (
+                    <div key={msg.id}>
+                      {showDate && (
+                        <div className="text-center text-xs text-gray-500 my-4">
+                          {formatDate(msg.timestamp)}
+                        </div>
+                      )}
+                      <div
+                        className={`flex ${
+                          isAdmin ? "justify-end" : "justify-start"
+                        }`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            isAdmin
                               ? themeMode === "dark"
-                                ? "text-green-300"
-                                : "text-green-600"
+                                ? "bg-blue-600 text-white"
+                                : "bg-blue-500 text-white"
                               : themeMode === "dark"
-                              ? "text-blue-300"
-                              : "text-blue-600"
+                              ? "bg-gray-700 text-gray-100"
+                              : "bg-white text-gray-900 border"
                           }`}
                         >
-                          {chat.sender === 0
-                            ? "Admin"
-                            : chat.name || "Khách hàng"}
-                        </span>
+                          <div className="text-sm">{msg.message}</div>
+                          <div
+                            className={`text-xs mt-1 ${
+                              isAdmin ? "text-blue-100" : "text-gray-500"
+                            }`}
+                          >
+                            {formatTime(msg.timestamp)}
+                          </div>
+                        </div>
                       </div>
-                      <p
-                        className={`text-sm ${
-                          themeMode === "dark"
-                            ? "text-gray-100"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        {chat.message}
-                      </p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          themeMode === "dark"
-                            ? "text-gray-400"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {new Date(chat.timestamp).toLocaleString("vi-VN")}
-                      </p>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
             </div>
 
-            {/* Response input */}
+            {/* Message Input */}
             <div
-              className={`p-4 ${
+              className={`p-4 border-t ${
                 themeMode === "dark"
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              } border-t`}
+                  ? "border-gray-700 bg-gray-800"
+                  : "border-gray-200 bg-white"
+              }`}
             >
-              <div className="flex gap-2">
-                <textarea
-                  ref={textareaRef}
-                  value={responseMessage}
-                  onChange={(e) => setResponseMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      sendResponse(selectedChatRoomId);
-                    }
-                  }}
-                  placeholder="Nhập phản hồi..."
-                  className={`flex-1 px-3 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Nhập tin nhắn..."
+                  className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     themeMode === "dark"
                       ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400"
-                      : "border-gray-300 text-gray-900 placeholder-gray-500"
+                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                   }`}
-                  rows={1}
                 />
                 <button
-                  onClick={() => sendResponse(selectedChatRoomId)}
-                  disabled={!responseMessage.trim() || loading}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-lg transition-colors flex items-center gap-1 self-end"
+                  type="submit"
+                  disabled={!message.trim()}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  <Send size={14} />
-                  {loading ? "Đang gửi..." : "Gửi"}
+                  <Send size={16} />
+                  Gửi
                 </button>
-              </div>
+              </form>
             </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <div
-              className={`text-center ${
-                themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-              }`}
-            >
+            <div className="text-center text-gray-500">
               <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
-              <p>Chọn một cuộc trò chuyện để xem chi tiết</p>
+              <p>Chọn một phòng chat để bắt đầu</p>
             </div>
           </div>
         )}

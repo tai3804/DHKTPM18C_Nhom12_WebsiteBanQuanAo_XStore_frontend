@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft } from "lucide-react";
 import { registerUser } from "../slices/AuthSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
-import { toast } from "react-toastify";
 
 export default function RegisterInfoPage() {
   const location = useLocation();
@@ -93,8 +92,6 @@ export default function RegisterInfoPage() {
       ).unwrap();
 
       if (res.code === 200) {
-        // Toast đã được handle trong Redux slice, không cần duplicate
-        // toast.success("Đăng ký tài khoản thành công!");
         setForm({
           firstName: "",
           lastName: "",

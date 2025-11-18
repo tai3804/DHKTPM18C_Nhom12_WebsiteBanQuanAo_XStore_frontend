@@ -10,6 +10,7 @@ const PriceSummary = ({
   onTotalChange,
 }) => {
   const themeMode = useSelector(selectThemeMode);
+  const { productSales } = useSelector((state) => state.productSales);
   const [calculations, setCalculations] = useState({
     subtotal: 0,
     productDiscountAmount: 0,
@@ -33,29 +34,46 @@ const PriceSummary = ({
     // Calculate subtotal from cart items
     const subtotal = cartItems.reduce((total, item) => {
       const product = item.product || {};
-      const itemPrice = Number(product.salePrice) || Number(product.price) || 0;
+      // Find product sale from Redux state
+      const productSale = productSales?.find(
+        (ps) => ps.product?.id === product.id
+      );
+      const itemPrice = productSale
+        ? Number(productSale.discountedPrice)
+        : Number(product.price) || 0;
       const quantity = Number(item.quantity) || 0;
       return total + itemPrice * quantity;
     }, 0);
 
-    // Calculate product discount amount (multiple discounts)
+    // Separate discounts by type
+    const percentDiscounts = selectedDiscounts.filter(
+      (d) => d.type === "PERCENT"
+    );
+    const fixedDiscounts = selectedDiscounts.filter((d) => d.type === "FIXED");
+
+    // Apply percent discounts first
     let productDiscountAmount = 0;
-    if (selectedDiscounts.length > 0 && subtotal > 0) {
-      selectedDiscounts.forEach((discount) => {
-        if (discount.type === "PERCENT") {
-          const amount =
-            (subtotal * (Number(discount.discountPercent) || 0)) / 100;
-          const maxDiscount = Number(discount.discountAmount) || amount;
-          productDiscountAmount += Math.min(amount, maxDiscount);
-        } else {
-          productDiscountAmount += Math.min(
-            Number(discount.discountAmount) || 0,
-            subtotal
-          );
-        }
+    let remainingSubtotal = subtotal;
+    if (percentDiscounts.length > 0 && subtotal > 0) {
+      percentDiscounts.forEach((discount) => {
+        let amount =
+          (remainingSubtotal * (Number(discount.discountPercent) || 0)) / 100;
+        const maxDiscount = Number(discount.discountAmount) || amount;
+        amount = Math.min(amount, maxDiscount);
+        amount = Math.min(amount, remainingSubtotal);
+        productDiscountAmount += amount;
+        remainingSubtotal -= amount;
       });
-      // Đảm bảo không giảm quá subtotal
-      productDiscountAmount = Math.min(productDiscountAmount, subtotal);
+    }
+
+    // Then apply fixed discounts
+    if (fixedDiscounts.length > 0 && remainingSubtotal > 0) {
+      fixedDiscounts.forEach((discount) => {
+        let amount = Number(discount.discountAmount) || 0;
+        amount = Math.min(amount, remainingSubtotal);
+        productDiscountAmount += amount;
+        remainingSubtotal -= amount;
+      });
     }
 
     // Calculate shipping discount amount

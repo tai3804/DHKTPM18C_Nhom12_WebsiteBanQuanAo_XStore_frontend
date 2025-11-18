@@ -190,30 +190,19 @@ export default function OrderDetailPage() {
                 <Package size={32} />
                 Chi tiết đơn hàng #{order.id}
               </h1>
-              <div className="flex gap-3">
-                {order.status !== "DELIVERED" && (
-                  <button
-                    onClick={() => navigate(`/orders/${orderId}/tracking`)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Truck size={18} />
-                    Theo dõi đơn hàng
-                  </button>
-                )}
-                <div
-                  className={`flex items-center gap-3 px-4 py-2 rounded-full ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {getStatusIcon(order.status)}
-                  <span className="font-medium">
-                    {getStatusText(order.status)}
-                  </span>
-                </div>
+              <div
+                className={`flex items-center gap-3 px-4 py-2 rounded-full ${getStatusColor(
+                  order.status
+                )}`}
+              >
+                {getStatusIcon(order.status)}
+                <span className="font-medium">
+                  {getStatusText(order.status)}
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
               {/* Order Info */}
               <div className="space-y-6">
                 <div>
@@ -251,13 +240,13 @@ export default function OrderDetailPage() {
                     Thông tin giao hàng
                   </h3>
                   <div className="space-y-3">
-                    <div>
+                    <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">
-                        Địa chỉ:
+                        Người nhận:
                       </span>
-                      <p className="mt-1 font-medium">
-                        {order.shippingAddress}
-                      </p>
+                      <span className="font-medium">
+                        {order.recipientName || user?.fullName || "N/A"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">
@@ -265,48 +254,29 @@ export default function OrderDetailPage() {
                       </span>
                       <span className="font-medium">{order.phoneNumber}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Địa chỉ:
+                      </span>
+                      <span className="font-medium">
+                        {order.shippingAddress}
+                      </span>
+                    </div>
                     {order.notes && (
-                      <div>
+                      <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">
                           Ghi chú:
                         </span>
-                        <p className="mt-1 font-medium">{order.notes}</p>
+                        <span className="font-medium">{order.notes}</span>
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Tóm tắt đơn hàng</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Tạm tính:</span>
-                    <span>{(order.subtotal || 0).toLocaleString()}₫</span>
-                  </div>
-                  {order.discountAmount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Giảm giá:</span>
-                      <span>-{order.discountAmount.toLocaleString()}₫</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span>Phí vận chuyển:</span>
-                    <span>{(order.shippingFee || 0).toLocaleString()}₫</span>
-                  </div>
-                  <div className="border-t pt-3 flex justify-between font-bold text-xl">
-                    <span>Tổng cộng:</span>
-                    <span className="text-emerald-600">
-                      {order.total?.toLocaleString()}₫
-                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Products */}
-            <div>
+            <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Sản phẩm đã đặt</h3>
               <div className="space-y-4">
                 {order.orderItems?.map((item) => (
@@ -374,6 +344,34 @@ export default function OrderDetailPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="flex justify-end">
+              <div className="w-80">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span>Tạm tính:</span>
+                    <span>{(order.subtotal || 0).toLocaleString()}₫</span>
+                  </div>
+                  {order.discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Giảm giá:</span>
+                      <span>-{order.discountAmount.toLocaleString()}₫</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Phí vận chuyển:</span>
+                    <span>{(order.shippingFee || 0).toLocaleString()}₫</span>
+                  </div>
+                  <div className="border-t pt-3 flex justify-between font-bold text-xl">
+                    <span>Tổng cộng:</span>
+                    <span className="text-emerald-600">
+                      {order.total?.toLocaleString()}₫
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

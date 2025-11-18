@@ -81,17 +81,6 @@ export default function DiscountSelection({
     }
   };
 
-  const calculateDiscountAmount = (discount) => {
-    if (!discount || cartTotal <= 0) return 0;
-
-    if (discount.type === "PERCENT") {
-      const amount = (cartTotal * discount.discountPercent) / 100;
-      return Math.min(amount, discount.discountAmount || amount);
-    } else {
-      return Math.min(discount.discountAmount, cartTotal);
-    }
-  };
-
   const getUserTypeName = (userType) => {
     const types = {
       COPPER: "Đồng",
@@ -120,7 +109,39 @@ export default function DiscountSelection({
     onClick,
     showCheck = true
   ) => {
-    const discountAmount = calculateDiscountAmount(discount);
+    // Separate selected discounts by type, excluding current discount
+    const otherSelected = selectedDiscounts.filter((d) => d.id !== discount.id);
+    const otherPercent = otherSelected.filter((d) => d.type === "PERCENT");
+    const otherFixed = otherSelected.filter((d) => d.type === "FIXED");
+
+    // Calculate remaining after applying other discounts in priority order
+    let remaining = cartTotal;
+    // First apply other percent discounts
+    otherPercent.forEach((d) => {
+      let amt = (remaining * (Number(d.discountPercent) || 0)) / 100;
+      const maxDiscount = Number(d.discountAmount) || amt;
+      amt = Math.min(amt, maxDiscount);
+      amt = Math.min(amt, remaining);
+      remaining -= amt;
+    });
+    // Then apply other fixed discounts
+    otherFixed.forEach((d) => {
+      let amt = Number(d.discountAmount) || 0;
+      amt = Math.min(amt, remaining);
+      remaining -= amt;
+    });
+
+    // Now calculate discount amount for current discount
+    let discountAmount = 0;
+    if (discount.type === "PERCENT") {
+      discountAmount =
+        (remaining * (Number(discount.discountPercent) || 0)) / 100;
+      const maxDiscount = Number(discount.discountAmount) || discountAmount;
+      discountAmount = Math.min(discountAmount, maxDiscount);
+    } else {
+      discountAmount = Number(discount.discountAmount) || 0;
+    }
+    discountAmount = Math.min(discountAmount, remaining);
 
     return (
       <div

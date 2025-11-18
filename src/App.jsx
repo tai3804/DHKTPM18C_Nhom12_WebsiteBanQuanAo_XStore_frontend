@@ -39,6 +39,8 @@ import { selectThemeMode } from "./slices/ThemeSlice";
 import { getProducts } from "./slices/ProductSlice";
 import { getCartByUser } from "./slices/CartSlice";
 import { getFavouritesByUser } from "./slices/FavouriteSlice";
+import { getStocks } from "./slices/StockSlice";
+import { getProductSales } from "./slices/ProductSalesSlice";
 import SendOtpPage from "./pages/SendOtpPage";
 import FavouritePage from "./pages/FavouritePage";
 import DebugPage from "./pages/DebugPage";
@@ -47,10 +49,11 @@ import ManageStockPage from "./pages/admin/ManageStockPage";
 import ManageDiscountsPage from "./pages/admin/ManageDiscountsPage";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import StockItemList from "./components/admin/StockItemList";
+import StockItemsPage from "./pages/admin/StockItemsPage";
 import ChatManagementPage from "./pages/admin/ChatManagementPage";
 import CommentsPage from "./pages/CommentsPage";
 import ManageProductSalePage from "./pages/admin/ManageProductSalePage";
+import ManageRequestsPage from "./pages/admin/ManageRequestsPage";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -74,6 +77,12 @@ export default function App() {
       console.log("App.jsx - Dispatching getProducts()");
       const result = await dispatch(getProducts());
       console.log("App.jsx - getProducts result:", result);
+
+      console.log("App.jsx - Dispatching getStocks()");
+      await dispatch(getStocks());
+
+      console.log("App.jsx - Dispatching getProductSales()");
+      await dispatch(getProductSales());
 
       // Chỉ load cart và favourites nếu có user đã login
       if (user?.id) {
@@ -124,6 +133,7 @@ export default function App() {
             element={<OrderConfirmationPage />}
           />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/tracking" element={<OrderTrackingPage />} />
           <Route path="orders/:orderId" element={<OrderDetailPage />} />
           <Route
             path="orders/:orderId/tracking"
@@ -157,10 +167,11 @@ export default function App() {
           <Route path="products" element={<ProductsAdminPage />} />
           <Route path="product-types" element={<ManageProductTypesPage />} />
           <Route path="stocks" element={<ManageStockPage />} />
-          <Route path="stocks/:stockId/items" element={<StockItemList />} />
+          <Route path="stocks/:stockId/items" element={<StockItemsPage />} />
           <Route path="discounts" element={<ManageDiscountsPage />} />
           <Route path="product-sales" element={<ManageProductSalePage />} />
           <Route path="orders" element={<ManageOrdersPage />} />
+          <Route path="requests" element={<ManageRequestsPage />} />
           <Route path="chat" element={<ChatManagementPage />} />
         </Route>
       </Routes>

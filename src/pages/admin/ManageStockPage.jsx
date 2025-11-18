@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { getStocks, deleteStock } from "../../slices/StockSlice";
 import { toast } from "react-toastify";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Package } from "lucide-react";
 import SearchBar from "../../components/admin/SearchBar";
 import StockForm from "../../components/admin/StockForm";
 import { selectThemeMode } from "../../slices/ThemeSlice";
@@ -75,13 +75,14 @@ const ManageStockPage = () => {
   const filteredStocks = stocks.filter((s) => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
-    const haystack = `${s.name || ""} ${s.code || s.sku || ""} ${s.location || ""} ${s.description || ""} ${s.id || ""}`.toLowerCase();
+    const haystack = `${s.name || ""} ${s.code || s.sku || ""} ${
+      s.location || ""
+    } ${s.description || ""} ${s.id || ""}`.toLowerCase();
     return haystack.includes(q);
   });
 
   return (
     <div className="space-y-6 relative">
-
       {/* Breadcrumb */}
       <div
         className={`text-sm mb-2 flex items-center gap-1 ${
@@ -115,10 +116,11 @@ const ManageStockPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className={`text-2xl font-bold ${
+            className={`text-2xl font-bold flex items-center gap-2 ${
               themeMode === "dark" ? "text-gray-100" : "text-gray-800"
             }`}
           >
+            <Package size={24} />
             Quản lý kho hàng
           </h1>
           <p
