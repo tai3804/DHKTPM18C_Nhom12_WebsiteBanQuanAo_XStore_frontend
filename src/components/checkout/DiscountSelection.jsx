@@ -206,7 +206,7 @@ export default function DiscountSelection({
             </div>
           </div>
           {showCheck && isSelected && (
-            <div className="flex-shrink-0">
+            <div className="">
               <div
                 className={`w-5 h-5 rounded-full flex items-center justify-center ${
                   themeMode === "dark" ? "bg-green-600" : "bg-green-500"

@@ -47,7 +47,7 @@ export default function Dashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
-    newCustomers: 0,
+    totalCustomers: 0,
     totalOrders: 0,
     revenue: 0,
     profit: 0,
@@ -83,11 +83,8 @@ export default function Dashboard() {
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
 
-    // Tính khách hàng mới
-    const newCustomers = users.filter((user) => {
-      const userCreated = new Date(user.createdAt || user.dob);
-      return userCreated >= startDate && userCreated < endDate;
-    }).length;
+    // Tính tổng khách hàng
+    const totalCustomers = users.length;
 
     // Tính đơn hàng trong khoảng thời gian
     const periodOrders = orders.filter((order) => {
@@ -106,7 +103,7 @@ export default function Dashboard() {
     const profit = revenue * 0.3;
 
     setStats({
-      newCustomers,
+      totalCustomers,
       totalOrders,
       revenue,
       profit,
@@ -416,8 +413,8 @@ export default function Dashboard() {
         <StatsSection
           stats={[
             {
-              label: "Khách hàng mới",
-              value: stats.newCustomers,
+              label: "Tổng khách hàng",
+              value: stats.totalCustomers,
               color: "bg-blue-500",
               icon: <Users size={20} />,
             },

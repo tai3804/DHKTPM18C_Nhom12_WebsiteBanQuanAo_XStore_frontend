@@ -9,6 +9,7 @@ import {
 } from "../../slices/ProductSlice";
 import {
   createMultipleProductInfos,
+  createProductInfo,
   deleteProductInfo,
   updateProductInfo,
   getProductInfosByProductId,
@@ -30,6 +31,8 @@ export default function ProductForm({
   const { allProductVariants } = useSelector((state) => state.product);
   const isEdit = !!product;
   const modalRef = useRef(null);
+
+  console.log("ProductForm types:", types);
 
   const commonSizes = ["S", "M", "L", "XL", "XXL", "XXXL"];
 
@@ -129,12 +132,18 @@ export default function ProductForm({
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Set file ngay lập tức
+      setForm((prev) => ({
+        ...prev,
+        image: file,
+        imagePreview: "", // Tạm thời empty
+      }));
+
       // Tạo preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setForm((prev) => ({
           ...prev,
-          image: file,
           imagePreview: reader.result,
         }));
       };
@@ -185,6 +194,14 @@ export default function ProductForm({
       return;
     }
 
+    if (
+      !newProductInfo.colorHexCode.trim() ||
+      !/^#[0-9A-F]{6}$/i.test(newProductInfo.colorHexCode.trim())
+    ) {
+      toast.error("Vui lòng nhập mã màu hợp lệ (VD: #FF0000)!");
+      return;
+    }
+
     if (!newProductInfo.sizeName.trim()) {
       toast.error("Vui lòng nhập kích cỡ!");
       return;
@@ -207,6 +224,7 @@ export default function ProductForm({
     const infoToAdd = {
       ...newProductInfo,
       colorName: newProductInfo.colorName.trim(),
+      colorHexCode: newProductInfo.colorHexCode.trim(),
       sizeName: newProductInfo.sizeName.trim(),
     };
 
@@ -234,8 +252,20 @@ export default function ProductForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name.trim() || !form.type) {
-      toast.error("Vui lòng điền đầy đủ các trường bắt buộc!");
+    console.log("Form submit - form:", form);
+    console.log("isEdit:", isEdit);
+    console.log("productInfos:", productInfos);
+    console.log("form.type:", form.type, "parseInt:", parseInt(form.type));
+
+    // Validation
+    if (!form.name || form.name.trim() === "") {
+      toast.error("Vui lòng nhập tên sản phẩm!");
+      return;
+    }
+
+    if (!form.type || form.type === "") {
+      console.log("Validation failed for type:", form.type);
+      toast.error("Vui lòng chọn loại sản phẩm!");
       return;
     }
 
@@ -519,7 +549,10 @@ export default function ProductForm({
               name="type"
               value={form.type}
               onChange={handleChange}
-              options={types.map((t) => ({ value: t.id, label: t.name }))}
+              options={[
+                { value: "", label: "Chọn loại sản phẩm" },
+                ...types.map((t) => ({ value: t.id, label: t.name })),
+              ]}
               required
             />
             <FormInput
@@ -562,8 +595,8 @@ export default function ProductForm({
                   Thêm chi tiết mới
                 </h4>
 
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Variant Image */}
+                <div className="space-y-4">
+                  {/* Variant Image - Full width */}
                   <div>
                     <label
                       className={`block text-sm mb-2 font-medium ${
@@ -622,7 +655,7 @@ export default function ProductForm({
                     </div>
                   </div>
 
-                  {/* Color */}
+                  {/* Color - Full width */}
                   <div>
                     <label
                       className={`block text-sm mb-2 font-medium ${
@@ -649,6 +682,22 @@ export default function ProductForm({
                         }`}
                       />
                       <input
+                        type="text"
+                        value={newProductInfo.colorHexCode}
+                        onChange={(e) =>
+                          setNewProductInfo({
+                            ...newProductInfo,
+                            colorHexCode: e.target.value,
+                          })
+                        }
+                        placeholder="#000000"
+                        className={`px-3 py-2 border rounded-lg text-sm outline-none transition-all duration-300 w-24 ${
+                          themeMode === "dark"
+                            ? "bg-gray-600 border-gray-500 text-white placeholder-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+                            : "bg-white border-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-gray-300 focus:border-gray-300"
+                        }`}
+                      />
+                      <input
                         type="color"
                         value={newProductInfo.colorHexCode}
                         onChange={(e) =>
@@ -662,7 +711,7 @@ export default function ProductForm({
                     </div>
                   </div>
 
-                  {/* Size */}
+                  {/* Size - Full width */}
                   <div>
                     <label
                       className={`block text-sm mb-2 font-medium ${
@@ -865,6 +914,40 @@ export default function ProductForm({
                                       : "bg-white border-gray-300 text-gray-900"
                                   }`}
                                   placeholder="Tên màu"
+                                />
+                                <input
+                                  type="text"
+                                  value={colorGroup.colorHexCode}
+                                  onChange={(e) => {
+                                    const newColorHex = e.target.value;
+                                    // Validate hex code format
+                                    if (
+                                      /^#[0-9A-F]{6}$/i.test(newColorHex) ||
+                                      newColorHex === ""
+                                    ) {
+                                      const updatedInfos = productInfos.map(
+                                        (info) => {
+                                          const infoColorKey = `${info.colorName}-${info.colorHexCode}`;
+                                          if (
+                                            infoColorKey === colorGroup.groupId
+                                          ) {
+                                            return {
+                                              ...info,
+                                              colorHexCode: newColorHex,
+                                            };
+                                          }
+                                          return info;
+                                        }
+                                      );
+                                      setProductInfos(updatedInfos);
+                                    }
+                                  }}
+                                  className={`px-2 py-1 border rounded text-sm w-20 ${
+                                    themeMode === "dark"
+                                      ? "bg-gray-600 border-gray-500 text-white"
+                                      : "bg-white border-gray-300 text-gray-900"
+                                  }`}
+                                  placeholder="#000000"
                                 />
                                 <input
                                   type="color"

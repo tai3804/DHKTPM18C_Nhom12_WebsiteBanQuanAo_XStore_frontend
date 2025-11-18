@@ -8,7 +8,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye,
   Search,
   X,
 } from "lucide-react";
@@ -30,6 +29,7 @@ const StockItemsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [editingQuantity, setEditingQuantity] = useState(null);
   const [editQuantityValue, setEditQuantityValue] = useState("");
+  const [expandedRows, setExpandedRows] = useState(new Set());
 
   // Fetch stock info if not provided in state
   useEffect(() => {
@@ -111,9 +111,9 @@ const StockItemsPage = () => {
     setSelectedProduct(null);
   };
 
-  const handleEditQuantity = (stockItem) => {
-    setEditingQuantity(stockItem.id);
-    setEditQuantityValue(stockItem.quantity.toString());
+  const handleEditQuantity = (productInfo) => {
+    setEditingQuantity(productInfo.id);
+    setEditQuantityValue(productInfo.quantity.toString());
   };
 
   const handleCancelEditQuantity = () => {
@@ -121,7 +121,7 @@ const StockItemsPage = () => {
     setEditQuantityValue("");
   };
 
-  const handleSaveQuantity = async (stockItemId, productInfoId) => {
+  const handleSaveQuantity = async (productInfoId) => {
     try {
       const newQuantity = parseInt(editQuantityValue);
       if (isNaN(newQuantity) || newQuantity < 0) {
@@ -154,7 +154,7 @@ const StockItemsPage = () => {
   };
 
   const handleDeleteStockItem = async (productInfoId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này khỏi kho?")) {
+    if (!window.confirm("Bạn có chắc muốn xóa biến thể này khỏi kho?")) {
       return;
     }
 
@@ -171,14 +171,24 @@ const StockItemsPage = () => {
       );
 
       if (response.ok) {
-        toast.success("Xóa sản phẩm khỏi kho thành công");
+        toast.success("Xóa biến thể khỏi kho thành công");
         fetchStockItems();
       } else {
-        toast.error("Không thể xóa sản phẩm khỏi kho");
+        toast.error("Không thể xóa biến thể khỏi kho");
       }
     } catch (error) {
-      toast.error("Lỗi khi xóa sản phẩm khỏi kho");
+      toast.error("Lỗi khi xóa biến thể khỏi kho");
     }
+  };
+
+  const toggleExpanded = (productId) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId);
+    } else {
+      newExpanded.add(productId);
+    }
+    setExpandedRows(newExpanded);
   };
 
   if (loading && !stock) {
@@ -368,7 +378,7 @@ const StockItemsPage = () => {
               themeMode === "dark" ? "text-gray-100" : "text-gray-800"
             }`}
           >
-            {stockItems.reduce((sum, item) => sum + item.quantity, 0)}
+            {stockItems.reduce((sum, item) => sum + item.totalQuantity, 0)}
           </span>
         </div>
 
@@ -394,7 +404,7 @@ const StockItemsPage = () => {
               themeMode === "dark" ? "text-gray-100" : "text-gray-800"
             }`}
           >
-            {stockItems.filter((item) => item.quantity === 0).length}
+            {stockItems.filter((item) => item.totalQuantity === 0).length}
           </span>
         </div>
       </div>
@@ -449,14 +459,7 @@ const StockItemsPage = () => {
                   themeMode === "dark" ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Số lượng
-              </th>
-              <th
-                className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 text-right ${
-                  themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                Hành động
+                Số lượng tổng
               </th>
             </tr>
           </thead>
@@ -473,129 +476,166 @@ const StockItemsPage = () => {
                 </td>
               </tr>
             ) : stockItems.length > 0 ? (
-              stockItems.map((item) => (
-                <tr
-                  key={item.id}
-                  className={`border-b hover:transition cursor-pointer transition-colors duration-300 ${
-                    themeMode === "dark"
-                      ? "border-gray-700 hover:bg-gray-700"
-                      : "border-gray-100 hover:bg-gray-50"
-                  }`}
-                >
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+              stockItems.map((product) => (
+                <React.Fragment key={product.id}>
+                  <tr
+                    className={`border-b hover:transition cursor-pointer transition-colors duration-300 ${
+                      themeMode === "dark"
+                        ? "border-gray-700 hover:bg-gray-700"
+                        : "border-gray-100 hover:bg-gray-50"
                     }`}
+                    onClick={() => toggleExpanded(product.id)}
                   >
-                    {item.productInfo?.id}
-                  </td>
-                  <td className="px-4 py-3">
-                    <img
-                      src={
-                        item.productInfo?.image ||
-                        item.productInfo?.product?.image ||
-                        "/placeholder-image.jpg"
-                      }
-                      alt={item.productInfo?.product?.name}
-                      className="w-12 h-12 object-cover rounded-lg"
-                    />
-                  </td>
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    {item.productInfo?.product?.name} -{" "}
-                    {item.productInfo?.colorName} - {item.productInfo?.sizeName}
-                  </td>
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {item.productInfo?.product?.brand || "N/A"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {editingQuantity === item.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          value={editQuantityValue}
-                          onChange={(e) => setEditQuantityValue(e.target.value)}
-                          className={`w-20 px-2 py-1 border rounded transition-colors duration-300 ${
-                            themeMode === "dark"
-                              ? "border-gray-600 bg-gray-700 text-gray-100"
-                              : "border-gray-300 bg-white text-gray-900"
-                          }`}
-                        />
-                        <button
-                          onClick={() =>
-                            handleSaveQuantity(item.id, item.productInfo.id)
-                          }
-                          className="text-green-600 hover:text-green-800 transition cursor-pointer"
-                          title="Lưu"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={handleCancelEditQuantity}
-                          className="text-red-600 hover:text-red-800 transition cursor-pointer"
-                          title="Hủy"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        className={`transition-colors duration-300 ${
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {product.id}
+                    </td>
+                    <td className="px-4 py-3">
+                      <img
+                        src={product.image || "/placeholder-image.jpg"}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                    </td>
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {product.name}
+                    </td>
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      {product.brand || "N/A"}
+                    </td>
+                    <td
+                      className={`px-4 py-3 transition-colors duration-300 ${
+                        themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {product.totalQuantity}
+                    </td>
+                  </tr>
+                  {expandedRows.has(product.id) &&
+                    product.variants.map((variant) => (
+                      <tr
+                        key={variant.id}
+                        className={`border-b transition-colors duration-300 ${
                           themeMode === "dark"
-                            ? "text-gray-300"
-                            : "text-gray-700"
+                            ? "border-gray-700 bg-gray-800"
+                            : "border-gray-100 bg-gray-50"
                         }`}
                       >
-                        {item.quantity}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right space-x-2">
-                    <button
-                      onClick={() =>
-                        handleViewProductDetails(item.productInfo.product)
-                      }
-                      className={`transition-colors duration-300 ${
-                        themeMode === "dark"
-                          ? "text-blue-400 hover:text-blue-300"
-                          : "text-blue-600 hover:text-blue-800"
-                      }`}
-                      title="Xem chi tiết"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleEditQuantity(item)}
-                      className={`transition-colors duration-300 ${
-                        themeMode === "dark"
-                          ? "text-yellow-400 hover:text-yellow-300"
-                          : "text-yellow-600 hover:text-yellow-800"
-                      }`}
-                      title="Chỉnh sửa số lượng"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteStockItem(item.productInfo.id)}
-                      className={`transition-colors duration-300 ${
-                        themeMode === "dark"
-                          ? "text-red-400 hover:text-red-300"
-                          : "text-red-600 hover:text-red-800"
-                      }`}
-                      title="Xóa khỏi kho"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
+                        <td className="px-4 py-2 pl-8">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-4 h-4 rounded border"
+                              style={{ backgroundColor: variant.colorHexCode }}
+                            ></div>
+                            <span
+                              className={`text-sm transition-colors duration-300 ${
+                                themeMode === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {variant.colorName} - {variant.sizeName}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2">
+                          {variant.image && (
+                            <img
+                              src={variant.image}
+                              alt={`${variant.colorName} ${variant.sizeName}`}
+                              className="w-8 h-8 object-cover rounded"
+                            />
+                          )}
+                        </td>
+                        <td className="px-4 py-2"></td>
+                        <td className="px-4 py-2"></td>
+                        <td className="px-4 py-2">
+                          {editingQuantity === variant.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={editQuantityValue}
+                                onChange={(e) =>
+                                  setEditQuantityValue(e.target.value)
+                                }
+                                className={`w-20 px-2 py-1 border rounded transition-colors duration-300 ${
+                                  themeMode === "dark"
+                                    ? "border-gray-600 bg-gray-700 text-gray-100"
+                                    : "border-gray-300 bg-white text-gray-900"
+                                }`}
+                              />
+                              <button
+                                onClick={() => handleSaveQuantity(variant.id)}
+                                className="text-green-600 hover:text-green-800 transition cursor-pointer"
+                                title="Lưu"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={handleCancelEditQuantity}
+                                className="text-red-600 hover:text-red-800 transition cursor-pointer"
+                                title="Hủy"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <span
+                              className={`transition-colors duration-300 ${
+                                themeMode === "dark"
+                                  ? "text-gray-300"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {variant.quantity}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-right space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditQuantity(variant);
+                            }}
+                            className={`transition-colors duration-300 ${
+                              themeMode === "dark"
+                                ? "text-yellow-400 hover:text-yellow-300"
+                                : "text-yellow-600 hover:text-yellow-800"
+                            }`}
+                            title="Chỉnh sửa số lượng"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteStockItem(variant.id);
+                            }}
+                            className={`transition-colors duration-300 ${
+                              themeMode === "dark"
+                                ? "text-red-400 hover:text-red-300"
+                                : "text-red-600 hover:text-red-800"
+                            }`}
+                            title="Xóa khỏi kho"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </React.Fragment>
               ))
             ) : (
               <tr>
@@ -923,9 +963,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
           <div>
             <h4 className="text-lg font-medium mb-4">Biến thể sản phẩm</h4>
 
-            {product.productInfos && product.productInfos.length > 0 ? (
+            {product.variants && product.variants.length > 0 ? (
               <div className="space-y-4">
-                {product.productInfos.map((info) => (
+                {product.variants.map((info) => (
                   <div
                     key={info.id}
                     className={`p-4 rounded-lg border transition-colors duration-300 ${
@@ -973,7 +1013,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
 
                       <div className="col-span-2">
                         <span className="font-medium text-gray-500 dark:text-gray-400">
-                          Số lượng trong kho hiện tại:
+                          Số lượng trong kho:
                         </span>
                         <p
                           className={`mt-1 transition-colors duration-300 ${
@@ -982,7 +1022,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
                               : "text-gray-800"
                           }`}
                         >
-                          Quản lý trong phần kho hàng
+                          {info.quantity}
                         </p>
                       </div>
 

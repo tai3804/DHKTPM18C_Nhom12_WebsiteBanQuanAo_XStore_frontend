@@ -283,9 +283,11 @@ export default function AdminLayout() {
             <NavLink
               to="/admin/stocks"
               className={({ isActive }) =>
-                `flex items-center  gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-gray-900 text-white shadow-sm"
+                    : themeMode === "dark"
+                    ? "hover:bg-gray-700"
                     : "hover:bg-gray-100"
                 }`
               }
@@ -366,7 +368,7 @@ export default function AdminLayout() {
             <NavLink
               to="/admin/chat"
               className={({ isActive }) =>
-                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                `flex flex-1 h-full items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-gray-900 text-white shadow-sm"
                     : themeMode === "dark"

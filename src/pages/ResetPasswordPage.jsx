@@ -66,11 +66,11 @@ export default function ResetPasswordPage() {
   return (
     <div
       className={`min-h-screen flex flex-col transition-colors duration-300 ${
-        isDark ? "bg-gray-900 text-gray-100" : "bg-gradient-to-b from-white to-gray-50 text-gray-900"
+        isDark ? "bg-gray-900 text-gray-100" : " from-white to-gray-50 text-gray-900"
       }`}
     >
       <Header />
-      <div className="flex-grow container mx-auto p-4 py-12 max-w-md">
+      <div className=" container mx-auto p-4 py-12 max-w-md">
         <div
           className={`p-6 rounded-lg shadow-lg border transition-colors duration-300 ${
             isDark

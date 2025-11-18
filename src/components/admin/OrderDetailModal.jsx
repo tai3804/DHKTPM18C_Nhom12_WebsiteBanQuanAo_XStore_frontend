@@ -1,4 +1,3 @@
-import React from "react";
 import { X } from "lucide-react";
 
 const OrderDetailModal = ({ order, onClose }) => {
@@ -25,7 +24,7 @@ const OrderDetailModal = ({ order, onClose }) => {
   } = order;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 rounded-xl w-[90%] max-w-4xl p-6 relative overflow-y-auto max-h-[90vh] shadow-xl">
         {/* Close button */}
         <button

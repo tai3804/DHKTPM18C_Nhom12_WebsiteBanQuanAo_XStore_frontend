@@ -19,6 +19,7 @@ const ChatManagement = () => {
   );
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     // Preload chat data
@@ -38,6 +39,8 @@ const ChatManagement = () => {
     if (selectedChatRoom) {
       dispatch(getChatHistory(selectedChatRoom.id));
       dispatch(markChatRoomAsRead(selectedChatRoom.id));
+      // Focus input when selecting a chat room
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [dispatch, selectedChatRoom]);
 
@@ -61,6 +64,8 @@ const ChatManagement = () => {
         })
       );
       setMessage("");
+      // Focus back to input for next message
+      inputRef.current?.focus();
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -94,16 +99,10 @@ const ChatManagement = () => {
     : [];
 
   return (
-    <div
-      className={`flex h-full overflow-hidden ${
-        themeMode === "dark"
-          ? "bg-gray-900 text-gray-100"
-          : "bg-gray-50 text-gray-900"
-      }`}
-    >
+    <div className="flex max-h-[92vh] rounded-4xl">
       {/* Chat Rooms List */}
       <div
-        className={`w-1/3 border-r flex flex-col h-full ${
+        className={`hidden md:flex w-1/3 min-w-[300px] border-r flex-col ${
           themeMode === "dark"
             ? "border-gray-700 bg-gray-800"
             : "border-gray-200 bg-white"
@@ -167,7 +166,7 @@ const ChatManagement = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 md:flex-1 flex flex-col">
         {selectedChatRoom ? (
           <>
             {/* Chat Header */}
@@ -188,9 +187,14 @@ const ChatManagement = () => {
 
             {/* Messages */}
             <div
-              className={`flex-1 max-h-[calc(100vh-13rem)] overflow-y-scroll p-4 space-y-4 min-h-0 ${
+              className={`flex-1 overflow-y-auto p-4 space-y-4 min-h-0 ${
                 themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"
               }`}
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor:
+                  themeMode === "dark" ? "#4B5563 #1F2937" : "#9CA3AF #E5E7EB",
+              }}
             >
               {currentHistory.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">
@@ -254,6 +258,7 @@ const ChatManagement = () => {
             >
               <form onSubmit={handleSendMessage} className="flex gap-2">
                 <input
+                  ref={inputRef}
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -267,10 +272,10 @@ const ChatManagement = () => {
                 <button
                   type="submit"
                   disabled={!message.trim()}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                 >
                   <Send size={16} />
-                  Gửi
+                  <span className="hidden sm:inline">Gửi</span>
                 </button>
               </form>
             </div>
