@@ -64,7 +64,7 @@ export const logoutUser = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (
-    { firstName, lastName, dob, username, password, email },
+    { firstName, lastName, dob, username, password, email, phone },
     { dispatch, rejectWithValue }
   ) => {
     dispatch(startLoading());
@@ -80,6 +80,7 @@ export const registerUser = createAsyncThunk(
           username,
           password,
           email: email || null,
+          phone: phone || null,
         }),
       });
       if (!res.ok) {

@@ -150,12 +150,14 @@ export default function ProductDetailPage() {
 
     try {
       const token = localStorage.getItem("token");
+      const headers = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const response = await fetch(
         `${API_BASE_URL}/api/stocks/products/${product.id}/total-quantities`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
         }
       );
 
@@ -173,12 +175,14 @@ export default function ProductDetailPage() {
 
     try {
       const token = localStorage.getItem("token");
+      const headers = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const response = await fetch(
         `${API_BASE_URL}/api/stocks/${selectedStock.id}/items`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
         }
       );
 
