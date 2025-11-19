@@ -1,0 +1,8 @@
+{
+    "route": [
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ]
+}
