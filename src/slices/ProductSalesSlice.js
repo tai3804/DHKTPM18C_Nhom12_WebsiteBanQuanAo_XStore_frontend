@@ -20,11 +20,15 @@ export const getProductSales = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/product-sales`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        headers,
       });
       if (!res.ok) throw new Error(Errors.PRODUCT_SALES_FETCH_FAILED || "Lỗi khi lấy danh sách giảm giá sản phẩm");
 
@@ -48,11 +52,15 @@ export const getProductSalesById = createAsyncThunk(
     try {
       const token = getState().auth.token;
 
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/product-sales/${productId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        headers,
       });
       if (!res.ok) throw new Error(Errors.PRODUCT_SALES_FETCH_FAILED || "Lỗi khi lấy giảm giá sản phẩm");
 

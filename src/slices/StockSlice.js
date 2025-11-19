@@ -22,12 +22,15 @@ export const getStocks = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth.token;
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
       const res = await fetch(`${API_BASE_URL}/api/stocks`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
       });
       if (!res.ok) throw new Error(Errors.STOCK_FETCH_FAILED);
       const json = await res.json();
