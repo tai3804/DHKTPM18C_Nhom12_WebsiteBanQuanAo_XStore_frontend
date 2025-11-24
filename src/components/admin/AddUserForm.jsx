@@ -73,120 +73,130 @@ export default function AddUserForm({
           Tạo người dùng mới
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Account Info */}
-          <div className="grid grid-cols-1 gap-3">
-            <FormInput
-              label="Tên đăng nhập"
-              name="username"
-              value={formData.account.username}
-              onChange={handleAccountChange}
-              placeholder="Tên đăng nhập"
-              required
-              className="cursor-text"
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="max-h-[60vh] flex flex-col">
+            <div className="flex-1 overflow-y-auto pr-2">
+              <div className="space-y-5">
+                {/* Account Info */}
+                <div className="grid grid-cols-1 gap-3">
+                  <FormInput
+                    label="Tên đăng nhập"
+                    name="username"
+                    value={formData.account.username}
+                    onChange={handleAccountChange}
+                    placeholder="Tên đăng nhập"
+                    required
+                    className="cursor-text"
+                  />
 
-            <FormInput
-              label="Mật khẩu"
-              type="password"
-              name="password"
-              value={formData.account.password}
-              onChange={handleAccountChange}
-              placeholder="Mật khẩu"
-              required
-              className="cursor-text"
-            />
+                  <FormInput
+                    label="Mật khẩu"
+                    type="password"
+                    name="password"
+                    value={formData.account.password}
+                    onChange={handleAccountChange}
+                    placeholder="Mật khẩu"
+                    required
+                    className="cursor-text"
+                  />
 
-            <FormSelect
-              label="Vai trò"
-              name="role"
-              value={formData.account.role}
-              onChange={handleAccountChange}
-              required
-              className="cursor-pointer"
-              options={[
-                { value: "", label: "Chọn vai trò", disabled: true },
-                { value: "CUSTOMER", label: "Khách hàng" },
-                { value: "ADMIN", label: "Quản trị viên" },
-              ]}
-            />
+                  <FormSelect
+                    label="Vai trò"
+                    name="role"
+                    value={formData.account.role}
+                    onChange={handleAccountChange}
+                    required
+                    className="cursor-pointer"
+                    options={[
+                      { value: "", label: "Chọn vai trò", disabled: true },
+                      { value: "CUSTOMER", label: "Khách hàng" },
+                      { value: "ADMIN", label: "Quản trị viên" },
+                    ]}
+                  />
 
-            <FormSelect
-              label="Loại người dùng"
-              name="userType"
-              value={formData.userType}
-              onChange={handleChange}
-              className="cursor-pointer"
-              options={[
-                { value: "", label: "Chọn loại người dùng", disabled: true },
-                { value: "COPPER", label: "Đồng" },
-                { value: "SILVER", label: "Bạc" },
-                { value: "GOLD", label: "Vàng" },
-                { value: "PLATINUM", label: "Bạch kim" },
-              ]}
-            />
-          </div>
+                  <FormSelect
+                    label="Loại người dùng"
+                    name="userType"
+                    value={formData.userType}
+                    onChange={handleChange}
+                    className="cursor-pointer"
+                    options={[
+                      {
+                        value: "",
+                        label: "Chọn loại người dùng",
+                        disabled: true,
+                      },
+                      { value: "COPPER", label: "Đồng" },
+                      { value: "SILVER", label: "Bạc" },
+                      { value: "GOLD", label: "Vàng" },
+                      { value: "PLATINUM", label: "Bạch kim" },
+                    ]}
+                  />
+                </div>
 
-          {/* Personal Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormInput
-              label="Họ"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              placeholder="Họ"
-              required
-              className="cursor-text"
-            />
-            <FormInput
-              label="Tên"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              placeholder="Tên"
-              required
-              className="cursor-text"
-            />
-          </div>
+                {/* Personal Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="Họ"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Họ"
+                    required
+                    className="cursor-text"
+                  />
+                  <FormInput
+                    label="Tên"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Tên"
+                    required
+                    className="cursor-text"
+                  />
+                </div>
 
-          <FormInput
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Email"
-            className="cursor-text"
-          />
+                <FormInput
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  className="cursor-text"
+                />
 
-          <FormInput
-            label="Ngày sinh"
-            name="dob"
-            type="date"
-            value={formData.dob}
-            onChange={handleChange}
-            className="cursor-pointer"
-          />
+                <FormInput
+                  label="Ngày sinh"
+                  name="dob"
+                  type="date"
+                  value={formData.dob}
+                  onChange={handleChange}
+                  className="cursor-pointer"
+                />
+              </div>
+            </div>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className={`px-5 py-2 rounded-lg border transition cursor-pointer ${
-                themeMode === "dark"
-                  ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer font-medium"
-            >
-              Thêm mới
-            </button>
+            {/* Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className={`px-5 py-2 rounded-lg border transition cursor-pointer ${
+                  themeMode === "dark"
+                    ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                    : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition cursor-pointer font-medium"
+              >
+                Thêm mới
+              </button>
+            </div>
           </div>
         </form>
       </div>

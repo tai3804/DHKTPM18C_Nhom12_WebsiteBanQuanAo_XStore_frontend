@@ -125,7 +125,7 @@ export default function AdminLayout() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+      className={`min-h-screen flex flex-col transition-colors duration-300 overflow-hidden ${
         themeMode === "dark"
           ? "bg-gray-900 text-gray-100"
           : "bg-gray-50 text-gray-900"
@@ -385,7 +385,7 @@ export default function AdminLayout() {
 
         {/* Nội dung chính */}
         <main
-          className={`flex-1 h-full ${
+          className={`flex-1 h-full overflow-hidden ${
             isChatPage ? "" : "p-8"
           } transition-colors duration-300 ${
             themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"

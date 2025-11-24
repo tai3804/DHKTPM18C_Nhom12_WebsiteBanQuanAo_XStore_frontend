@@ -1,21 +1,39 @@
-import { useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useState, useMemo, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import ProductCard from "../components/product/ProductCard";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import { getProductSales } from "../slices/ProductSalesSlice";
 
 export default function SalePage() {
+  const dispatch = useDispatch();
   const allProducts = useSelector((state) => state.product.products) || [];
+  const productSales =
+    useSelector((state) => state.productSales.productSales) || [];
   const themeMode = useSelector(selectThemeMode);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
 
-  // Lấy sản phẩm sale (có isSale = true)
+  useEffect(() => {
+    // Fetch product sales khi component mount
+    dispatch(getProductSales());
+  }, [dispatch]);
+
+  // Lấy sản phẩm sale đang active (dựa trên productSales và ngày hiện tại)
   const saleProducts = useMemo(() => {
+    const now = new Date();
+    const activeSales = productSales.filter((sale) => {
+      const startDate = new Date(sale.startDate);
+      const endDate = new Date(sale.endDate);
+      return now >= startDate && now <= endDate;
+    });
+
+    // Lấy danh sách product từ active sales
+    const saleProductIds = new Set(activeSales.map((sale) => sale.product.id));
     return allProducts
-      .filter((product) => product.isSale)
+      .filter((product) => saleProductIds.has(product.id))
       .sort((a, b) => b.id - a.id);
-  }, [allProducts]);
+  }, [allProducts, productSales]);
 
   // Tính toán phân trang
   const totalPages = Math.ceil(saleProducts.length / productsPerPage);

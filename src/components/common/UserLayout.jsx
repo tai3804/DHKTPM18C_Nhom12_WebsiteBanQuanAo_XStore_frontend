@@ -38,7 +38,7 @@ export default function UserLayout() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+      className={`min-h-screen flex flex-col transition-colors duration-300 overflow-hidden ${
         themeMode === "dark"
           ? "bg-gray-900 text-gray-100"
           : "bg-gray-50 text-gray-900"
@@ -56,7 +56,7 @@ export default function UserLayout() {
         )}
 
         {/* Nội dung chính */}
-        <main className="flex-1">
+        <main className="flex-1 overflow-hidden">
           <Outlet />
         </main>
       </div>

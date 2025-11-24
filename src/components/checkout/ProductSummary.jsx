@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { selectThemeMode } from "../../slices/ThemeSlice";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const ProductSummary = ({ cartItems }) => {
   const themeMode = useSelector(selectThemeMode);
@@ -73,7 +74,7 @@ const ProductSummary = ({ cartItems }) => {
             }`}
           >
             <img
-              src={item.product?.image || "/placeholder-image.jpg"}
+              src={getImageUrl(item.product?.image) || "/placeholder-image.jpg"}
               alt={item.product?.name || "Sản phẩm"}
               className="w-24 h-24 object-contain rounded"
               onError={(e) => {

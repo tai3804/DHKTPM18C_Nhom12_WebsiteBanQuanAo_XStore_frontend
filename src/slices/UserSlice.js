@@ -172,9 +172,11 @@ export const createUser = createAsyncThunk(
 // UPDATE USER
 export const updateUser = createAsyncThunk(
   "user/updateUser",
-  async ({ id, userData, token }, { dispatch, rejectWithValue }) => {
+  async ({ id, userData }, { dispatch, getState, rejectWithValue }) => {
     dispatch(startLoading());
     dispatch(clearError());
+
+    const token = getState().auth.token;
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
@@ -308,9 +310,9 @@ const userSlice = createSlice({
 
       // Cập nhật user
       .addCase(updateUser.fulfilled, (state, action) => {
-        const index = state.users.findIndex((u) => u.id === action.payload.id);
+        const index = state.users.findIndex((u) => u.id === action.meta.arg.id);
         if (index !== -1) {
-          state.users[index] = action.payload;
+          state.users[index] = { ...state.users[index], ...action.payload };
         }
       })
 

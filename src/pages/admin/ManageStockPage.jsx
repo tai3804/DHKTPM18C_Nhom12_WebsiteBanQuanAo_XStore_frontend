@@ -77,7 +77,9 @@ const ManageStockPage = () => {
     if (!q) return true;
     const haystack = `${s.name || ""} ${s.code || s.sku || ""} ${
       s.location || ""
-    } ${s.description || ""} ${s.id || ""}`.toLowerCase();
+    } ${s.description || ""} ${s.id || ""} ${
+      s.address?.fullAddress || ""
+    }`.toLowerCase();
     return haystack.includes(q);
   });
 
@@ -176,25 +178,30 @@ const ManageStockPage = () => {
             }`}
           >
             <tr>
-              {["ID", "Tên kho", "Email", "Điện thoại", "Hành động"].map(
-                (th) => (
-                  <th
-                    key={th}
-                    className={`px-4 py-3 text-sm font-semibold ${
-                      themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                    } ${th === "Hành động" ? "text-right" : ""}`}
-                  >
-                    {th}
-                  </th>
-                )
-              )}
+              {[
+                "ID",
+                "Tên kho",
+                "Email",
+                "Điện thoại",
+                "Địa chỉ",
+                "Hành động",
+              ].map((th) => (
+                <th
+                  key={th}
+                  className={`px-4 py-3 text-sm font-semibold ${
+                    themeMode === "dark" ? "text-gray-300" : "text-gray-600"
+                  } ${th === "Hành động" ? "text-right" : ""}`}
+                >
+                  {th}
+                </th>
+              ))}
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5" className="py-6 text-center text-gray-500">
+                <td colSpan="6" className="py-6 text-center text-gray-500">
                   Đang tải danh sách kho...
                 </td>
               </tr>
@@ -213,6 +220,9 @@ const ManageStockPage = () => {
                   <td className="px-4 py-3">{stock.name}</td>
                   <td className="px-4 py-3">{stock.email}</td>
                   <td className="px-4 py-3">{stock.phone}</td>
+                  <td className="px-4 py-3">
+                    {stock.address?.fullAddress || "N/A"}
+                  </td>
 
                   <td className="px-4 py-3 text-right space-x-2">
                     <button
@@ -247,7 +257,7 @@ const ManageStockPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="py-6 text-center text-gray-500">
+                <td colSpan="6" className="py-6 text-center text-gray-500">
                   Không có kho hàng nào
                 </td>
               </tr>

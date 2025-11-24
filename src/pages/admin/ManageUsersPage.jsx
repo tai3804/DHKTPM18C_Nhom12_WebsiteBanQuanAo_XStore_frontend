@@ -52,15 +52,8 @@ export default function ManageUsersPage() {
   });
   const [editFormData, setEditFormData] = useState({
     account: {
-      username: "",
       role: "CUSTOMER",
     },
-    email: "",
-    firstName: "",
-    lastName: "",
-    dob: "",
-    phone: "",
-    city: "",
     point: 0,
     userType: "COPPER",
   });
@@ -114,15 +107,8 @@ export default function ManageUsersPage() {
     setEditingUser(user);
     setEditFormData({
       account: {
-        username: user.account?.username || "",
         role: user.account?.role || "CUSTOMER",
       },
-      email: user.email || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      dob: user.dob ? user.dob.split("T")[0] : "", // Format date for input
-      phone: user.phone || "",
-      city: user.city || "",
       point: user.point || 0,
       userType: user.userType || "COPPER",
     });
@@ -139,12 +125,42 @@ export default function ManageUsersPage() {
     }
   };
 
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+
+    console.log("Form data being sent for update:", editFormData); // Debug log
+
+    try {
+      await dispatch(
+        updateUser({ id: editingUser.id, userData: editFormData })
+      ).unwrap();
+      toast.success("Cập nhật người dùng thành công!");
+      setShowEditForm(false);
+      dispatch(getUsers());
+    } catch (err) {
+      console.error("Error updating user:", err); // Debug log
+      toast.error(err);
+    }
+  };
+
   // ✅ Update các field cho edit form
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // ✅ Update các field trong account cho edit form
+  const handleEditAccountChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      account: {
+        ...prev.account,
+        [name]: value,
+      },
     }));
   };
 

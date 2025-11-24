@@ -9,6 +9,7 @@ import {
   clearCart,
 } from "../slices/CartSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import { getImageUrl } from "../utils/imageUrl";
 
 export default function CartPage() {
   const dispatch = useDispatch();
@@ -221,7 +222,10 @@ export default function CartPage() {
                 }`}
               >
                 <img
-                  src={item.product?.image || "https://via.placeholder.com/150"}
+                  src={
+                    getImageUrl(item.product?.image) ||
+                    "https://via.placeholder.com/150"
+                  }
                   alt={item.product?.name}
                   className="w-24 h-24 object-contain rounded"
                 />

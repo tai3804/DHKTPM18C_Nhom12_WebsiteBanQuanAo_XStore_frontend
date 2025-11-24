@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,6 +16,35 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
+  const [hasCancelRequest, setHasCancelRequest] = useState(false);
+  const [hasReturnRequest, setHasReturnRequest] = useState(false);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/requests?orderId=${order.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const requests = data.result || [];
+          const cancelRequest = requests.find((req) => req.type === "CANCEL");
+          const returnRequest = requests.find((req) => req.type === "RETURN");
+          setHasCancelRequest(!!cancelRequest);
+          setHasReturnRequest(!!returnRequest);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải requests:", error);
+      }
+    };
+
+    fetchRequests();
+  }, [order.id]);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -92,10 +121,24 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
 
       if (response.ok) {
         toast.success("Yêu cầu hủy đơn đã được gửi!");
+        setHasCancelRequest(true);
+        // Refresh orders list
+        window.location.reload();
       } else {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        const errorText = await response.text();
+        console.error(
+          "Lỗi khi gửi yêu cầu hủy đơn:",
+          response.status,
+          errorText
+        );
+        toast.error(
+          `Có lỗi xảy ra: ${response.status} - ${
+            errorText || "Vui lòng thử lại."
+          }`
+        );
       }
     } catch (error) {
+      console.error("Lỗi network:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
@@ -122,10 +165,24 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
 
       if (response.ok) {
         toast.success("Yêu cầu đổi/trả đã được gửi!");
+        setHasReturnRequest(true);
+        // Refresh orders list
+        window.location.reload();
       } else {
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+        const errorText = await response.text();
+        console.error(
+          "Lỗi khi gửi yêu cầu đổi/trả:",
+          response.status,
+          errorText
+        );
+        toast.error(
+          `Có lỗi xảy ra: ${response.status} - ${
+            errorText || "Vui lòng thử lại."
+          }`
+        );
       }
     } catch (error) {
+      console.error("Lỗi network:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
@@ -213,26 +270,34 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
       </div>
 
       {/* Dòng 4: nút action */}
-      <div className="px-4 py-3 flex justify-between items-center">
-        <div>
+      <div className="px-4 py-3 flex justify-end items-center">
+        <div className="flex items-center gap-3">
           {(order.status === "PENDING" || order.status === "CONFIRMED") && (
             <button
               onClick={() => setShowCancelModal(true)}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+              disabled={hasCancelRequest}
+              className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                hasCancelRequest
+                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  : "bg-red-600 text-white hover:bg-red-700"
+              }`}
             >
-              Yêu cầu hủy đơn
+              {hasCancelRequest ? "Đã gửi yêu cầu hủy" : "Yêu cầu hủy đơn"}
             </button>
           )}
           {order.status === "DELIVERED" && (
             <button
               onClick={() => setShowReturnModal(true)}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+              disabled={hasReturnRequest}
+              className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                hasReturnRequest
+                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  : "bg-orange-600 text-white hover:bg-orange-700"
+              }`}
             >
-              Yêu cầu đổi/trả
+              {hasReturnRequest ? "Đã gửi yêu cầu đổi/trả" : "Yêu cầu đổi/trả"}
             </button>
           )}
-        </div>
-        <div>
           {actionType === "detail" && (
             <a
               href="#"

@@ -166,21 +166,21 @@ const ChatbotStaff = () => {
       {/* Chat Bubble */}
       {!isOpen && (
         <div
-          className={`fixed bottom-24 right-6 rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110 z-50 ${
+          className={`fixed bottom-6 right-6 rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:scale-110 z-50 ${
             themeMode === "dark"
               ? "bg-green-600 hover:bg-green-700"
               : "bg-green-600 hover:bg-green-700"
           } text-white`}
           onClick={() => setIsOpen(true)}
         >
-          <UserIcon size={24} />
+          <MessageCircle size={24} />
         </div>
       )}
 
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-24 right-6 w-96 h-[500px] rounded-lg shadow-2xl z-50 flex flex-col transition-colors duration-300 ${
+          className={`fixed bottom-6 right-6 w-96 h-[500px] rounded-lg shadow-2xl z-50 flex flex-col transition-colors duration-300 ${
             themeMode === "dark"
               ? "bg-gray-800 border-gray-700"
               : "bg-white border-gray-200"

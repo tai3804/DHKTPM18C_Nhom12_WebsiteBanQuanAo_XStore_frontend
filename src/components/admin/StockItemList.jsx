@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 
 import { getStockItems, deleteStockItem } from "../../slices/StockSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
+import { getImageUrl } from "../../utils/imageUrl";
 import SearchBar from "../../components/admin/SearchBar";
 
 export default function StockItemList() {
@@ -174,7 +175,7 @@ export default function StockItemList() {
                     <td className="px-4 py-3">
                       {p.image && (
                         <img
-                          src={p.image}
+                          src={getImageUrl(p.image)}
                           alt={p.name}
                           className="w-12 h-12 object-cover rounded"
                         />
