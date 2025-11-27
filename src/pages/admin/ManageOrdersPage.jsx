@@ -122,14 +122,18 @@ const ManageOrdersPage = () => {
 
   const statusOptions = [
     { value: "PENDING", label: "Chờ xác nhận" },
+    { value: "AWAITING_PAYMENT", label: "Chờ thanh toán" },
     { value: "CONFIRMED", label: "Đã xác nhận" },
     { value: "IN_TRANSIT", label: "Đang giao hàng" },
     { value: "DELIVERED", label: "Đã giao" },
     { value: "CANCELLED", label: "Đã hủy" },
   ];
 
-  // Filter theo search query
+  // Filter theo search query và ẩn đơn đã giao
   const filteredOrders = orders.filter((o) => {
+    // Ẩn đơn hàng đã giao
+    if (o.status === "DELIVERED") return false;
+
     const q = (searchQuery || "").trim().toLowerCase();
     return (
       o.user?.account?.username?.toLowerCase().includes(q) ||

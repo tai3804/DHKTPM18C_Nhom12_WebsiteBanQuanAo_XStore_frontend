@@ -53,7 +53,11 @@ export default function CheckoutPage() {
 
   // Load ship infos from API
   const loadShipInfos = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log("loadShipInfos: No user ID");
+      return;
+    }
+    console.log("Loading ship infos for user:", user.id);
     setLoadingShipInfos(true);
     try {
       const response = await fetch(
@@ -64,17 +68,24 @@ export default function CheckoutPage() {
           },
         }
       );
+      console.log("Ship infos response status:", response.status);
       const data = await response.json();
+      console.log("Ship infos data:", data);
 
       if (data.code === 200 && data.result) {
         const shipInfoList = Array.isArray(data.result) ? data.result : [];
+        console.log("Setting ship infos:", shipInfoList);
         setShipInfos(shipInfoList);
 
         // Auto-select first ship info or default
         if (shipInfoList.length > 0) {
           const defaultShipInfo = shipInfoList.find((s) => s.isDefault);
-          setSelectedShipInfoId(defaultShipInfo?.id || shipInfoList[0].id);
+          const selectedId = defaultShipInfo?.id || shipInfoList[0].id;
+          console.log("Auto-selecting ship info:", selectedId);
+          setSelectedShipInfoId(selectedId);
         }
+      } else {
+        console.log("Failed to load ship infos:", data.message);
       }
     } catch (err) {
       console.error("Error loading ship infos:", err);
@@ -118,33 +129,54 @@ export default function CheckoutPage() {
 
   // Validate checkout data
   const validateCheckout = () => {
+    console.log("Validating checkout...");
+    console.log("selectedShipInfoId:", selectedShipInfoId);
+    console.log("selectedPaymentMethod:", selectedPaymentMethod);
+    console.log("cart:", cart);
+
     if (!selectedShipInfoId) {
+      console.log("Validation failed: No ship info selected");
       toast.error("Vui lòng chọn địa chỉ giao hàng");
       return false;
     }
     const selectedShipInfo = shipInfos.find((s) => s.id === selectedShipInfoId);
+    console.log("Found selectedShipInfo:", selectedShipInfo);
     if (!selectedShipInfo?.recipientName) {
+      console.log("Validation failed: No recipient name");
       toast.error("Địa chỉ giao hàng phải có tên người nhận");
       return false;
     }
     if (!selectedShipInfo?.recipientPhone) {
+      console.log("Validation failed: No recipient phone");
       toast.error("Địa chỉ giao hàng phải có số điện thoại người nhận");
       return false;
     }
     if (!selectedPaymentMethod) {
+      console.log("Validation failed: No payment method");
       toast.error("Vui lòng chọn phương thức thanh toán");
       return false;
     }
     if (!cart || cart.cartItems?.length === 0) {
+      console.log("Validation failed: Empty cart");
       toast.error("Giỏ hàng trống");
       return false;
     }
+    console.log("Validation passed");
     return true;
   };
 
   // Handle checkout submission
   const handleCheckout = async () => {
-    if (!validateCheckout()) return;
+    console.log("=== STARTING CHECKOUT ===");
+    console.log("Selected payment method:", selectedPaymentMethod);
+    console.log("Selected ship info ID:", selectedShipInfoId);
+    console.log("User:", user);
+    console.log("Cart:", cart);
+
+    if (!validateCheckout()) {
+      console.log("Checkout validation failed");
+      return;
+    }
 
     setLoading(true);
 
@@ -152,6 +184,7 @@ export default function CheckoutPage() {
       const selectedShipInfo = shipInfos.find(
         (s) => s.id === selectedShipInfoId
       );
+      console.log("Selected ship info:", selectedShipInfo);
 
       const checkoutRequest = {
         userId: user.id,
@@ -188,6 +221,13 @@ export default function CheckoutPage() {
         shippingDiscountId: selectedShippingDiscount?.id || null,
       };
 
+      console.log("Checkout request:", checkoutRequest);
+      console.log("API_BASE_URL:", API_BASE_URL);
+      console.log(
+        "Token:",
+        localStorage.getItem("token") ? "Present" : "Missing"
+      );
+
       const response = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
         method: "POST",
         headers: {
@@ -197,7 +237,9 @@ export default function CheckoutPage() {
         body: JSON.stringify(checkoutRequest),
       });
 
+      console.log("Checkout response status:", response.status);
       const data = await response.json();
+      console.log("Checkout response data:", data);
 
       if (data.code === 200 || response.ok) {
         toast.success("✓ Đặt hàng thành công!");
@@ -205,14 +247,77 @@ export default function CheckoutPage() {
         // Clear cart after successful order
         dispatch(getCartByUser(user.id));
 
-        // Navigate to order confirmation or orders page
-        setTimeout(() => {
-          if (data.result?.id) {
-            navigate(`/order-confirmation/${data.result.id}`);
-          } else {
-            navigate(`/orders`);
+        // If payment method is VNPAY, create payment URL and redirect
+        if (selectedPaymentMethod === "VNPAY") {
+          if (!data.result || !data.result.id) {
+            toast.error("Không thể lấy thông tin đơn hàng");
+            navigate("/orders");
+            return;
           }
-        }, 1000);
+          try {
+            const order = data.result;
+            console.log("Creating VNPay payment for order:", order);
+            const paymentRequest = {
+              vnp_OrderInfo: `Thanh toán đơn hàng ${order.id}`,
+              amount: order.total,
+              ordertype: "billpayment",
+              bankcode: "",
+              language: "vn",
+              txt_billing_fullname:
+                selectedShipInfo?.recipientName ||
+                user?.name ||
+                user?.email ||
+                "Customer",
+              txt_billing_mobile:
+                selectedShipInfo?.recipientPhone || user?.phone || "0123456789",
+              txt_billing_email: user?.email || "customer@example.com",
+            };
+            console.log("Payment request:", paymentRequest);
+
+            const paymentResponse = await fetch(
+              `${API_BASE_URL}/api/payment/create`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify(paymentRequest),
+              }
+            );
+
+            const paymentData = await paymentResponse.json();
+            console.log("Payment response:", paymentData);
+
+            if (paymentData.code === "00") {
+              toast.info("Đang chuyển hướng đến VNPay...");
+              setTimeout(() => {
+                window.open(paymentData.data, "_blank");
+                navigate(`/order-confirmation/${order.id}`);
+              }, 1000);
+            } else {
+              toast.error(paymentData.message || "Lỗi tạo thanh toán VNPay");
+              navigate(`/order-confirmation/${order.id}`);
+            }
+          } catch (err) {
+            console.error("VNPay payment error:", err);
+            toast.error("Lỗi thanh toán VNPay: " + err.message);
+            if (data.result?.id) {
+              navigate(`/order-confirmation/${data.result.id}`);
+            } else {
+              navigate("/orders");
+            }
+          }
+        } else {
+          // Navigate to order confirmation for CASH payment
+          setTimeout(() => {
+            if (data.result?.id) {
+              navigate(`/order-confirmation/${data.result.id}`);
+            } else {
+              navigate(`/orders`);
+            }
+          }, 1000);
+        }
       } else {
         toast.error(data.message || "Lỗi tạo đơn hàng");
       }

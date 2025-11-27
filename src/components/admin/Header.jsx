@@ -12,7 +12,7 @@ export default function Header() {
   const navigate = useNavigate();
   return (
     <header
-      className={`border-b flex items-center justify-between px-8 py-3 w-full h-16 transition-colors duration-300 ${
+      className={`border-b flex items-center justify-between px-8 py-3 w-full h-16 fixed top-0 z-50 transition-colors duration-300 ${
         themeMode === "dark"
           ? "bg-gray-800 border-gray-700"
           : "bg-white border-gray-200"

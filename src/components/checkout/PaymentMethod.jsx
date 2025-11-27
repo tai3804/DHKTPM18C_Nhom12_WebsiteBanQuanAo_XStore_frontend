@@ -14,7 +14,7 @@ const PaymentMethod = ({ selectedMethod, onSelectMethod }) => {
     {
       id: "VNPAY",
       name: "VNPay",
-      available: false,
+      available: true,
     },
   ];
 

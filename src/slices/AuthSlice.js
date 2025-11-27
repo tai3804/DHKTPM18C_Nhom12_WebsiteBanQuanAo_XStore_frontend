@@ -251,6 +251,33 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+// Google Login
+export const googleLogin = createAsyncThunk(
+  "auth/googleLogin",
+  async (token, { dispatch, rejectWithValue }) => {
+    dispatch(startLoading());
+    dispatch(clearError());
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Google login failed");
+      }
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      dispatch(setError(error.message));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(stopLoading());
+    }
+  }
+);
+
 
 const authSlice = createSlice({
   name: "auth",
@@ -348,7 +375,24 @@ const authSlice = createSlice({
         toast.error("Xác thực OTP thất bại!");
       })
       .addCase(resetPassword.fulfilled, (state, action) => {})
-      .addCase(resetPassword.rejected, (state, action) => {});
+      .addCase(resetPassword.rejected, (state, action) => {})
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        const res = action.payload;
+        if (res.code == 200) {
+          const token = res.result.token;
+          const user = res.result.user;
+          state.token = token;
+          state.user = user;
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+          toast.success("Đăng nhập Google thành công!");
+        } else {
+          toast.error(res.message);
+        }
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        toast.error("Đăng nhập Google thất bại!");
+      });
   },
 });
 

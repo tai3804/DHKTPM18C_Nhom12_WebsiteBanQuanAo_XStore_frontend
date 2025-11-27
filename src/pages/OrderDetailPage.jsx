@@ -62,6 +62,8 @@ export default function OrderDetailPage() {
     switch (status) {
       case "PENDING":
         return <Clock className="w-6 h-6 text-yellow-500" />;
+      case "AWAITING_PAYMENT":
+        return <Clock className="w-6 h-6 text-purple-500" />;
       case "CONFIRMED":
         return <CheckCircle className="w-6 h-6 text-blue-500" />;
       case "SHIPPING":
@@ -78,6 +80,7 @@ export default function OrderDetailPage() {
   const getStatusText = (status) => {
     const statusMap = {
       PENDING: "Chờ xác nhận",
+      AWAITING_PAYMENT: "Chờ thanh toán",
       CONFIRMED: "Đã xác nhận",
       SHIPPING: "Đang giao hàng",
       DELIVERED: "Đã giao",
@@ -90,6 +93,8 @@ export default function OrderDetailPage() {
     const colorMap = {
       PENDING:
         "text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300",
+      AWAITING_PAYMENT:
+        "text-purple-600 bg-purple-100 dark:bg-purple-900 dark:text-purple-300",
       CONFIRMED:
         "text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300",
       SHIPPING:
@@ -102,6 +107,57 @@ export default function OrderDetailPage() {
       colorMap[status] ||
       "text-gray-600 bg-gray-100 dark:bg-gray-900 dark:text-gray-300"
     );
+  };
+
+  const handlePayment = async () => {
+    if (order.paymentMethod !== "VNPAY") {
+      toast.error("Chỉ hỗ trợ thanh toán VNPay cho đơn hàng này");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      toast.info("Đang tạo liên kết thanh toán...");
+
+      const paymentRequest = {
+        vnp_OrderInfo: `Thanh toán đơn hàng ${order.id}`,
+        amount: order.total,
+        ordertype: "billpayment",
+        bankcode: "",
+        language: "vn",
+        txt_billing_fullname:
+          order.recipientName ||
+          user?.firstName + " " + user?.lastName ||
+          "Customer",
+        txt_billing_mobile: order.phoneNumber || "0123456789",
+        txt_billing_email: user?.account?.username || "customer@example.com",
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/payment/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(paymentRequest),
+      });
+
+      const data = await response.json();
+
+      if (data.code === "00") {
+        toast.success("Đang mở trang thanh toán VNPay...");
+        setTimeout(() => {
+          window.open(data.data, "_blank");
+        }, 1000);
+      } else {
+        toast.error(data.message || "Lỗi tạo thanh toán VNPay");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Lỗi thanh toán: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) {
@@ -374,6 +430,24 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            {order.status === "AWAITING_PAYMENT" && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handlePayment}
+                  disabled={loading}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+                >
+                  {loading ? (
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  ) : (
+                    <span>💳</span>
+                  )}
+                  Thanh toán ngay
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

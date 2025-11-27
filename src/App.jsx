@@ -55,6 +55,9 @@ import CommentsPage from "./pages/CommentsPage";
 import ManageProductSalePage from "./pages/admin/ManageProductSalePage";
 import ManageRequestsPage from "./pages/admin/ManageRequestsPage";
 
+import TestVNPayPage from "./pages/TestVNPayPage";
+import PaymentReturnPage from "./pages/PaymentReturnPage";
+
 export default function App() {
   const dispatch = useDispatch();
 
@@ -137,7 +140,7 @@ export default function App() {
           <Route path="orders/:orderId" element={<OrderDetailPage />} />
           <Route
             path="orders/:orderId/tracking"
-            element={<OrderTrackingPage />}
+            element={<OrderDetailPage />}
           />
           <Route path="contact" element={<Contact />} />
           <Route path="about" element={<AboutPage />} />
@@ -151,6 +154,8 @@ export default function App() {
           <Route path="user" element={<UserPage />} />
           <Route path="favourite" element={<FavouritePage />} />
           <Route path="debug" element={<DebugPage />} />
+          <Route path="test-vnpay" element={<TestVNPayPage />} />
+          <Route path="payment-return" element={<PaymentReturnPage />} />
         </Route>
 
         {/* ✅ Khu vực ADMIN có nhiều route con */}

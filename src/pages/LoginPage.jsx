@@ -6,9 +6,10 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 import { getUserByUsername } from "../slices/UserSlice";
-import { loginUser, setUser, setToken } from "../slices/AuthSlice";
+import { loginUser, setUser, setToken, googleLogin } from "../slices/AuthSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -54,7 +55,6 @@ export default function LoginPage() {
             Đăng nhập
           </h1>
         </div>
-
         {/* Form login */}
         <form onSubmit={handleLogin}>
           <input
@@ -94,7 +94,6 @@ export default function LoginPage() {
             Login
           </button>
         </form>
-
         {/* Links tạo tài khoản và quên mật khẩu */}
         <div className="mt-4 flex justify-between text-sm">
           <Link
@@ -114,6 +113,46 @@ export default function LoginPage() {
           >
             Quên mật khẩu?
           </Link>
+        </div>
+
+        <div className="mt-6 flex items-center">
+          <hr
+            className={`flex-1 border-t ${
+              themeMode === "dark" ? "border-gray-600" : "border-gray-300"
+            }`}
+          />
+          <span
+            className={`px-3 text-sm ${
+              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            Hoặc
+          </span>
+          <hr
+            className={`flex-1 border-t ${
+              themeMode === "dark" ? "border-gray-600" : "border-gray-300"
+            }`}
+          />
+        </div>
+
+        <div className="w-full mt-4 flex justify-center items-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              try {
+                const res = await dispatch(
+                  googleLogin(credentialResponse.credential)
+                );
+                if (res.payload.code == 200) {
+                  navigate("/");
+                }
+              } catch (error) {
+                toast.error("Đăng nhập Google thất bại!");
+              }
+            }}
+            onError={() => {
+              toast.error("Đăng nhập Google thất bại!");
+            }}
+          />
         </div>
       </div>
     </div>

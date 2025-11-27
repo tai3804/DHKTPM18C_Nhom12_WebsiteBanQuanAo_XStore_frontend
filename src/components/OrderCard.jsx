@@ -13,11 +13,13 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const themeMode = useSelector(selectThemeMode);
+  const { user } = useSelector((state) => state.auth);
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [hasCancelRequest, setHasCancelRequest] = useState(false);
   const [hasReturnRequest, setHasReturnRequest] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -50,6 +52,8 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
     switch (status) {
       case "PENDING":
         return <Clock className="w-5 h-5 text-yellow-500" />;
+      case "AWAITING_PAYMENT":
+        return <Clock className="w-5 h-5 text-purple-500" />;
       case "CONFIRMED":
         return <CheckCircle className="w-5 h-5 text-blue-500" />;
       case "SHIPPING":
@@ -67,6 +71,7 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
   const getStatusText = (status) => {
     const statusMap = {
       PENDING: "Chờ xác nhận",
+      AWAITING_PAYMENT: "Chờ thanh toán",
       CONFIRMED: "Đã xác nhận",
       SHIPPING: "Đang giao hàng",
       IN_TRANSIT: "Đang giao hàng",
@@ -80,6 +85,8 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
     const colorMap = {
       PENDING:
         "text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300",
+      AWAITING_PAYMENT:
+        "text-purple-600 bg-purple-100 dark:bg-purple-900 dark:text-purple-300",
       CONFIRMED:
         "text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300",
       SHIPPING:
@@ -111,7 +118,7 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
         },
         body: JSON.stringify({
           order: { id: order.id },
-          user: { id: order.user?.id },
+          user: { id: user.id },
           type: "CANCEL",
           reason: `${formData.reason}${
             formData.description ? `\n\nChi tiết: ${formData.description}` : ""
@@ -153,7 +160,7 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
         },
         body: JSON.stringify({
           order: { id: order.id },
-          user: { id: order.user?.id },
+          user: { id: user.id },
           type: "RETURN",
           reason: `${
             formData.returnMethod === "exchange" ? "Đổi hàng" : "Hoàn tiền"
@@ -184,6 +191,58 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
     } catch (error) {
       console.error("Lỗi network:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+    }
+  };
+
+  const handlePayment = async () => {
+    if (order.paymentMethod !== "VNPAY") {
+      toast.error("Chỉ hỗ trợ thanh toán VNPay cho đơn hàng này");
+      return;
+    }
+
+    try {
+      setPaymentLoading(true);
+      toast.info("Đang tạo liên kết thanh toán...");
+
+      const paymentRequest = {
+        vnp_OrderInfo: `Thanh toán đơn hàng ${order.id}`,
+        amount: order.total,
+        ordertype: "billpayment",
+        bankcode: "",
+        language: "vn",
+        txt_billing_fullname:
+          order.recipientName ||
+          order.user?.firstName + " " + order.user?.lastName ||
+          "Customer",
+        txt_billing_mobile: order.phoneNumber || "0123456789",
+        txt_billing_email:
+          order.user?.account?.username || "customer@example.com",
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/payment/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(paymentRequest),
+      });
+
+      const data = await response.json();
+
+      if (data.code === "00") {
+        toast.success("Đang mở trang thanh toán VNPay...");
+        setTimeout(() => {
+          window.open(data.data, "_blank");
+        }, 1000);
+      } else {
+        toast.error(data.message || "Lỗi tạo thanh toán VNPay");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Lỗi thanh toán: " + error.message);
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -272,7 +331,23 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
       {/* Dòng 4: nút action */}
       <div className="px-4 py-3 flex justify-end items-center">
         <div className="flex items-center gap-3">
-          {(order.status === "PENDING" || order.status === "CONFIRMED") && (
+          {order.status === "AWAITING_PAYMENT" && (
+            <button
+              onClick={handlePayment}
+              disabled={paymentLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {paymentLoading ? (
+                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+              ) : (
+                <span>💳</span>
+              )}
+              Thanh toán
+            </button>
+          )}
+          {(order.status === "PENDING" ||
+            order.status === "CONFIRMED" ||
+            order.status === "AWAITING_PAYMENT") && (
             <button
               onClick={() => setShowCancelModal(true)}
               disabled={hasCancelRequest}

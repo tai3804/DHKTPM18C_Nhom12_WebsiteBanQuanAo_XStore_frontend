@@ -30,6 +30,10 @@ export default function OrderTrackingPage() {
     if (activeTab === "all") return orders || [];
     if (activeTab === "pending")
       return (orders || []).filter((order) => order.status === "PENDING");
+    if (activeTab === "awaiting_payment")
+      return (orders || []).filter(
+        (order) => order.status === "AWAITING_PAYMENT"
+      );
     if (activeTab === "confirmed")
       return (orders || []).filter((order) => order.status === "CONFIRMED");
     if (activeTab === "shipping")
@@ -53,6 +57,12 @@ export default function OrderTrackingPage() {
       id: "pending",
       label: "Chờ xác nhận",
       count: (orders || []).filter((o) => o.status === "PENDING").length,
+    },
+    {
+      id: "awaiting_payment",
+      label: "Chờ thanh toán",
+      count: (orders || []).filter((o) => o.status === "AWAITING_PAYMENT")
+        .length,
     },
     {
       id: "confirmed",

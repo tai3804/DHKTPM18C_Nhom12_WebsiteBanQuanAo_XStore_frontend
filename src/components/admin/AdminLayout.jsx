@@ -125,7 +125,7 @@ export default function AdminLayout() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col transition-colors duration-300 overflow-hidden ${
+      className={`min-h-screen flex flex-col pt-16 transition-colors duration-300 overflow-hidden ${
         themeMode === "dark"
           ? "bg-gray-900 text-gray-100"
           : "bg-gray-50 text-gray-900"
@@ -136,7 +136,7 @@ export default function AdminLayout() {
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside
-          className={`border-r transition-all duration-300 flex flex-col relative h-full ${
+          className={`border-r transition-all duration-300 flex flex-col fixed ${
             themeMode === "dark"
               ? "bg-gray-800 border-gray-700"
               : "bg-white border-gray-200"
@@ -385,7 +385,8 @@ export default function AdminLayout() {
 
         {/* Nội dung chính */}
         <main
-          className={`flex-1 h-full overflow-hidden ${
+          style={{ marginLeft: sidebarOpen ? "12rem" : "4rem" }}
+          className={`flex-1 h-full overflow-hidden  ${
             isChatPage ? "" : "p-8"
           } transition-colors duration-300 ${
             themeMode === "dark" ? "bg-gray-900" : "bg-gray-50"

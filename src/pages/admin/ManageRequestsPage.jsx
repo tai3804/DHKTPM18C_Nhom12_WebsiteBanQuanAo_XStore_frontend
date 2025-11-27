@@ -43,6 +43,9 @@ export default function ManageRequestsPage() {
   useEffect(() => {
     let filtered = requests;
 
+    // Chỉ hiển thị yêu cầu đang chờ xử lý
+    filtered = filtered.filter((request) => request.status === "PENDING");
+
     // Apply date filter
     if (dateFilter !== "all") {
       const now = new Date();
@@ -569,41 +572,26 @@ export default function ManageRequestsPage() {
                       </div>
                     </td>
                     <td className="px-2 py-3 text-right space-x-2">
-                      {request.status === "PENDING" && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openAdminNoteModal(request, "approve");
-                            }}
-                            className="text-green-600 hover:text-green-800 transition cursor-pointer mr-2"
-                            title="Chấp nhận yêu cầu"
-                          >
-                            <CheckCircle size={18} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openAdminNoteModal(request, "reject");
-                            }}
-                            className="text-red-600 hover:text-red-800 transition cursor-pointer"
-                            title="Từ chối yêu cầu"
-                          >
-                            <XCircle size={18} />
-                          </button>
-                        </>
-                      )}
-                      {request.status !== "PENDING" && (
-                        <span
-                          className={`transition-colors duration-300 ${
-                            themeMode === "dark"
-                              ? "text-gray-500"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          Đã xử lý
-                        </span>
-                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAdminNoteModal(request, "approve");
+                        }}
+                        className="text-green-600 hover:text-green-800 transition cursor-pointer mr-2"
+                        title="Chấp nhận yêu cầu"
+                      >
+                        <CheckCircle size={18} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAdminNoteModal(request, "reject");
+                        }}
+                        className="text-red-600 hover:text-red-800 transition cursor-pointer"
+                        title="Từ chối yêu cầu"
+                      >
+                        <XCircle size={18} />
+                      </button>
                     </td>
                   </tr>
                   {expandedRows.has(request.id) && (
