@@ -12,6 +12,7 @@ import { selectThemeMode } from "../slices/ThemeSlice";
 import { getCartByUser } from "../slices/CartSlice";
 import { API_BASE_URL } from "../config/api";
 import { ArrowLeft } from "lucide-react";
+import { createPaymentUrl } from "../api/payment";
 
 export default function CheckoutPage() {
   const dispatch = useDispatch();
@@ -153,6 +154,7 @@ export default function CheckoutPage() {
         (s) => s.id === selectedShipInfoId
       );
 
+      // Tạo object request cho đơn hàng
       const checkoutRequest = {
         userId: user.id,
         cartId: cart.id,
@@ -174,20 +176,19 @@ export default function CheckoutPage() {
         recipientName: selectedShipInfo?.recipientName || "",
         recipientPhone: selectedShipInfo?.recipientPhone || "",
         shippingAddress: selectedShipInfo
-          ? `${
-              selectedShipInfo.streetNumber
-                ? selectedShipInfo.streetNumber + ", "
-                : ""
-            }${selectedShipInfo.streetName}, ${
-              selectedShipInfo.ward ? selectedShipInfo.ward + ", " : ""
-            }${selectedShipInfo.district}, ${selectedShipInfo.city}`
+          ? `${selectedShipInfo.streetNumber
+            ? selectedShipInfo.streetNumber + ", "
+            : ""
+          }${selectedShipInfo.streetName}, ${selectedShipInfo.ward ? selectedShipInfo.ward + ", " : ""
+          }${selectedShipInfo.district}, ${selectedShipInfo.city}`
           : "",
         phoneNumber: selectedShipInfo?.recipientPhone || "",
         notes: orderNotes,
-        discountIds: selectedDiscounts.map((d) => d.id), // Gửi danh sách ID discount cho hoá đơn
+        discountIds: selectedDiscounts.map((d) => d.id),
         shippingDiscountId: selectedShippingDiscount?.id || null,
       };
 
+      // 1. GỌI API TẠO ĐƠN HÀNG (ORDER SERVICE)
       const response = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
         method: "POST",
         headers: {
@@ -200,27 +201,68 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (data.code === 200 || response.ok) {
-        toast.success("✓ Đặt hàng thành công!");
+        // Lấy ID đơn hàng vừa tạo thành công
+        const orderId = data.result?.id;
 
-        // Clear cart after successful order
-        dispatch(getCartByUser(user.id));
+        // 2. XỬ LÝ THANH TOÁN DỰA TRÊN PHƯƠNG THỨC
+        if (selectedPaymentMethod === "VNPAY") {
+          toast.info("Đang chuyển hướng đến cổng thanh toán VNPay...");
 
-        // Navigate to order confirmation or orders page
-        setTimeout(() => {
-          if (data.result?.id) {
-            navigate(`/order-confirmation/${data.result.id}`);
-          } else {
-            navigate(`/orders`);
+          try {
+            // Gọi API Backend để lấy URL thanh toán
+            const paymentRes = await createPaymentUrl({
+              amount: finalTotal, // Tổng tiền cuối cùng
+              orderId: orderId,
+              bankCode: "" // Để trống để user tự chọn ngân hàng tại VNPay
+            });
+
+            // Kiểm tra kết quả trả về từ API Payment
+            // (Tuỳ thuộc vào cấu trúc ApiResponse của bạn, thường check code hoặc result)
+            if (paymentRes.result) {
+              // Cập nhật giỏ hàng (xoá item đã mua)
+              dispatch(getCartByUser(user.id));
+
+              // Chuyển hướng trình duyệt sang VNPay
+              window.location.href = paymentRes.result;
+
+              return; // Dừng hàm để chờ redirect
+            } else {
+              toast.error("Không lấy được đường dẫn thanh toán");
+              navigate(`/order-confirmation/${orderId}`);
+            }
+          } catch (paymentErr) {
+            console.error("Payment creation error:", paymentErr);
+            toast.error("Lỗi kết nối cổng thanh toán. Vui lòng thử lại sau.");
+            navigate(`/order-confirmation/${orderId}`);
           }
-        }, 1000);
+        } else {
+          // 3. XỬ LÝ THANH TOÁN KHI NHẬN HÀNG (CASH/COD)
+          toast.success("✓ Đặt hàng thành công!");
+
+          // Clear cart after successful order
+          dispatch(getCartByUser(user.id));
+
+          // Navigate to confirmation page
+          setTimeout(() => {
+            if (orderId) {
+              navigate(`/order-confirmation/${orderId}`);
+            } else {
+              navigate(`/orders`);
+            }
+          }, 1000);
+        }
       } else {
+        // Xử lý lỗi từ API tạo đơn hàng
         toast.error(data.message || "Lỗi tạo đơn hàng");
       }
     } catch (err) {
       console.error("Checkout error:", err);
       toast.error("Lỗi checkout: " + err.message);
     } finally {
-      setLoading(false);
+      // Chỉ tắt loading nếu KHÔNG phải chuyển hướng đi VNPAY (để tránh UI bị nháy)
+      if (selectedPaymentMethod !== "VNPAY") {
+        setLoading(false);
+      }
     }
   };
 
@@ -228,18 +270,16 @@ export default function CheckoutPage() {
   if (!user || !cart) {
     return (
       <div
-        className={`min-h-screen transition-colors duration-300 ${
-          themeMode === "dark"
-            ? "bg-linear-to-b from-gray-900 to-gray-800"
-            : "bg-linear-to-b from-white to-gray-50"
-        }`}
+        className={`min-h-screen transition-colors duration-300 ${themeMode === "dark"
+          ? "bg-linear-to-b from-gray-900 to-gray-800"
+          : "bg-linear-to-b from-white to-gray-50"
+          }`}
       >
         <div className="container mx-auto px-4 py-16 text-center">
           <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p
-            className={`transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-400" : "text-gray-500"
-            }`}
+            className={`transition-colors duration-300 ${themeMode === "dark" ? "text-gray-400" : "text-gray-500"
+              }`}
           >
             Đang tải thông tin checkout...
           </p>
@@ -252,19 +292,17 @@ export default function CheckoutPage() {
   if (cart.cartItems?.length === 0) {
     return (
       <div
-        className={`min-h-screen transition-colors duration-300 ${
-          themeMode === "dark"
-            ? "bg-linear-to-b from-gray-900 to-gray-800"
-            : "bg-linear-to-b from-white to-gray-50"
-        }`}
+        className={`min-h-screen transition-colors duration-300 ${themeMode === "dark"
+          ? "bg-linear-to-b from-gray-900 to-gray-800"
+          : "bg-linear-to-b from-white to-gray-50"
+          }`}
       >
         <div className="container mx-auto px-4 py-16 text-center">
           <div className="text-6xl mb-4">🛒</div>
           <h2 className="text-2xl font-bold mb-4">Giỏ hàng trống</h2>
           <p
-            className={`mb-6 transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
+            className={`mb-6 transition-colors duration-300 ${themeMode === "dark" ? "text-gray-400" : "text-gray-600"
+              }`}
           >
             Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán
           </p>
@@ -281,22 +319,20 @@ export default function CheckoutPage() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${
-        themeMode === "dark"
-          ? "bg-linear-to-b from-gray-900 to-gray-800 text-gray-100"
-          : "bg-linear-to-b from-white to-gray-50 text-gray-900"
-      }`}
+      className={`min-h-screen transition-colors duration-300 ${themeMode === "dark"
+        ? "bg-linear-to-b from-gray-900 to-gray-800 text-gray-100"
+        : "bg-linear-to-b from-white to-gray-50 text-gray-900"
+        }`}
     >
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate("/cart")}
-            className={`flex items-center gap-2 transition-colors ${
-              themeMode === "dark"
-                ? "text-emerald-400 hover:text-emerald-300"
-                : "text-emerald-600 hover:text-emerald-700"
-            }`}
+            className={`flex items-center gap-2 transition-colors ${themeMode === "dark"
+              ? "text-emerald-400 hover:text-emerald-300"
+              : "text-emerald-600 hover:text-emerald-700"
+              }`}
           >
             <ArrowLeft size={20} />
             Quay lại giỏ hàng
@@ -360,11 +396,10 @@ export default function CheckoutPage() {
 
             {/* Checkout Button */}
             <div
-              className={`p-6 rounded-lg border transition-colors ${
-                themeMode === "dark"
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              }`}
+              className={`p-6 rounded-lg border transition-colors ${themeMode === "dark"
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-200"
+                }`}
             >
               <button
                 onClick={handleCheckout}
