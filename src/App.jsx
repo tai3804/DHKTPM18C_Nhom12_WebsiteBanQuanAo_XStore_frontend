@@ -54,6 +54,7 @@ import ChatManagementPage from "./pages/admin/ChatManagementPage";
 import CommentsPage from "./pages/CommentsPage";
 import ManageProductSalePage from "./pages/admin/ManageProductSalePage";
 import ManageRequestsPage from "./pages/admin/ManageRequestsPage";
+import PaymentResult from "./pages/PaymentResult";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -128,6 +129,7 @@ export default function App() {
           />
           <Route path="cart" element={<Cart />} />
           <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="payment/result" element={<PaymentResult />} />
           <Route
             path="order-confirmation/:orderId"
             element={<OrderConfirmationPage />}
