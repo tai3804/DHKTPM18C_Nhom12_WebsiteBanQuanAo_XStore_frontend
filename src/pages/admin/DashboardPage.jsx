@@ -367,6 +367,7 @@ export default function Dashboard() {
     setPieData(pieData);
   };
 
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
   // Effect 1: Load data từ Redux khi component mount
   useEffect(() => {
     const loadData = async () => {
@@ -376,23 +377,8 @@ export default function Dashboard() {
         ordersLength: orders.length,
       });
 
-      setLoading(true);
-      try {
-        const results = await Promise.all([
-          users.length === 0 ? dispatch(getUsers()) : Promise.resolve(),
-          products.length === 0 ? dispatch(getProducts()) : Promise.resolve(),
-          orders.length === 0 ? dispatch(fetchAllOrders()) : Promise.resolve(),
-          productTypes.length === 0
-            ? dispatch(getProductTypes())
-            : Promise.resolve(),
-        ]);
-
-        console.log("📊 [Dashboard] Data loaded - Results:", results);
-      } catch (error) {
-        console.error("❌ [Dashboard] Error loading dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
+      // Dữ liệu đã được preload, chỉ cần set loading = false
+      setLoading(false);
     };
 
     loadData();

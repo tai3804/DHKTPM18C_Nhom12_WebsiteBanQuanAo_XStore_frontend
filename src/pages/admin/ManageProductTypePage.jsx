@@ -26,13 +26,14 @@ export default function ManageProductTypesPage() {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchTypes = async () => {
-      const res = await dispatch(getProductTypes());
-      dispatch(setProductTypes(res));
-    };
-    fetchTypes();
-  }, [dispatch]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   const fetchTypes = async () => {
+  //     const res = await dispatch(getProductTypes());
+  //     dispatch(setProductTypes(res));
+  //   };
+  //   fetchTypes();
+  // }, [dispatch]);
 
   // Filter product types based on search query
   const filteredTypes =

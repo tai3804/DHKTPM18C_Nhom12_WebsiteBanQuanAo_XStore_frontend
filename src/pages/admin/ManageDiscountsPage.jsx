@@ -37,12 +37,13 @@ const ManageDiscountsPage = () => {
     activeDiscounts: 0,
   });
 
-  useEffect(() => {
-    dispatch(getDiscounts());
-    if (orders.length === 0) {
-      dispatch(fetchAllOrders());
-    }
-  }, [dispatch, orders.length]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   dispatch(getDiscounts());
+  //   if (orders.length === 0) {
+  //     dispatch(fetchAllOrders());
+  //   }
+  // }, [dispatch, orders.length]);
 
   // Tính toán thống kê theo khoảng thời gian
   useEffect(() => {

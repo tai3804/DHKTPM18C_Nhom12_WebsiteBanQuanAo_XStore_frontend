@@ -40,13 +40,14 @@ export default function ManageProductsPage() {
     accessoriesProducts: 0,
   });
 
-  useEffect(() => {
-    const fetchTypes = async () => {
-      const result = await dispatch(getProductTypes());
-      dispatch(setProductTypes(result));
-    };
-    fetchTypes();
-  }, [dispatch]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   const fetchTypes = async () => {
+  //     const result = await dispatch(getProductTypes());
+  //     dispatch(setProductTypes(result));
+  //   };
+  //   fetchTypes();
+  // }, [dispatch]);
 
   // Tính toán thống kê sản phẩm
   useEffect(() => {
@@ -88,9 +89,9 @@ export default function ManageProductsPage() {
       try {
         await dispatch(deleteProduct(id));
         toast.success("Đã xóa sản phẩm!");
-        dispatch(getProducts());
-        // Cập nhật variants sau khi xóa sản phẩm
-        dispatch(getAllProductVariants());
+        // ✅ Chỉ refresh để cập nhật store
+        await dispatch(getProducts());
+        await dispatch(getAllProductVariants());
       } catch (err) {
         toast.error("Không thể xóa sản phẩm: " + err);
       }
@@ -112,11 +113,11 @@ export default function ManageProductsPage() {
     setSelectedProduct(null);
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
     handleCloseForm();
-    dispatch(getProducts());
-    // Cập nhật variants sau khi products thay đổi
-    dispatch(getAllProductVariants());
+    // ✅ Refresh data sau khi thêm/sửa
+    await dispatch(getProducts());
+    await dispatch(getAllProductVariants());
   };
 
   // 🔍 Filter products dựa trên searchQuery

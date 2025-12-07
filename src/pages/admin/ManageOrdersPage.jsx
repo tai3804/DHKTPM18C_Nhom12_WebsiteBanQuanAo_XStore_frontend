@@ -31,9 +31,10 @@ const ManageOrdersPage = () => {
     cancelledOrders: 0,
   });
 
-  useEffect(() => {
-    dispatch(fetchAllOrders());
-  }, [dispatch]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   dispatch(fetchAllOrders());
+  // }, [dispatch]);
 
   // Tính toán thống kê theo khoảng thời gian
   useEffect(() => {

@@ -1,14 +1,16 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { getUsers } from "../../slices/UserSlice";
 import { getProducts, getAllProductVariants } from "../../slices/ProductSlice";
 import { getDiscounts } from "../../slices/DiscountSlice";
 import { fetchAllOrders } from "../../slices/OrderSlice";
 import { getProductTypes } from "../../slices/ProductTypeSlice";
 import { getStocks } from "../../slices/StockSlice";
+import { getProductSales } from "../../slices/ProductSalesSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 import {
   LayoutDashboard,
@@ -29,92 +31,63 @@ import {
 
 export default function AdminLayout() {
   const dispatch = useDispatch();
-  const users = useSelector((state) => state.user.users);
-  const products = useSelector((state) => state.product.products);
-  const discounts = useSelector((state) => state.discount.discounts);
-  const orders = useSelector((state) => state.order.orders);
-  const productTypes = useSelector((state) => state.productType.productTypes);
-  const stocks = useSelector((state) => state.stock.stocks);
-  const allProductVariants = useSelector(
-    (state) => state.product.allProductVariants
-  );
+  const navigate = useNavigate();
+
+  const { user, token } = useSelector((state) => state.auth);
   const themeMode = useSelector(selectThemeMode);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openProducts, setOpenProducts] = useState(false);
+
   const location = useLocation();
 
+  // ✅ Check admin permission
   useEffect(() => {
-    const preloadAdminData = async () => {
+    if (!user || !token) {
+      toast.error("Vui lòng đăng nhập!");
+      navigate("/login");
+      return;
+    }
+
+    // Check if user has admin role
+    const isAdmin = user.role === "ADMIN" || user.account?.role === "ADMIN";
+    if (!isAdmin) {
+      toast.error("Bạn không có quyền truy cập trang quản trị!");
+      navigate("/");
+      return;
+    }
+  }, [user, token, navigate]);
+
+  // ✅ PRELOAD TẤT CẢ DỮ LIỆU ADMIN NGẦM (không chặn UI)
+  useEffect(() => {
+    const preloadAllAdminData = async () => {
+      if (!token || !user) return;
+
       try {
-        // Preload tất cả dữ liệu cần thiết cho admin
-        const preloadPromises = [];
+        console.log("🚀 Starting admin data preload in background...");
 
-        // Users
-        if (!users || users.length === 0) {
-          preloadPromises.push(dispatch(getUsers()));
-        }
+        // Load tất cả dữ liệu song song trong background
+        await Promise.all([
+          // dispatch(getProducts({})),
+          // dispatch(getAllProductVariants()),
+          dispatch(getProductTypes()),
+          dispatch(getUsers(token)),
+          dispatch(getStocks()),
+          dispatch(getDiscounts(token)),
+          dispatch(fetchAllOrders(token)),
+          dispatch(getProductSales()),
+        ]);
 
-        // Products
-        if (!products || products.length === 0) {
-          preloadPromises.push(dispatch(getProducts()));
-        }
-
-        // Discounts
-        if (!discounts || discounts.length === 0) {
-          preloadPromises.push(dispatch(getDiscounts()));
-        }
-
-        // Orders
-        if (!orders || orders.length === 0) {
-          preloadPromises.push(dispatch(fetchAllOrders()));
-        }
-
-        // Product Types
-        if (!productTypes || productTypes.length === 0) {
-          preloadPromises.push(dispatch(getProductTypes()));
-        }
-
-        // Stocks
-        if (!stocks || stocks.length === 0) {
-          preloadPromises.push(dispatch(getStocks()));
-        }
-
-        // Đợi tất cả preload hoàn thành
-        await Promise.all(preloadPromises);
-
-        // Load product variants sau khi products đã được load
-        if (products && products.length > 0) {
-          await dispatch(getAllProductVariants());
-        }
-
-        console.log("Admin data preloaded successfully");
-      } catch (err) {
-        console.error("Lỗi khi preload dữ liệu admin:", err);
+        console.log("✅ Admin data preloaded successfully");
+        toast.success("Đã tải dữ liệu quản trị!", { autoClose: 2000 });
+      } catch (error) {
+        console.error("❌ Error preloading admin data:", error);
+        toast.error("Có lỗi khi tải dữ liệu quản trị!");
       }
     };
 
-    preloadAdminData();
-  }, [dispatch]);
-
-  // Load product variants khi products thay đổi
-  useEffect(() => {
-    const loadProductDetails = async () => {
-      if (
-        products &&
-        products.length > 0 &&
-        (!allProductVariants || Object.keys(allProductVariants).length === 0)
-      ) {
-        try {
-          await dispatch(getAllProductVariants());
-          console.log("Product variants loaded successfully");
-        } catch (err) {
-          console.error("Lỗi khi load product variants:", err);
-        }
-      }
-    };
-
-    loadProductDetails();
-  }, [dispatch, products, allProductVariants]);
+    preloadAllAdminData();
+  }, [dispatch, token, user]);
 
   // Khi sidebar thu gọn thì dropdown luôn đóng
   useEffect(() => {

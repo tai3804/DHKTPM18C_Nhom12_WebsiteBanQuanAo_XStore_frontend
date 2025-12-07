@@ -29,9 +29,10 @@ export default function ManageProductSalePage() {
   const [editingProductSales, setEditingProductSales] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    dispatch(getProductSales());
-  }, [dispatch]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   dispatch(getProductSales());
+  // }, [dispatch]);
 
   const handleAdd = () => {
     setEditingProductSales(null);

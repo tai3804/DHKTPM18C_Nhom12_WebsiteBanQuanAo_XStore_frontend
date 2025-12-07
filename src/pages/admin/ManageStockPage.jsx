@@ -19,9 +19,10 @@ const ManageStockPage = () => {
   const [selectedStock, setSelectedStock] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    dispatch(getStocks());
-  }, [dispatch]);
+  // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
+  // useEffect(() => {
+  //   dispatch(getStocks());
+  // }, [dispatch]);
 
   const handleAdd = () => {
     setSelectedStock(null);
@@ -38,9 +39,10 @@ const ManageStockPage = () => {
     setSelectedStock(null);
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
     handleCloseForm();
-    dispatch(getStocks());
+    // ✅ Refresh để cập nhật store
+    await dispatch(getStocks());
   };
 
   const handleDelete = (id) => {

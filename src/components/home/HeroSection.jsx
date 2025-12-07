@@ -40,7 +40,7 @@ export default function HeroSection() {
             </div>
 
             <h1
-              className={`text-4xl lg:text-6xl tracking-tight font-bold transition-colors duration-300 ${
+              className={`text-3xl lg:text-5xl tracking-tight font-bold transition-colors duration-300 ${
                 themeMode === "dark" ? "text-white" : "text-gray-900"
               }`}
             >
