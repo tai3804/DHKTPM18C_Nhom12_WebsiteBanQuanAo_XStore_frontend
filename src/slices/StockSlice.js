@@ -10,6 +10,10 @@ const initialState = {
   stockItems: [], // Danh sách sản phẩm trong kho hiện tại
   productStocks: [], // Danh sách stock items của một sản phẩm
   selectedStock: null, // Kho được chọn trong header
+  // ✅ CACHE cho stock quantities - tránh fetch lại nhiều lần
+  allStockQuantities: {}, // Cache: { stockId: { [productInfoId]: quantity } }
+  totalStockQuantities: {}, // Cache: { productId: { [productInfoId]: totalQuantity } }
+  lastFetchTime: {}, // Track thời gian fetch để tránh fetch quá thường xuyên
 };
 
 //THUNKS
@@ -329,6 +333,82 @@ export const getProductStocks = createAsyncThunk(
   }
 );
 
+// ✅ MỚI: Fetch total quantities cho tất cả products (gọi 1 lần duy nhất)
+export const fetchAllTotalQuantities = createAsyncThunk(
+  "stock/fetchAllTotalQuantities",
+  async (productIds, { dispatch, getState, rejectWithValue }) => {
+    // Không dùng loading global để tránh block UI
+    try {
+      const token = getState().auth.token;
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      // Fetch song song cho tất cả products
+      const promises = productIds.map((productId) =>
+        fetch(`${API_BASE_URL}/api/stocks/products/${productId}/total-quantities`, {
+          headers,
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => ({
+            productId,
+            quantities: data?.result || {},
+          }))
+          .catch(() => ({ productId, quantities: {} }))
+      );
+
+      const results = await Promise.all(promises);
+      return results;
+    } catch (error) {
+      console.error("Error fetching all total quantities:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// ✅ MỚI: Fetch selected stock quantities (gọi 1 lần cho cả stock)
+export const fetchStockQuantities = createAsyncThunk(
+  "stock/fetchStockQuantities",
+  async (stockId, { dispatch, getState, rejectWithValue }) => {
+    // Check cache trước - nếu đã fetch trong vòng 5 phút thì skip
+    const state = getState().stock;
+    const lastFetch = state.lastFetchTime[stockId];
+    const now = Date.now();
+    if (lastFetch && now - lastFetch < 5 * 60 * 1000) {
+      console.log(`Using cached data for stock ${stockId}`);
+      return { stockId, cached: true };
+    }
+
+    try {
+      const token = getState().auth.token;
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/stocks/${stockId}/items`,
+        { headers }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const quantities = {};
+        (data.result || []).forEach((product) => {
+          (product.variants || []).forEach((variant) => {
+            if (variant.id) {
+              quantities[variant.id] = variant.quantity;
+            }
+          });
+        });
+        console.log(`Fetched stock ${stockId} quantities:`, quantities);
+        return { stockId, quantities, timestamp: now };
+      }
+      return { stockId, quantities: {}, timestamp: now };
+    } catch (error) {
+      console.error("Error fetching stock quantities:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 //SLICE
 
 const stockSlice = createSlice({
@@ -340,6 +420,12 @@ const stockSlice = createSlice({
     },
     clearSelectedStock: (state) => {
       state.selectedStock = null;
+    },
+    // ✅ Reset cache khi cần
+    clearStockCache: (state) => {
+      state.allStockQuantities = {};
+      state.totalStockQuantities = {};
+      state.lastFetchTime = {};
     },
   },
   extraReducers: (builder) => {
@@ -411,9 +497,23 @@ const stockSlice = createSlice({
       // Lấy stock items theo product ID
       .addCase(getProductStocks.fulfilled, (state, action) => {
         state.productStocks = action.payload;
+      })
+      // ✅ Cache total quantities cho tất cả products
+      .addCase(fetchAllTotalQuantities.fulfilled, (state, action) => {
+        action.payload.forEach(({ productId, quantities }) => {
+          state.totalStockQuantities[productId] = quantities;
+        });
+      })
+      // ✅ Cache stock quantities
+      .addCase(fetchStockQuantities.fulfilled, (state, action) => {
+        const { stockId, quantities, timestamp, cached } = action.payload;
+        if (!cached && quantities) {
+          state.allStockQuantities[stockId] = quantities;
+          state.lastFetchTime[stockId] = timestamp;
+        }
       });
   },
 });
 
-export const { setSelectedStock, clearSelectedStock } = stockSlice.actions;
+export const { setSelectedStock, clearSelectedStock, clearStockCache } = stockSlice.actions;
 export default stockSlice.reducer;

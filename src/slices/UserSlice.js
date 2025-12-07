@@ -20,6 +20,8 @@ export const getUsers = createAsyncThunk(
     dispatch(clearError());
     try {
       const token = getState().auth?.token;
+      console.log("🔍 [UserSlice] getUsers - Token:", token ? "EXISTS" : "MISSING");
+      
       const res = await fetch(`${API_BASE_URL}/api/users`, {
           headers: {
           "Content-Type": "application/json",
@@ -27,10 +29,21 @@ export const getUsers = createAsyncThunk(
         },
       });
 
+      console.log("🔍 [UserSlice] getUsers - Response status:", res.status);
+
       // cái này là báo lỗi ra console, user bình thường sẽ k bt cách xem
-      if (!res.ok) throw new Error(Errors.USER_FETCH_FAILED); 
+      if (!res.ok) {
+        console.error("❌ [UserSlice] getUsers - Request failed:", res.status);
+        throw new Error(Errors.USER_FETCH_FAILED);
+      }
 
       const json = await res.json();
+      console.log("🔍 [UserSlice] getUsers - Response data:", json);
+      console.log("🔍 [UserSlice] getUsers - Response structure:", {
+        hasData: !!json.data,
+        hasResult: !!json.result,
+        result: json.result
+      });
       /**
        * data nhận được từ server sẽ có dạng là: 
        * {
@@ -292,7 +305,10 @@ const userSlice = createSlice({
     builder
       // Lấy danh sách
       .addCase(getUsers.fulfilled, (state, action) => {
+        console.log("✅ [UserSlice] getUsers.fulfilled - action.payload:", action.payload);
+        console.log("✅ [UserSlice] getUsers.fulfilled - action.payload.result:", action.payload.result);
         state.users = action.payload.result;
+        console.log("✅ [UserSlice] getUsers.fulfilled - state.users updated:", state.users?.length);
       })
 
       // Lấy 1 user

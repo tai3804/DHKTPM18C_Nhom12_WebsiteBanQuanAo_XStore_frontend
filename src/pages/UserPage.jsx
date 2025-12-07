@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { updateUser } from "../slices/UserSlice";
 import { setUser } from "../slices/AuthSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import { API_BASE_URL } from "../config/api";
 
 const formatUserType = (type) => {
   if (!type) return "N/A";
@@ -33,8 +34,10 @@ export default function UserPage() {
       country: "",
       fullAddress: "",
     },
+    avatar: "",
   });
 
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   useEffect(() => {
@@ -55,9 +58,87 @@ export default function UserPage() {
               country: "",
               fullAddress: "",
             },
+        avatar: user.avatar || "",
       });
     }
   }, [user, token, navigate]);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast.error("File quá lớn! Kích thước tối đa là 10MB");
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)");
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Tự động upload ngay khi chọn file
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "avatar");
+
+    try {
+      toast.info("Đang tải lên avatar...");
+      const response = await fetch(`${API_BASE_URL}/api/file/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok && data.code === 200) {
+        // Backend trả về path tương đối: "/avatars/filename.jpg"
+        const avatarPath = data.result;
+
+        // Lưu URL đầy đủ vào profile state
+        const avatarUrl = `${API_BASE_URL}${avatarPath}`;
+        setProfile((prev) => ({ ...prev, avatar: avatarUrl }));
+
+        // ✅ Gọi API updateUser để lưu avatar vào database
+        const updatedUserData = {
+          ...user,
+          avatar: avatarUrl, // Lưu URL đầy đủ
+        };
+
+        const resultAction = await dispatch(
+          updateUser({ id: user.id, userData: updatedUserData, token })
+        );
+
+        if (updateUser.fulfilled.match(resultAction)) {
+          // Cập nhật Redux store và localStorage
+          const savedUser = { ...resultAction.payload, avatar: avatarUrl };
+          dispatch(setUser(savedUser));
+          localStorage.setItem("user", JSON.stringify(savedUser));
+
+          toast.success("Upload và lưu avatar thành công!");
+        } else {
+          toast.error("Upload thành công nhưng lưu vào database thất bại!");
+        }
+
+        setSelectedFile(null);
+      } else {
+        toast.error(data.message || "Upload thất bại!");
+      }
+    } catch (error) {
+      console.error("Upload avatar error:", error);
+      toast.error("Lỗi khi upload avatar!");
+    }
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -80,6 +161,7 @@ export default function UserPage() {
       ...user,
       ...profile,
       address: { ...(user.address || {}), ...profile.address },
+      avatar: profile.avatar, // Đảm bảo avatar được lưu
     };
 
     const resultAction = await dispatch(
@@ -88,8 +170,9 @@ export default function UserPage() {
 
     if (updateUser.fulfilled.match(resultAction)) {
       toast.success("Cập nhật thông tin thành công!");
-      dispatch(setUser(resultAction.payload));
-      localStorage.setItem("user", JSON.stringify(resultAction.payload));
+      const updatedUser = { ...resultAction.payload, avatar: profile.avatar };
+      dispatch(setUser(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     } else {
       toast.error("Cập nhật thất bại. Vui lòng thử lại.");
     }
@@ -125,15 +208,76 @@ export default function UserPage() {
                 : "bg-white border-gray-200"
             }`}
           >
-            <h2 className="text-xl font-bold mb-4">Tài khoản</h2>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium">Username</label>
-                <p className="font-semibold">{user.account?.username}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Vai trò</label>
-                <p className="font-semibold">{user.account?.role}</p>
+            <h2 className="text-xl font-bold mb-4">Avatar</h2>
+            <div className="flex flex-col items-center space-y-4">
+              <img
+                src={
+                  profile.avatar
+                    ? profile.avatar.startsWith("http")
+                      ? profile.avatar
+                      : `${API_BASE_URL}${profile.avatar}`
+                    : "https://via.placeholder.com/150"
+                }
+                alt="Avatar"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://via.placeholder.com/150";
+                }}
+              />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Avatar của bạn
+              </p>
+              <div className="w-full">
+                <label className="relative cursor-pointer group block">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <div
+                    className={`w-full p-4 rounded-lg border-2 border-dashed transition-all duration-300 text-center ${
+                      isDark
+                        ? "bg-gray-700 border-gray-600 hover:border-blue-500 hover:bg-gray-650 group-hover:shadow-lg"
+                        : "bg-gray-50 border-gray-300 hover:border-blue-500 hover:bg-blue-50 group-hover:shadow-lg"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <svg
+                        className={`w-8 h-8 ${
+                          isDark ? "text-blue-400" : "text-blue-500"
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      <div>
+                        <span
+                          className={`text-sm font-semibold block ${
+                            isDark ? "text-gray-200" : "text-gray-700"
+                          }`}
+                        >
+                          Nhấn để chọn ảnh avatar
+                        </span>
+                        <p
+                          className={`text-xs mt-1 ${
+                            isDark ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          Avatar sẽ tự động cập nhật khi bạn chọn ảnh
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
@@ -146,16 +290,121 @@ export default function UserPage() {
             }`}
           >
             <h2 className="text-xl font-bold mb-4">Thành viên</h2>
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Hạng thành viên với icon */}
               <div>
-                <label className="text-sm font-medium">Hạng</label>
-                <p className="font-semibold text-blue-400">
-                  {formatUserType(user.userType)}
+                <label className="text-sm font-medium mb-2 block">
+                  Hạng hiện tại
+                </label>
+                <div className="flex items-center gap-2">
+                  {user.userType === "PLATINUM" && (
+                    <span className="text-2xl">💎</span>
+                  )}
+                  {user.userType === "GOLD" && (
+                    <span className="text-2xl">🥇</span>
+                  )}
+                  {user.userType === "SILVER" && (
+                    <span className="text-2xl">🥈</span>
+                  )}
+                  {user.userType === "COPPER" && (
+                    <span className="text-2xl">🥉</span>
+                  )}
+                  <span
+                    className={`font-bold text-lg ${
+                      user.userType === "PLATINUM"
+                        ? "text-purple-400"
+                        : user.userType === "GOLD"
+                        ? "text-yellow-400"
+                        : user.userType === "SILVER"
+                        ? "text-gray-300"
+                        : "text-orange-400"
+                    }`}
+                  >
+                    {user.userType === "PLATINUM"
+                      ? "Bạch Kim"
+                      : user.userType === "GOLD"
+                      ? "Vàng"
+                      : user.userType === "SILVER"
+                      ? "Bạc"
+                      : "Đồng"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Điểm tích lũy */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Điểm tích lũy
+                </label>
+                <p className="font-bold text-2xl text-emerald-500">
+                  {user.point || 0} điểm
                 </p>
               </div>
-              <div>
-                <label className="text-sm font-medium">Điểm tích lũy</label>
-                <p className="font-semibold">{user.point}</p>
+
+              {/* Progress bar nếu chưa đạt Platinum */}
+              {user.userType !== "PLATINUM" && (
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span>Tiến trình lên hạng</span>
+                    <span>
+                      {user.userType === "GOLD"
+                        ? `${user.point}/500`
+                        : user.userType === "SILVER"
+                        ? `${user.point}/200`
+                        : `${user.point}/100`}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2.5">
+                    <div
+                      className={`h-2.5 rounded-full transition-all duration-500 ${
+                        user.userType === "GOLD"
+                          ? "bg-purple-500"
+                          : user.userType === "SILVER"
+                          ? "bg-yellow-500"
+                          : "bg-gray-400"
+                      }`}
+                      style={{
+                        width: `${
+                          user.userType === "GOLD"
+                            ? (user.point / 500) * 100
+                            : user.userType === "SILVER"
+                            ? (user.point / 200) * 100
+                            : (user.point / 100) * 100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    {user.userType === "GOLD"
+                      ? `Còn ${500 - user.point} điểm để lên Bạch Kim`
+                      : user.userType === "SILVER"
+                      ? `Còn ${200 - user.point} điểm để lên Vàng`
+                      : `Còn ${100 - user.point} điểm để lên Bạc`}
+                  </p>
+                </div>
+              )}
+
+              {user.userType === "PLATINUM" && (
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
+                  <p className="text-sm text-purple-800 dark:text-purple-300">
+                    🎉 Chúc mừng! Bạn đã đạt hạng cao nhất
+                  </p>
+                </div>
+              )}
+
+              {/* Thông tin tích điểm */}
+              <div className="border-t pt-3 mt-3">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  💡 Mỗi 1.000₫ = 1 điểm
+                  <br />
+                  🥉 Đồng: 0-99 điểm
+                  <br />
+                  🥈 Bạc: 100-199 điểm
+                  <br />
+                  🥇 Vàng: 200-499 điểm
+                  <br />
+                  💎 Bạch Kim: ≥500 điểm
+                </p>
               </div>
             </div>
           </div>

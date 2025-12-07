@@ -22,10 +22,11 @@ export default function ProductCard({ product }) {
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
   const { favourites } = useSelector((state) => state.favourite);
-  const { selectedStock } = useSelector((state) => state.stock);
-  const { productStocks } = useSelector((state) => state.stock);
+  const { selectedStock, allStockQuantities, totalStockQuantities } =
+    useSelector((state) => state.stock);
   const { productSales } = useSelector((state) => state.productSales);
   const loading = useSelector((state) => state.loading.isLoading);
+
   const [isAdding, setIsAdding] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -33,115 +34,20 @@ export default function ProductCard({ product }) {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [actionType, setActionType] = useState(""); // "addToCart" or "buyNow"
-  const [variantStock, setVariantStock] = useState({}); // Lưu stock cho từng variant
-  const [totalQuantities, setTotalQuantities] = useState({}); // Total quantities from all stocks
-  const [selectedStockQuantities, setSelectedStockQuantities] = useState({}); // Quantities from selected stock
 
-  console.log(
-    "ProductCard render - selectedStock:",
-    selectedStock,
-    "variantStock:",
-    variantStock,
-    "productStocks:",
-    productStocks
-  );
+  // ✅ ĐỌC TRỰC TIẾP TỪ REDUX CACHE - không cần fetch nữa!
+  const totalQuantities = totalStockQuantities[product?.id] || {};
+  const selectedStockQuantities = selectedStock?.id
+    ? allStockQuantities[selectedStock.id] || {}
+    : {};
 
-  // Kiểm tra xem sản phẩm có trong danh sách yêu thích không
+  // ✅ Chỉ check favourite - KHÔNG fetch API nữa!
   useEffect(() => {
     if (favourites && product) {
       const found = favourites.some((fav) => fav.product?.id === product.id);
       setIsFavourite(found);
     }
   }, [favourites, product]);
-
-  // Fetch stock information khi component mount hoặc product thay đổi
-  useEffect(() => {
-    if (product?.id) {
-      console.log("Fetching total stock for product:", product.id);
-      fetchTotalQuantities();
-    }
-    if (product?.id && selectedStock?.id) {
-      fetchSelectedStockQuantities();
-    }
-  }, [product?.id, selectedStock?.id, dispatch]);
-
-  // Cập nhật variant stock khi productStocks thay đổi
-  useEffect(() => {
-    if (productStocks && productStocks.length > 0 && selectedStock) {
-      const stockMap = {};
-      productStocks.forEach((stockItem) => {
-        if (stockItem.stockId === selectedStock.id) {
-          // Giả sử stockItem có productInfoId và quantity
-          stockMap[stockItem.productInfoId] = stockItem.quantity || 0;
-        }
-      });
-      console.log("Updated variant stock:", stockMap);
-      setVariantStock(stockMap);
-    } else if (!selectedStock) {
-      // Nếu chưa chọn stock, cho phép tất cả variant
-      setVariantStock({});
-    }
-  }, [productStocks, selectedStock]);
-
-  const fetchTotalQuantities = async () => {
-    if (!product?.id) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const response = await fetch(
-        `${API_BASE_URL}/api/stocks/products/${product.id}/total-quantities`,
-        {
-          headers,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setTotalQuantities(data.result || {});
-        console.log("Fetched total stock quantities:", data.result);
-      }
-    } catch (error) {
-      console.error("Error fetching total stock quantities:", error);
-    }
-  };
-
-  const fetchSelectedStockQuantities = async () => {
-    if (!selectedStock?.id || !product?.id) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const response = await fetch(
-        `${API_BASE_URL}/api/stocks/${selectedStock.id}/items`,
-        {
-          headers,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        const quantities = {};
-        (data.result || []).forEach((product) => {
-          (product.variants || []).forEach((variant) => {
-            if (variant.id) {
-              quantities[variant.id] = variant.quantity;
-            }
-          });
-        });
-        setSelectedStockQuantities(quantities);
-        console.log("Fetched selected stock quantities:", quantities);
-      }
-    } catch (error) {
-      console.error("Error fetching selected stock quantities:", error);
-    }
-  };
 
   // Tính % giảm giá
   const calculateDiscount = () => {

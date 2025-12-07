@@ -4,12 +4,17 @@ import ProductCard from "../components/product/ProductCard";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
 import { getProductSales } from "../slices/ProductSalesSlice";
+import {
+  fetchAllTotalQuantities,
+  fetchStockQuantities,
+} from "../slices/StockSlice";
 
 export default function SalePage() {
   const dispatch = useDispatch();
   const allProducts = useSelector((state) => state.product.products) || [];
   const productSales =
     useSelector((state) => state.productSales.productSales) || [];
+  const { selectedStock } = useSelector((state) => state.stock);
   const themeMode = useSelector(selectThemeMode);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
@@ -34,6 +39,20 @@ export default function SalePage() {
       .filter((product) => saleProductIds.has(product.id))
       .sort((a, b) => b.id - a.id);
   }, [allProducts, productSales]);
+
+  // ✅ Fetch stock data cho sale products
+  useEffect(() => {
+    if (saleProducts.length > 0) {
+      const productIds = saleProducts.map((p) => p.id);
+      dispatch(fetchAllTotalQuantities(productIds));
+    }
+  }, [saleProducts.length, dispatch]);
+
+  useEffect(() => {
+    if (selectedStock?.id) {
+      dispatch(fetchStockQuantities(selectedStock.id));
+    }
+  }, [selectedStock?.id, dispatch]);
 
   // Tính toán phân trang
   const totalPages = Math.ceil(saleProducts.length / productsPerPage);

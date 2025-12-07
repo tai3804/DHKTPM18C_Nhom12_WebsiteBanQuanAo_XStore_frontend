@@ -10,6 +10,7 @@ import OrderNotes from "../components/checkout/OrderNotes";
 import PriceSummary from "../components/checkout/PriceSummary";
 import { selectThemeMode } from "../slices/ThemeSlice";
 import { getCartByUser } from "../slices/CartSlice";
+import { refreshUserInfo } from "../slices/AuthSlice";
 import { API_BASE_URL } from "../config/api";
 import { ArrowLeft } from "lucide-react";
 
@@ -246,6 +247,9 @@ export default function CheckoutPage() {
 
         // Clear cart after successful order
         dispatch(getCartByUser(user.id));
+
+        // Refresh user info to update points and rank
+        dispatch(refreshUserInfo(user.id));
 
         // If payment method is VNPAY, create payment URL and redirect
         if (selectedPaymentMethod === "VNPAY") {

@@ -1,11 +1,17 @@
-import { useState, useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useState, useMemo, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import ProductCard from "../components/product/ProductCard";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import {
+  fetchAllTotalQuantities,
+  fetchStockQuantities,
+} from "../slices/StockSlice";
 
 export default function HotPage() {
+  const dispatch = useDispatch();
   const allProducts = useSelector((state) => state.product.products) || [];
+  const { selectedStock } = useSelector((state) => state.stock);
   const themeMode = useSelector(selectThemeMode);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20; // 4 sản phẩm x 5 dòng = 20 sản phẩm
@@ -25,6 +31,20 @@ export default function HotPage() {
       })
       .sort((a, b) => b.id - a.id); // Sắp xếp theo ID giảm dần (mới nhất)
   }, [allProducts]);
+
+  // ✅ Fetch stock data cho hot products
+  useEffect(() => {
+    if (hotProducts.length > 0) {
+      const productIds = hotProducts.map((p) => p.id);
+      dispatch(fetchAllTotalQuantities(productIds));
+    }
+  }, [hotProducts.length, dispatch]);
+
+  useEffect(() => {
+    if (selectedStock?.id) {
+      dispatch(fetchStockQuantities(selectedStock.id));
+    }
+  }, [selectedStock?.id, dispatch]);
 
   // Tính toán phân trang
   const totalPages = Math.ceil(hotProducts.length / productsPerPage);

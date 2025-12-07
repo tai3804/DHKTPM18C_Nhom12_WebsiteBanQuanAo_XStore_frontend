@@ -5,6 +5,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getCartByUser } from "../slices/CartSlice";
 import { getProductTypes } from "../slices/ProductTypeSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import {
+  fetchAllTotalQuantities,
+  fetchStockQuantities,
+} from "../slices/StockSlice";
 import ProductList from "../components/product/ProductList";
 import ProductFilter from "../components/product/ProductFilter";
 
@@ -19,6 +23,7 @@ export default function ProductsPage() {
   const productTypes =
     useSelector((state) => state.productType.productTypes) || [];
   const { user } = useSelector((state) => state.auth);
+  const { selectedStock } = useSelector((state) => state.stock);
 
   const [filters, setFilters] = useState({
     type: category || "",
@@ -133,6 +138,21 @@ export default function ProductsPage() {
 
     return result;
   }, [allProducts, filters, searchQuery]);
+
+  // ✅ Fetch stock data cho filtered products
+  useEffect(() => {
+    if (filteredProducts.length > 0) {
+      const productIds = filteredProducts.map((p) => p.id);
+      dispatch(fetchAllTotalQuantities(productIds));
+    }
+  }, [filteredProducts.length, dispatch]);
+
+  // ✅ Fetch selected stock quantities
+  useEffect(() => {
+    if (selectedStock?.id) {
+      dispatch(fetchStockQuantities(selectedStock.id));
+    }
+  }, [selectedStock?.id, dispatch]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);

@@ -2,13 +2,19 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Star } from "lucide-react";
+import { toast } from "react-toastify";
 import { getProductById } from "../slices/ProductSlice";
+import CartToast from "../components/common/CartToast";
 import { addToCart, createCart } from "../slices/CartSlice";
 import {
   toggleFavouriteInstant as toggleFavourite,
   getFavouritesByUser,
 } from "../slices/FavouriteSlice";
 import { selectThemeMode } from "../slices/ThemeSlice";
+import {
+  fetchAllTotalQuantities,
+  fetchStockQuantities,
+} from "../slices/StockSlice";
 import ProductImageSection from "../components/product/ProductImageSection";
 import ProductPriceInfo from "../components/product/ProductPriceInfo";
 import ProductColorSelector from "../components/product/ProductColorSelector";
@@ -20,7 +26,6 @@ import ProductComments from "../components/product/ProductComments";
 import ProductCard from "../components/product/ProductCard";
 import RelatedProducts from "../components/product/RelatedProducts";
 import { getCommentsByProductId } from "../slices/CommentSlice";
-import { API_BASE_URL } from "../config/api";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -35,7 +40,8 @@ export default function ProductDetailPage() {
   const loading = useSelector((state) => state.loading.isLoading);
   const themeMode = useSelector(selectThemeMode);
   const isDark = themeMode === "dark";
-  const { selectedStock } = useSelector((state) => state.stock);
+  const { selectedStock, allStockQuantities, totalStockQuantities } =
+    useSelector((state) => state.stock);
 
   const infos = product?.productInfos || [];
   const colors = useMemo(
@@ -66,9 +72,13 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
-  const [stockQuantities, setStockQuantities] = useState({});
-  const [selectedStockQuantities, setSelectedStockQuantities] = useState({});
   const [isFavourite, setIsFavourite] = useState(false);
+
+  // ✅ ĐỌC TRỰC TIẾP TỪ REDUX CACHE
+  const stockQuantities = totalStockQuantities[product?.id] || {};
+  const selectedStockQuantities = selectedStock?.id
+    ? allStockQuantities[selectedStock.id] || {}
+    : {};
 
   // selected variant info
   const selectedInfo = useMemo(() => {
@@ -136,72 +146,18 @@ export default function ProductDetailPage() {
     }
   }, [colors]);
 
+  // ✅ Fetch stock data cho product này
   useEffect(() => {
     if (product?.id) {
-      fetchTotalQuantities();
+      dispatch(fetchAllTotalQuantities([product.id]));
     }
-    if (selectedStock?.id && product?.id) {
-      fetchSelectedStockQuantities();
+  }, [product?.id, dispatch]);
+
+  useEffect(() => {
+    if (selectedStock?.id) {
+      dispatch(fetchStockQuantities(selectedStock.id));
     }
-  }, [product, selectedStock]);
-
-  const fetchTotalQuantities = async () => {
-    if (!product?.id) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const response = await fetch(
-        `${API_BASE_URL}/api/stocks/products/${product.id}/total-quantities`,
-        {
-          headers,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setStockQuantities(data.result || {});
-      }
-    } catch (error) {
-      console.error("Error fetching stock quantities:", error);
-    }
-  };
-
-  const fetchSelectedStockQuantities = async () => {
-    if (!selectedStock?.id || !product?.id) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const response = await fetch(
-        `${API_BASE_URL}/api/stocks/${selectedStock.id}/items`,
-        {
-          headers,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        const quantities = {};
-        (data.result || []).forEach((product) => {
-          (product.variants || []).forEach((variant) => {
-            if (variant.id) {
-              quantities[variant.id] = variant.quantity;
-            }
-          });
-        });
-        setSelectedStockQuantities(quantities);
-      }
-    } catch (error) {
-      console.error("Error fetching selected stock quantities:", error);
-    }
-  };
+  }, [selectedStock?.id, dispatch]);
 
   // Update main image when color changes
   useEffect(() => {
@@ -229,38 +185,45 @@ export default function ProductDetailPage() {
 
     // Check if user is logged in
     if (!user) {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
       navigate("/login");
       return;
     }
 
     // Check if stock is selected
     if (!selectedStock) {
+      toast.warning("Vui lòng chọn kho hàng");
       return;
     }
 
     // Check if color is selected (only if product has colors)
     if (colors?.length > 0 && !selectedColor) {
+      toast.warning("Vui lòng chọn màu sắc");
       return;
     }
 
     // Check if size is selected (only if product has sizes)
     if (sizes?.length > 0 && !selectedSize) {
+      toast.warning("Vui lòng chọn kích thước");
       return;
     }
 
     // Check if variant is selected if product has variants
     if ((colors.length > 0 || sizes.length > 0) && !selectedInfo) {
+      toast.warning("Vui lòng chọn màu sắc và kích thước");
       return;
     }
 
     // Check quantity validation
     if (quantity <= 0) {
+      toast.warning("Số lượng phải lớn hơn 0");
       return;
     }
 
     if (
       quantity > (selectedStock ? availableInSelectedStock : availableQuantity)
     ) {
+      toast.warning("Số lượng vượt quá số lượng có sẵn trong kho");
       return;
     }
 
@@ -274,6 +237,7 @@ export default function ProductDetailPage() {
         const createResult = await dispatch(createCart(user.id));
 
         if (createResult.error) {
+          toast.error("Không thể tạo giỏ hàng. Vui lòng thử lại!");
           setIsAddingToCart(false);
           return;
         }
@@ -291,8 +255,19 @@ export default function ProductDetailPage() {
           productInfoId: selectedInfo?.id,
         })
       ).unwrap();
+
+      // Hiển thị thông báo thành công với custom component
+      toast.success(<CartToast product={product} />, {
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        icon: false, // Tắt icon mặc định vì đã có trong component
+      });
     } catch (error) {
       console.error("Add to cart error:", error);
+      toast.error("Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!");
     } finally {
       setIsAddingToCart(false);
     }
@@ -304,27 +279,32 @@ export default function ProductDetailPage() {
 
     // Same validations as add to cart
     if (!user) {
+      toast.error("Vui lòng đăng nhập để mua hàng");
       navigate("/login");
       return;
     }
 
     // Check if stock is selected
     if (!selectedStock) {
+      toast.warning("Vui lòng chọn kho hàng");
       return;
     }
 
     if (quantity <= 0) {
+      toast.warning("Số lượng phải lớn hơn 0");
       return;
     }
 
     if (
       quantity > (selectedStock ? availableInSelectedStock : availableQuantity)
     ) {
+      toast.warning("Số lượng vượt quá số lượng có sẵn trong kho");
       return;
     }
 
     // Check if variant is selected if product has variants
     if ((colors.length > 0 || sizes.length > 0) && !selectedInfo) {
+      toast.warning("Vui lòng chọn màu sắc và kích thước");
       return;
     }
 
@@ -338,6 +318,7 @@ export default function ProductDetailPage() {
         const createResult = await dispatch(createCart(user.id));
 
         if (createResult.error) {
+          toast.error("Không thể tạo giỏ hàng. Vui lòng thử lại!");
           setIsBuying(false);
           return;
         }
@@ -356,10 +337,12 @@ export default function ProductDetailPage() {
         })
       ).unwrap();
 
+      toast.success("Đang chuyển đến trang thanh toán...");
       // Redirect to checkout
       navigate("/checkout");
     } catch (error) {
       console.error("Buy now error:", error);
+      toast.error("Không thể mua hàng. Vui lòng thử lại!");
     } finally {
       setIsBuying(false);
     }

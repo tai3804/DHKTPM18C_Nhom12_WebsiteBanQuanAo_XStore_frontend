@@ -214,7 +214,11 @@ export default function ManageUsersPage() {
 
     // Tính khách hàng mới trong khoảng thời gian
     const newCustomers = users.filter((user) => {
-      const userCreated = new Date(user.createdAt || user.dob);
+      // Sử dụng createdAt nếu có, nếu không có thì user đó được tạo trước khi có createdAt
+      if (!user.createdAt) {
+        return false; // Bỏ qua user không có createdAt (user cũ)
+      }
+      const userCreated = new Date(user.createdAt);
       return userCreated >= startDate && userCreated < endDate;
     }).length;
 
@@ -421,13 +425,7 @@ export default function ManageUsersPage() {
               >
                 Tên
               </th>
-              <th
-                className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                  themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                Ngày sinh
-              </th>
+
               <th
                 className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
                   themeMode === "dark" ? "text-gray-300" : "text-gray-600"
@@ -455,13 +453,6 @@ export default function ManageUsersPage() {
                 }`}
               >
                 Loại người dùng
-              </th>
-              <th
-                className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
-                  themeMode === "dark" ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                Thành phố
               </th>
               <th
                 className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -527,13 +518,6 @@ export default function ManageUsersPage() {
                       themeMode === "dark" ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    {u.dob ? new Date(u.dob).toLocaleDateString() : "Trống"}
-                  </td>
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
                     {u.email || "Trống"}
                   </td>
                   <td
@@ -564,13 +548,6 @@ export default function ManageUsersPage() {
                       : u.userType === "PLATINUM"
                       ? "Bạch kim"
                       : u.userType || "N/A"}
-                  </td>
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {u.city || "Trống"}
                   </td>
                   <td className="px-4 py-3">
                     <span

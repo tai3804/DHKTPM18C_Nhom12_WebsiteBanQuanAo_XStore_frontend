@@ -52,11 +52,19 @@ export default function UserIcon() {
             themeMode === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-100"
           }`}
         >
-          <CircleUser
-            className={`h-6 w-6 transition-colors duration-300 ${
-              themeMode === "dark" ? "text-gray-300" : "text-gray-700"
-            }`}
-          />
+          {users.avatar ? (
+            <img
+              src={users.avatar}
+              alt="Avatar"
+              className="h-8 w-8 rounded-full object-cover border-2 border-gray-300"
+            />
+          ) : (
+            <CircleUser
+              className={`h-6 w-6 transition-colors duration-300 ${
+                themeMode === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}
+            />
+          )}
         </button>
       ) : (
         <button

@@ -201,69 +201,121 @@ const ProductComments = ({
             Chưa có bình luận nào.
           </p>
         ) : (
-          visibleComments.map((c) => (
-            <div
-              key={c.id}
-              className={`border-b pb-4 ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              }`}
-            >
-              <div className="font-semibold flex items-center gap-2">
-                <span
-                  className={`${isDark ? "text-blue-400" : "text-blue-600"}`}
-                >
-                  {c.authorName || c.author?.username || "Ẩn danh"}
-                </span>
-                <span className="text-yellow-500">
-                  {"★".repeat(c.rate)}
-                  <span className="text-gray-300">
-                    {"★".repeat(5 - c.rate)}
-                  </span>
-                </span>
-              </div>
+          visibleComments.map((c) => {
+            // Component Avatar inline
+            const CommentAvatar = () => {
+              const [imageError, setImageError] = useState(false);
+
+              // Debug
+              console.log(
+                "Comment:",
+                c.id,
+                "Author:",
+                c.author,
+                "AuthorId:",
+                c.authorId
+              );
+
+              // Xác định URL avatar
+              let avatarUrl = null;
+
+              if (c.author?.avatar) {
+                avatarUrl = c.author.avatar.startsWith("http")
+                  ? c.author.avatar
+                  : `${API_BASE_URL}${c.author.avatar}`;
+              } else if (c.authorAvatar) {
+                avatarUrl = c.authorAvatar.startsWith("http")
+                  ? c.authorAvatar
+                  : `${API_BASE_URL}${c.authorAvatar}`;
+              } else if (
+                c.authorId &&
+                user?.id === c.authorId &&
+                user?.avatar
+              ) {
+                avatarUrl = user.avatar.startsWith("http")
+                  ? user.avatar
+                  : `${API_BASE_URL}${user.avatar}`;
+              }
+            };
+
+            return (
               <div
-                className={`${isDark ? "text-gray-300" : "text-gray-700"} mt-1`}
+                key={c.id}
+                className={`border-b pb-4 ${
+                  isDark ? "border-gray-700" : "border-gray-200"
+                }`}
               >
-                {c.text}
-              </div>
-              {c.attachments && c.attachments.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {c.attachments.map((attachment, index) => (
-                    <div key={attachment.id || index}>
-                      {attachment.fileType === "video" ? (
-                        <video
-                          src={`${API_BASE_URL}${attachment.imageUrl}`}
-                          controls
-                          className="max-w-xs max-h-48 rounded-lg object-cover"
-                          onError={(e) => {
-                            console.error("Video load error:", e);
-                            e.target.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <img
-                          src={`${API_BASE_URL}${attachment.imageUrl}`}
-                          alt={`comment-attachment-${attachment.id || index}`}
-                          className="max-w-xs max-h-48 rounded-lg object-cover"
-                          onError={(e) => {
-                            console.error("Image load error:", e);
-                            e.target.style.display = "none";
-                          }}
-                        />
-                      )}
+                <div className="flex items-start gap-3">
+                  {/* Avatar */}
+                  <CommentAvatar />
+
+                  {/* Comment content */}
+                  <div className="flex-1">
+                    <div className="font-semibold flex items-center gap-2">
+                      <span
+                        className={`${
+                          isDark ? "text-blue-400" : "text-blue-600"
+                        }`}
+                      >
+                        {c.authorName || c.author?.username || "Ẩn danh"}
+                      </span>
+                      <span className="text-yellow-500">
+                        {"★".repeat(c.rate)}
+                        <span className="text-gray-300">
+                          {"★".repeat(5 - c.rate)}
+                        </span>
+                      </span>
                     </div>
-                  ))}
+                    <div
+                      className={`${
+                        isDark ? "text-gray-300" : "text-gray-700"
+                      } mt-1`}
+                    >
+                      {c.text}
+                    </div>
+                    {c.attachments && c.attachments.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {c.attachments.map((attachment, index) => (
+                          <div key={attachment.id || index}>
+                            {attachment.fileType === "video" ? (
+                              <video
+                                src={`${API_BASE_URL}${attachment.imageUrl}`}
+                                controls
+                                className="max-w-xs max-h-48 rounded-lg object-cover"
+                                onError={(e) => {
+                                  console.error("Video load error:", e);
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <img
+                                src={`${API_BASE_URL}${attachment.imageUrl}`}
+                                alt={`comment-attachment-${
+                                  attachment.id || index
+                                }`}
+                                className="max-w-xs max-h-48 rounded-lg object-cover"
+                                onError={(e) => {
+                                  console.error("Image load error:", e);
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div
+                      className={`${
+                        isDark ? "text-gray-500" : "text-gray-400"
+                      } text-xs mt-1`}
+                    >
+                      {new Date(c.commentAt).toLocaleString()}
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div
-                className={`${
-                  isDark ? "text-gray-500" : "text-gray-400"
-                } text-xs mt-1`}
-              >
-                {new Date(c.commentAt).toLocaleString()}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       {comments.length > 3 && !showAllByDefault && (

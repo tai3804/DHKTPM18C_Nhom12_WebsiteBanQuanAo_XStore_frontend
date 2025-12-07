@@ -37,7 +37,7 @@ export default function CategorySection() {
       name: "Phụ Kiện",
       icon: Watch,
       desc: "Phụ kiện thời trang",
-      productType: "phu-kien",
+      productType: "Phụ Kiện",
       id: "phu-kien",
     },
   ];

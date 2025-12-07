@@ -56,13 +56,19 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
         return <Clock className="w-5 h-5 text-purple-500" />;
       case "CONFIRMED":
         return <CheckCircle className="w-5 h-5 text-blue-500" />;
+      case "PROCESSING":
+        return <Package className="w-5 h-5 text-indigo-500" />;
       case "SHIPPING":
       case "IN_TRANSIT":
         return <Truck className="w-5 h-5 text-orange-500" />;
+      case "PENDING_RECEIPT":
+        return <Clock className="w-5 h-5 text-teal-500" />;
       case "DELIVERED":
         return <CheckCircle className="w-5 h-5 text-green-500" />;
       case "CANCELLED":
         return <XCircle className="w-5 h-5 text-red-500" />;
+      case "RETURN_REQUESTED":
+        return <XCircle className="w-5 h-5 text-pink-500" />;
       default:
         return <Package className="w-5 h-5 text-gray-500" />;
     }
@@ -73,10 +79,13 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
       PENDING: "Chờ xác nhận",
       AWAITING_PAYMENT: "Chờ thanh toán",
       CONFIRMED: "Đã xác nhận",
+      PROCESSING: "Đang xử lý",
       SHIPPING: "Đang giao hàng",
       IN_TRANSIT: "Đang giao hàng",
-      DELIVERED: "Đã giao",
+      PENDING_RECEIPT: "Chờ nhận hàng",
+      DELIVERED: "Đã giao hàng",
       CANCELLED: "Đã hủy",
+      RETURN_REQUESTED: "Yêu cầu đổi/trả",
     };
     return statusMap[status] || status;
   };
@@ -89,13 +98,19 @@ export default function OrderCard({ order, maxItems, actionType = "detail" }) {
         "text-purple-600 bg-purple-100 dark:bg-purple-900 dark:text-purple-300",
       CONFIRMED:
         "text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300",
+      PROCESSING:
+        "text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300",
       SHIPPING:
         "text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-300",
       IN_TRANSIT:
         "text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-300",
+      PENDING_RECEIPT:
+        "text-teal-600 bg-teal-100 dark:bg-teal-900 dark:text-teal-300",
       DELIVERED:
         "text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-300",
       CANCELLED: "text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300",
+      RETURN_REQUESTED:
+        "text-pink-600 bg-pink-100 dark:bg-pink-900 dark:text-pink-300",
     };
     return (
       colorMap[status] ||

@@ -75,17 +75,6 @@ export default function Header({ onMenuClick }) {
         {/* Cart */}
         <CartIcon />
 
-        {/* Notification */}
-        <div
-          className={`p-2 rounded-full transition-all duration-200 border border-transparent ${
-            themeMode === "dark"
-              ? "hover:bg-gray-800 hover:border-gray-700"
-              : "hover:bg-gray-100 hover:border-gray-300"
-          }`}
-        >
-          <NotiIcon />
-        </div>
-
         {/* Account */}
         <div
           className={`rounded-full transition-all duration-200 border border-transparent ${

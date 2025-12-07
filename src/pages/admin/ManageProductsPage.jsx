@@ -53,26 +53,22 @@ export default function ManageProductsPage() {
     if (products && productTypes) {
       const totalProducts = products.length;
       const womenProducts = products.filter((product) => {
-        const categoryId =
-          product.productTypeId || product.typeId || product.categoryId;
-        const category = productTypes.find((pt) => pt.id === categoryId);
-        return category && category.name.toLowerCase().includes("nữ");
+        // Product có thuộc tính type là object với id và name
+        const categoryName = product.type?.name || "";
+        return categoryName.toLowerCase().includes("nữ");
       }).length;
       const menProducts = products.filter((product) => {
-        const categoryId =
-          product.productTypeId || product.typeId || product.categoryId;
-        const category = productTypes.find((pt) => pt.id === categoryId);
-        return category && category.name.toLowerCase().includes("nam");
+        // Product có thuộc tính type là object với id và name
+        const categoryName = product.type?.name || "";
+        return categoryName.toLowerCase().includes("nam");
       }).length;
       const accessoriesProducts = products.filter((product) => {
-        const categoryId =
-          product.productTypeId || product.typeId || product.categoryId;
-        const category = productTypes.find((pt) => pt.id === categoryId);
+        // Product có thuộc tính type là object với id và name
+        const categoryName = product.type?.name || "";
         return (
-          category &&
-          (category.name.toLowerCase().includes("phụ kiện") ||
-            category.name.toLowerCase().includes("accessories") ||
-            category.name.toLowerCase().includes("phụ"))
+          categoryName.toLowerCase().includes("phụ kiện") ||
+          categoryName.toLowerCase().includes("accessories") ||
+          categoryName.toLowerCase().includes("phụ")
         );
       }).length;
 

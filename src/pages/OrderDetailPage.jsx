@@ -12,6 +12,7 @@ import {
   CheckCircle,
   XCircle,
   Truck,
+  DownloadCloud,
 } from "lucide-react";
 
 export default function OrderDetailPage() {
@@ -22,6 +23,7 @@ export default function OrderDetailPage() {
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -66,12 +68,19 @@ export default function OrderDetailPage() {
         return <Clock className="w-6 h-6 text-purple-500" />;
       case "CONFIRMED":
         return <CheckCircle className="w-6 h-6 text-blue-500" />;
+      case "PROCESSING":
+        return <Package className="w-6 h-6 text-indigo-500" />;
       case "SHIPPING":
+      case "IN_TRANSIT":
         return <Truck className="w-6 h-6 text-orange-500" />;
+      case "PENDING_RECEIPT":
+        return <Clock className="w-6 h-6 text-teal-500" />;
       case "DELIVERED":
         return <CheckCircle className="w-6 h-6 text-green-500" />;
       case "CANCELLED":
         return <XCircle className="w-6 h-6 text-red-500" />;
+      case "RETURN_REQUESTED":
+        return <XCircle className="w-6 h-6 text-pink-500" />;
       default:
         return <Package className="w-6 h-6 text-gray-500" />;
     }
@@ -82,9 +91,13 @@ export default function OrderDetailPage() {
       PENDING: "Chờ xác nhận",
       AWAITING_PAYMENT: "Chờ thanh toán",
       CONFIRMED: "Đã xác nhận",
+      PROCESSING: "Đang xử lý",
       SHIPPING: "Đang giao hàng",
-      DELIVERED: "Đã giao",
+      IN_TRANSIT: "Đang giao hàng",
+      PENDING_RECEIPT: "Chờ nhận hàng",
+      DELIVERED: "Đã giao hàng",
       CANCELLED: "Đã hủy",
+      RETURN_REQUESTED: "Yêu cầu đổi/trả",
     };
     return statusMap[status] || status;
   };
@@ -97,11 +110,19 @@ export default function OrderDetailPage() {
         "text-purple-600 bg-purple-100 dark:bg-purple-900 dark:text-purple-300",
       CONFIRMED:
         "text-blue-600 bg-blue-100 dark:bg-blue-900 dark:text-blue-300",
+      PROCESSING:
+        "text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300",
       SHIPPING:
         "text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-300",
+      IN_TRANSIT:
+        "text-orange-600 bg-orange-100 dark:bg-orange-900 dark:text-orange-300",
+      PENDING_RECEIPT:
+        "text-teal-600 bg-teal-100 dark:bg-teal-900 dark:text-teal-300",
       DELIVERED:
         "text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-300",
       CANCELLED: "text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300",
+      RETURN_REQUESTED:
+        "text-pink-600 bg-pink-100 dark:bg-pink-900 dark:text-pink-300",
     };
     return (
       colorMap[status] ||
@@ -157,6 +178,85 @@ export default function OrderDetailPage() {
       toast.error("Lỗi thanh toán: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setPdfLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Vui lòng đăng nhập để tải PDF");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/orders/${orderId}/pdf`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          navigate("/login");
+          return;
+        } else if (response.status === 404) {
+          toast.error("Không tìm thấy đơn hàng");
+          return;
+        } else if (response.status === 403) {
+          toast.error("Bạn không có quyền tải PDF đơn hàng này");
+          return;
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      }
+
+      const blob = await response.blob();
+
+      if (blob.size === 0) {
+        toast.error("File PDF trống hoặc không hợp lệ");
+        return;
+      }
+
+      // Tạo URL cho blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Tạo element a để download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `don-hang-${orderId}-${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
+      document.body.appendChild(a);
+
+      // Trigger download
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Đã tải xuống PDF đơn hàng thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tải PDF:", error);
+
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        toast.error(
+          "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng."
+        );
+      } else {
+        toast.error("Có lỗi xảy ra khi tải PDF. Vui lòng thử lại sau.");
+      }
+    } finally {
+      setPdfLoading(false);
     }
   };
 
@@ -432,8 +532,8 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Action Buttons */}
-            {order.status === "AWAITING_PAYMENT" && (
-              <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center gap-4">
+              {order.status === "AWAITING_PAYMENT" && (
                 <button
                   onClick={handlePayment}
                   disabled={loading}
@@ -446,8 +546,21 @@ export default function OrderDetailPage() {
                   )}
                   Thanh toán ngay
                 </button>
-              </div>
-            )}
+              )}
+
+              <button
+                onClick={handleDownloadPdf}
+                disabled={pdfLoading}
+                className="px-8 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+              >
+                {pdfLoading ? (
+                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <DownloadCloud size={20} />
+                )}
+                Xuất PDF
+              </button>
+            </div>
           </div>
         </div>
       </div>

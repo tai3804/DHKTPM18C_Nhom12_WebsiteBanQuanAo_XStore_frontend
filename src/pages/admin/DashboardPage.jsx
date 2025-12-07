@@ -43,12 +43,23 @@ export default function Dashboard() {
   const productTypes =
     useSelector((state) => state.productType.productTypes) || [];
 
+  // Log state khi component mount và khi data thay đổi
+  useEffect(() => {
+    console.log("📊 [Dashboard] State updated:", {
+      usersCount: users.length,
+      productsCount: products.length,
+      ordersCount: orders.length,
+      productTypesCount: productTypes.length,
+    });
+  }, [users.length, products.length, orders.length, productTypes.length]);
+
   const [timeRange, setTimeRange] = useState("month");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     totalCustomers: 0,
     totalOrders: 0,
+    deliveredOrders: 0,
     revenue: 0,
     profit: 0,
   });
@@ -58,6 +69,13 @@ export default function Dashboard() {
 
   // Tính toán thống kê theo khoảng thời gian
   const calculateStats = (range) => {
+    console.log("=== calculateStats START ===", {
+      range,
+      ordersCount: orders.length,
+      productsCount: products.length,
+      usersCount: users.length,
+    });
+
     const now = new Date();
     let startDate, endDate;
 
@@ -83,31 +101,136 @@ export default function Dashboard() {
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     }
 
+    console.log("Date range:", { startDate, endDate });
+
     // Tính tổng khách hàng
     const totalCustomers = users.length;
 
     // Tính đơn hàng trong khoảng thời gian
     const periodOrders = orders.filter((order) => {
       const orderDate = new Date(order.createdAt || order.orderDate);
-      return orderDate >= startDate && orderDate < endDate;
+      const inRange = orderDate >= startDate && orderDate < endDate;
+      return inRange;
+    });
+
+    console.log("Period orders:", {
+      total: periodOrders.length,
+      delivered: periodOrders.filter((o) => o.status === "DELIVERED").length,
+      allStatuses: periodOrders.map((o) => ({
+        id: o.id,
+        status: o.status,
+        total: o.total,
+        createdAt: o.createdAt,
+      })),
     });
 
     const totalOrders = periodOrders.length;
 
-    // Tính doanh thu
-    const revenue = periodOrders.reduce((sum, order) => {
-      return sum + (order.totalAmount || 0);
-    }, 0);
+    // Tính doanh thu - CHỈ tính đơn hàng đã giao
+    let revenue = 0;
+    const deliveredOrders = periodOrders.filter(
+      (o) => o.status === "DELIVERED"
+    );
 
-    // Tính lợi nhuận (giả sử lợi nhuận = doanh thu * 0.3)
-    const profit = revenue * 0.3;
+    console.log(
+      "Calculating revenue from delivered orders:",
+      deliveredOrders.length
+    );
+
+    deliveredOrders.forEach((order) => {
+      const orderTotal = order.total || order.totalAmount || 0;
+      revenue += orderTotal;
+      console.log(
+        `  Order ${order.id}: ${orderTotal}₫ (status: ${order.status}, createdAt: ${order.createdAt})`
+      );
+    });
+
+    console.log("Total revenue:", revenue);
+
+    // Tính lợi nhuận thực tế (giá bán - giá nhập)
+    let profit = 0;
+    let profitDetails = [];
+
+    deliveredOrders.forEach((order) => {
+      if (order.orderItems && Array.isArray(order.orderItems)) {
+        console.log(`Order ${order.id} has ${order.orderItems.length} items`);
+
+        order.orderItems.forEach((item, idx) => {
+          // Lấy product từ nhiều nguồn
+          let product = item.product;
+
+          if (!product && item.productId) {
+            product = products.find((p) => p.id === item.productId);
+          }
+
+          if (!product && item.product?.id) {
+            product = products.find((p) => p.id === item.product.id);
+          }
+
+          console.log(`  Item ${idx + 1}/${order.orderItems.length}:`, {
+            productId: item.productId || item.product?.id,
+            foundProduct: !!product,
+            productName: product?.name,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            subTotal: item.subTotal,
+          });
+
+          if (product) {
+            // Giá nhập: priceInStock hoặc 70% giá bán
+            const costPrice = product.priceInStock || item.unitPrice * 0.7;
+            const itemProfit = (item.unitPrice - costPrice) * item.quantity;
+            profit += itemProfit;
+
+            console.log(`    Profit calculation:`, {
+              unitPrice: item.unitPrice,
+              costPrice,
+              quantity: item.quantity,
+              itemProfit,
+              usingPriceInStock: !!product.priceInStock,
+            });
+
+            profitDetails.push({
+              orderId: order.id,
+              productName: product.name,
+              unitPrice: item.unitPrice,
+              costPrice,
+              quantity: item.quantity,
+              itemProfit,
+            });
+          } else {
+            console.warn(`    ⚠️ Product not found for item:`, {
+              productId: item.productId,
+              itemProduct: item.product,
+            });
+          }
+        });
+      } else {
+        console.warn(`Order ${order.id} has no orderItems`);
+      }
+    });
+
+    profit = Math.round(profit);
+
+    console.log("=== FINAL STATS ===", {
+      totalCustomers,
+      totalOrders,
+      deliveredOrders: deliveredOrders.length,
+      revenue,
+      profit,
+      profitDetails: profitDetails.slice(0, 5),
+      totalProfitCalculated: profit,
+    });
 
     setStats({
       totalCustomers,
       totalOrders,
+      deliveredOrders: deliveredOrders.length,
       revenue,
       profit,
     });
+
+    console.log("=== calculateStats END ===");
   };
 
   // Tạo dữ liệu cho biểu đồ
@@ -124,10 +247,12 @@ export default function Dashboard() {
           const orderDate = new Date(order.createdAt || order.orderDate);
           return orderDate.toDateString() === date.toDateString();
         });
-        const dayRevenue = dayOrders.reduce(
-          (sum, order) => sum + (order.totalAmount || 0),
-          0
-        );
+        const dayRevenue = dayOrders.reduce((sum, order) => {
+          if (order.status === "DELIVERED") {
+            return sum + (order.total || 0);
+          }
+          return sum;
+        }, 0);
 
         data.push({
           label: date.toLocaleDateString("vi-VN", {
@@ -149,10 +274,12 @@ export default function Dashboard() {
             orderDate.getMonth() === date.getMonth()
           );
         });
-        const monthRevenue = monthOrders.reduce(
-          (sum, order) => sum + (order.totalAmount || 0),
-          0
-        );
+        const monthRevenue = monthOrders.reduce((sum, order) => {
+          if (order.status === "DELIVERED") {
+            return sum + (order.total || 0);
+          }
+          return sum;
+        }, 0);
 
         data.push({
           label: date.toLocaleDateString("vi-VN", {
@@ -171,10 +298,12 @@ export default function Dashboard() {
           const orderDate = new Date(order.createdAt || order.orderDate);
           return orderDate.getFullYear() === year;
         });
-        const yearRevenue = yearOrders.reduce(
-          (sum, order) => sum + (order.totalAmount || 0),
-          0
-        );
+        const yearRevenue = yearOrders.reduce((sum, order) => {
+          if (order.status === "DELIVERED") {
+            return sum + (order.total || 0);
+          }
+          return sum;
+        }, 0);
 
         data.push({
           label: year.toString(),
@@ -192,14 +321,21 @@ export default function Dashboard() {
     const categoryStats = {};
     const revenueStats = {};
 
-    // Duyệt qua tất cả orders để tính toán
+    // Duyệt qua các đơn hàng đã giao để tính toán
     orders.forEach((order) => {
-      if (order.orderItems && Array.isArray(order.orderItems)) {
+      if (
+        order.status === "DELIVERED" &&
+        order.orderItems &&
+        Array.isArray(order.orderItems)
+      ) {
         order.orderItems.forEach((item) => {
-          const product = products.find((p) => p.id === item.productId);
+          // Lấy product trực tiếp từ item hoặc tìm trong products
+          const product =
+            item.product || products.find((p) => p.id === item.productId);
           if (product) {
+            // Lấy category ID từ nhiều nguồn khác nhau
             const categoryId =
-              product.productTypeId || product.typeId || product.categoryId;
+              product.type?.id || product.productTypeId || product.typeId;
             const category = productTypes.find((pt) => pt.id === categoryId);
             const categoryName = category ? category.name : "Khác";
 
@@ -213,8 +349,9 @@ export default function Dashboard() {
             if (!revenueStats[categoryName]) {
               revenueStats[categoryName] = 0;
             }
+            // Dùng subTotal hoặc tính từ unitPrice * quantity
             revenueStats[categoryName] +=
-              (item.price || 0) * (item.quantity || 1);
+              item.subTotal || (item.unitPrice || 0) * (item.quantity || 1);
           }
         });
       }
@@ -230,36 +367,70 @@ export default function Dashboard() {
     setPieData(pieData);
   };
 
+  // Effect 1: Load data từ Redux khi component mount
   useEffect(() => {
     const loadData = async () => {
+      console.log("📊 [Dashboard] Loading data - Current state:", {
+        usersLength: users.length,
+        productsLength: products.length,
+        ordersLength: orders.length,
+      });
+
       setLoading(true);
       try {
-        // Load dữ liệu từ Redux store
-        if (users.length === 0) await dispatch(getUsers());
-        if (products.length === 0) await dispatch(getProducts());
-        if (orders.length === 0) await dispatch(fetchAllOrders());
-        if (productTypes.length === 0) await dispatch(getProductTypes());
+        const results = await Promise.all([
+          users.length === 0 ? dispatch(getUsers()) : Promise.resolve(),
+          products.length === 0 ? dispatch(getProducts()) : Promise.resolve(),
+          orders.length === 0 ? dispatch(fetchAllOrders()) : Promise.resolve(),
+          productTypes.length === 0
+            ? dispatch(getProductTypes())
+            : Promise.resolve(),
+        ]);
 
-        // Tính toán thống kê và biểu đồ
-        calculateStats(timeRange);
-        generateChartData(timeRange);
-        generatePieData();
+        console.log("📊 [Dashboard] Data loaded - Results:", results);
       } catch (error) {
-        console.error("Error loading dashboard data:", error);
+        console.error("❌ [Dashboard] Error loading dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [
-    dispatch,
-    timeRange,
-    users.length,
-    products.length,
-    orders.length,
-    productTypes.length,
-  ]);
+  }, [dispatch]); // Chỉ chạy 1 lần khi mount
+
+  // Effect 2: Tính toán stats khi data hoặc timeRange thay đổi
+  useEffect(() => {
+    console.log(
+      "📊 [Dashboard] Effect 2 triggered - Checking data availability:",
+      {
+        hasOrders: orders.length > 0,
+        hasProducts: products.length > 0,
+        hasUsers: users.length > 0,
+        ordersCount: orders.length,
+        productsCount: products.length,
+        usersCount: users.length,
+      }
+    );
+
+    // Thay đổi: Chỉ yêu cầu users, orders và products có thể empty
+    if (users.length > 0) {
+      console.log("✅ [Dashboard] Recalculating stats with data:", {
+        orders: orders.length,
+        products: products.length,
+        users: users.length,
+        productTypes: productTypes.length,
+        timeRange,
+        sampleOrder: orders[0],
+        deliveredOrders: orders.filter((o) => o.status === "DELIVERED").length,
+      });
+
+      calculateStats(timeRange);
+      generateChartData(timeRange);
+      generatePieData();
+    } else {
+      console.warn("⚠️ [Dashboard] Not enough data to calculate stats");
+    }
+  }, [orders, products, users, productTypes, timeRange]); // Chạy khi data thay đổi
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
@@ -419,8 +590,8 @@ export default function Dashboard() {
               icon: <Users size={20} />,
             },
             {
-              label: "Đơn hàng",
-              value: stats.totalOrders,
+              label: "Đơn hàng (Đã giao)",
+              value: `${stats.totalOrders} (${stats.deliveredOrders || 0})`,
               color: "bg-green-500",
               icon: <ShoppingCart size={20} />,
             },

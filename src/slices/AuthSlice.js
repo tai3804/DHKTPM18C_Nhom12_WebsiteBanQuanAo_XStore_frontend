@@ -278,6 +278,43 @@ export const googleLogin = createAsyncThunk(
   }
 );
 
+// Refresh User Info - Cập nhật thông tin user mới nhất từ server
+export const refreshUserInfo = createAsyncThunk(
+  "auth/refreshUserInfo",
+  async (userId, { dispatch, rejectWithValue, getState }) => {
+    try {
+      const token = getState().auth.token || localStorage.getItem("token");
+      
+      if (!token || !userId) {
+        return rejectWithValue("Missing token or userId");
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user info");
+      }
+
+      const data = await res.json();
+      
+      if (data.code === 200 && data.result) {
+        return data.result;
+      } else {
+        throw new Error(data.message || "Failed to get user info");
+      }
+    } catch (error) {
+      console.error("Error refreshing user info:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const authSlice = createSlice({
   name: "auth",
@@ -392,6 +429,14 @@ const authSlice = createSlice({
       })
       .addCase(googleLogin.rejected, (state, action) => {
         toast.error("Đăng nhập Google thất bại!");
+      })
+      .addCase(refreshUserInfo.fulfilled, (state, action) => {
+        const updatedUser = action.payload;
+        state.user = updatedUser;
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      })
+      .addCase(refreshUserInfo.rejected, (state, action) => {
+        console.error("Failed to refresh user info:", action.payload);
       });
   },
 });
