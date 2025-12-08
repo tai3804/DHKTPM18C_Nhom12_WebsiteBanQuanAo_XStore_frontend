@@ -39,9 +39,6 @@ export default function Header() {
 
       {/* Right: Icons */}
       <div className="flex items-center gap-6 relative">
-        {/* Notification */}
-        <NotiIcon />
-
         {/* Theme Toggle */}
         <ThemeToggle />
 

@@ -67,15 +67,16 @@ export default function AdminLayout() {
         console.log("🚀 Starting admin data preload in background...");
 
         // Load tất cả dữ liệu song song trong background
+        // Note: Products, Stocks, ProductSales are already loaded in App.jsx
         await Promise.all([
           // dispatch(getProducts({})),
           // dispatch(getAllProductVariants()),
           dispatch(getProductTypes()),
           dispatch(getUsers(token)),
-          dispatch(getStocks()),
+          // dispatch(getStocks()), // Already loaded in App.jsx
           dispatch(getDiscounts(token)),
           dispatch(fetchAllOrders(token)),
-          dispatch(getProductSales()),
+          // dispatch(getProductSales()), // Already loaded in App.jsx
         ]);
 
         console.log("✅ Admin data preloaded successfully");

@@ -139,12 +139,12 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
-  useEffect(() => {
-    // Auto-select first color when colors are loaded
-    if (colors?.length > 0) {
-      setSelectedColor(colors[0]);
-    }
-  }, [colors]);
+  // useEffect(() => {
+  //   // Auto-select first color when colors are loaded
+  //   if (colors?.length > 0) {
+  //     setSelectedColor(colors[0]);
+  //   }
+  // }, [colors]);
 
   // ✅ Fetch stock data cho product này
   useEffect(() => {

@@ -65,6 +65,9 @@ export default function App() {
   const user = useSelector((state) => state.auth.user);
   const themeMode = useSelector(selectThemeMode);
 
+  // Debug: Check if .env is loaded
+  console.log("🔍 API_BASE_URL:", import.meta.env.VITE_API_URL);
+
   // Initialize theme on mount
   useEffect(() => {
     console.log("App.jsx - Initial theme mode:", themeMode);

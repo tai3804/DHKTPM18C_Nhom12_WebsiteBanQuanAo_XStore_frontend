@@ -18,6 +18,7 @@ import {
   Percent,
   DollarSign,
   Package,
+  ChevronDown,
 } from "lucide-react";
 
 export default function ManageProductSalePage() {
@@ -28,11 +29,25 @@ export default function ManageProductSalePage() {
   const [showForm, setShowForm] = useState(false);
   const [editingProductSales, setEditingProductSales] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // ✅ Không cần fetch nữa - đã được preload trong AdminLayout
   // useEffect(() => {
   //   dispatch(getProductSales());
   // }, [dispatch]);
+
+  // Đóng dropdown khi click bên ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest(".dropdown-container")) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen]);
 
   const handleAdd = () => {
     setEditingProductSales(null);
@@ -65,15 +80,31 @@ export default function ManageProductSalePage() {
     setShowForm(false);
   };
 
-  // 🔍 Filter product sales based on search query
+  const getProductSaleStatus = (productSale) => {
+    const now = new Date();
+    const start = productSale.startDate
+      ? new Date(productSale.startDate)
+      : null;
+    const end = productSale.endDate ? new Date(productSale.endDate) : null;
+
+    if (start && now < start) return "upcoming";
+    if (end && now > end) return "expired";
+    return "active";
+  };
+
+  // 🔍 Filter product sales based on search query and status
   const filteredProductSales = productSales.filter((productSale) => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return true;
-
     const productName = productSale.product?.name?.toLowerCase() || "";
     const productId = productSale.product?.id?.toString() || "";
 
-    return productName.includes(query) || productId.includes(query);
+    const matchSearch =
+      !query || productName.includes(query) || productId.includes(query);
+
+    if (!matchSearch) return false;
+
+    if (statusFilter === "all") return true;
+    return getProductSaleStatus(productSale) === statusFilter;
   });
 
   const formatDateTime = (dateString) => {
@@ -140,7 +171,7 @@ export default function ManageProductSalePage() {
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
           <h1
             className={`text-2xl font-bold transition-colors duration-300 ${
@@ -167,13 +198,71 @@ export default function ManageProductSalePage() {
             />
           </div>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <Plus size={18} />
-          Thêm giảm giá
-        </button>
+        <div className="flex items-center gap-4">
+          {/* Dropdown lọc theo trạng thái */}
+          <div className="relative dropdown-container">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-300 ${
+                themeMode === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100 hover:bg-gray-700"
+                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Tag size={18} />
+              {statusFilter === "all" && "Tất cả"}
+              {statusFilter === "active" && "Đang hoạt động"}
+              {statusFilter === "upcoming" && "Sắp diễn ra"}
+              {statusFilter === "expired" && "Đã kết thúc"}
+              <ChevronDown size={16} />
+            </button>
+
+            {isDropdownOpen && (
+              <div
+                className={`absolute right-0 mt-2 w-48 rounded-lg border shadow-lg z-10 transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                {[
+                  { value: "all", label: "Tất cả" },
+                  { value: "active", label: "Đang hoạt động" },
+                  { value: "upcoming", label: "Sắp diễn ra" },
+                  { value: "expired", label: "Đã kết thúc" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setStatusFilter(option.value);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors duration-300 ${
+                      themeMode === "dark"
+                        ? "text-gray-100 hover:bg-gray-700"
+                        : "text-gray-700 hover:bg-gray-50"
+                    } ${
+                      statusFilter === option.value
+                        ? themeMode === "dark"
+                          ? "bg-gray-700"
+                          : "bg-gray-100"
+                        : ""
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <Plus size={18} />
+            Thêm giảm giá
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}

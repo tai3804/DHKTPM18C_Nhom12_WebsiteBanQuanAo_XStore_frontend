@@ -9,49 +9,48 @@ export default function CategorySection() {
   const navigate = useNavigate();
   const themeMode = useSelector(selectThemeMode);
 
-  // Danh sách 4 categories cố định
+  // Danh sách 4 categories với background images
   const categories = [
     {
       name: "Tất Cả",
-      icon: ShoppingBag,
-      desc: "Xem toàn bộ sản phẩm",
+      desc: "Khám phá toàn bộ sản phẩm",
       productType: "all",
       id: "all",
+      bgImage:
+        "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80",
     },
     {
-      name: "HOT",
-      icon: Flame,
-      desc: "Sản phẩm HOT nhất",
-      productType: "hot",
-      id: "hot",
-      animate: true,
+      name: "Đồ Nam",
+      desc: "Thời trang nam hiện đại",
+      productType: "nam",
+      id: "do-nam",
+      bgImage:
+        "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=800&q=80",
     },
     {
-      name: "Sale",
-      icon: Tag,
-      desc: "Ưu đãi đặc biệt",
-      productType: "sale",
-      id: "sale",
+      name: "Đồ Nữ",
+      desc: "Thời trang nữ thanh lịch",
+      productType: "nu",
+      id: "do-nu",
+      bgImage:
+        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80",
     },
     {
       name: "Phụ Kiện",
-      icon: Watch,
-      desc: "Phụ kiện thời trang",
-      productType: "Phụ Kiện",
+      desc: "Hoàn thiện phong cách",
+      productType: "phu-kien",
       id: "phu-kien",
+      bgImage:
+        "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=800&q=80",
     },
   ];
 
   const handleCategoryClick = (productType) => {
     if (productType === "all") {
       navigate("/products");
-    } else if (productType === "sale") {
-      navigate("/sale");
-    } else if (productType === "hot") {
-      navigate("/hot");
     } else {
       // Navigate với query parameter
-      navigate(`/products?category=${encodeURIComponent(productType)}`);
+      navigate(`/products?type=${encodeURIComponent(productType)}`);
     }
   };
 
@@ -78,7 +77,7 @@ export default function CategorySection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
         {categories.map((category, index) => (
           <motion.div
             key={category.id || category.name}
@@ -88,85 +87,33 @@ export default function CategorySection() {
             className="group cursor-pointer"
             onClick={() => handleCategoryClick(category.productType)}
           >
-            <div
-              className={`rounded-lg p-6 text-center transition-all duration-300 border aspect-square flex flex-col justify-center items-center ${
-                category.productType === "hot"
-                  ? themeMode === "dark"
-                    ? "bg-gray-800 border-gray-700 hover:border-orange-400 hover:bg-gray-700"
-                    : "bg-white border-gray-200 hover:border-orange-500 hover:bg-gray-50"
-                  : category.productType === "sale"
-                  ? themeMode === "dark"
-                    ? "bg-gray-800 border-gray-700 hover:border-green-400 hover:bg-gray-700"
-                    : "bg-white border-gray-200 hover:border-green-500 hover:bg-gray-50"
-                  : themeMode === "dark"
-                  ? "bg-gray-800 border-gray-700 hover:border-blue-400 hover:bg-gray-700"
-                  : "bg-white border-gray-200 hover:border-blue-500 hover:bg-gray-50"
-              } ${
-                category.productType === "hot" ||
-                category.productType === "sale" ||
-                category.productType === "all"
-                  ? "hover:shadow-xl"
-                  : "hover:shadow-lg"
-              }`}
-            >
+            <div className="relative rounded-xl overflow-hidden aspect-[4/5] shadow-lg hover:shadow-2xl transition-all duration-500 group-hover:scale-105">
+              {/* Background Image with Overlay */}
               <div
-                className={`mb-3 transition-transform ${
-                  category.animate
-                    ? "group-hover:scale-110 animate-pulse"
-                    : "group-hover:scale-110"
-                }`}
-              >
-                <category.icon
-                  size={48}
-                  className={`transition-colors duration-300 ${
-                    category.productType === "hot"
-                      ? themeMode === "dark"
-                        ? "text-orange-400"
-                        : "text-orange-600"
-                      : category.productType === "sale"
-                      ? themeMode === "dark"
-                        ? "text-green-400"
-                        : "text-green-600"
-                      : themeMode === "dark"
-                      ? "text-blue-400"
-                      : "text-blue-600"
-                  }`}
-                />
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                style={{
+                  backgroundImage: `url(${category.bgImage})`,
+                }}
+              />
+
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+              {/* Content */}
+              <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2 transform transition-transform duration-300 group-hover:translate-y-[-4px]">
+                  {category.name}
+                </h3>
+                <p className="text-sm md:text-base text-white/90 mb-4 transform transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2">
+                  {category.desc}
+                </p>
+                <div className="flex items-center gap-2 text-sm font-semibold transform transition-all duration-300 opacity-0 group-hover:opacity-100">
+                  <span>Khám phá ngay</span>
+                  <span className="transform transition-transform duration-300 group-hover:translate-x-2">
+                    →
+                  </span>
+                </div>
               </div>
-              <h3
-                className={`font-semibold text-sm md:text-base mb-1 transition-colors duration-300 ${
-                  category.productType === "hot"
-                    ? themeMode === "dark"
-                      ? "text-orange-400"
-                      : "text-orange-600"
-                    : category.productType === "sale"
-                    ? themeMode === "dark"
-                      ? "text-green-400"
-                      : "text-green-600"
-                    : themeMode === "dark"
-                    ? "text-white"
-                    : "text-gray-900"
-                }`}
-              >
-                {category.name}
-              </h3>
-              <p
-                className={`text-xs line-clamp-2 transition-colors duration-300 ${
-                  category.productType === "hot"
-                    ? themeMode === "dark"
-                      ? "text-orange-300"
-                      : "text-orange-500"
-                    : category.productType === "sale"
-                    ? themeMode === "dark"
-                      ? "text-green-300"
-                      : "text-green-500"
-                    : themeMode === "dark"
-                    ? "text-gray-400"
-                    : "text-gray-700"
-                }`}
-              >
-                {category.desc}
-              </p>
             </div>
           </motion.div>
         ))}

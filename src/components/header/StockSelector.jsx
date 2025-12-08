@@ -11,12 +11,12 @@ export default function StockSelector() {
   const { stocks, selectedStock } = useSelector((state) => state.stock);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Load stocks on component mount
-  useEffect(() => {
-    if (!stocks || stocks.length === 0) {
-      dispatch(getStocks());
-    }
-  }, [dispatch, stocks]);
+  // Stocks are loaded in App.jsx on mount, no need to fetch again
+  // useEffect(() => {
+  //   if (!stocks || stocks.length === 0) {
+  //     dispatch(getStocks());
+  //   }
+  // }, [dispatch, stocks]);
 
   // Set default stock from localStorage or TP.HCM when stocks are loaded
   useEffect(() => {

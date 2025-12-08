@@ -26,15 +26,16 @@ const ProductSalesForm = ({ productSales = null, onCancel, onSuccess }) => {
     endDate: "",
   });
 
-  useEffect(() => {
-    if (!products || products.length === 0) {
-      dispatch(getProducts());
-    }
-    // Load product sales để kiểm tra sản phẩm nào đã có giảm giá
-    if (!existingProductSales || existingProductSales.length === 0) {
-      dispatch(getProductSales());
-    }
-  }, [dispatch, products, existingProductSales]);
+  // Products and productSales are loaded in App.jsx on mount, no need to fetch again
+  // useEffect(() => {
+  //   if (!products || products.length === 0) {
+  //     dispatch(getProducts());
+  //   }
+  //   // Load product sales để kiểm tra sản phẩm nào đã có giảm giá
+  //   if (!existingProductSales || existingProductSales.length === 0) {
+  //     dispatch(getProductSales());
+  //   }
+  // }, [dispatch, products, existingProductSales]);
 
   // Filter sản phẩm có thể tạo giảm giá
   const availableProducts = products.filter((product) => {

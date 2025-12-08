@@ -7,12 +7,21 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 
 export default function SaleProducts({ products = [] }) {
   const themeMode = useSelector(selectThemeMode);
-  // Lọc chỉ sản phẩm đang sale
+
+  // Lọc sản phẩm đang có sale (có productSales)
   const saleProducts = products
-    .filter((product) => product.sale && product.productSales)
+    .filter((product) => product.productSales != null)
     .slice(0, 8);
 
-  if (!Array.isArray(products) || products.length === 0) {
+  console.log("Total products:", products.length);
+  console.log("Sale products:", saleProducts.length);
+  console.log("Sample sale product:", saleProducts[0]);
+
+  if (
+    !Array.isArray(products) ||
+    products.length === 0 ||
+    saleProducts.length === 0
+  ) {
     return null;
   }
 

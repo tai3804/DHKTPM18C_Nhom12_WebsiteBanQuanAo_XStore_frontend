@@ -28,7 +28,7 @@ const ManageDiscountsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedDiscount, setSelectedDiscount] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [timeRange, setTimeRange] = useState("month");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [stats, setStats] = useState({
     totalDiscounts: 0,
@@ -45,12 +45,12 @@ const ManageDiscountsPage = () => {
   //   }
   // }, [dispatch, orders.length]);
 
-  // Tính toán thống kê theo khoảng thời gian
+  // Tính toán thống kê
   useEffect(() => {
     if (discounts.length > 0) {
-      calculateStats(timeRange);
+      calculateStats();
     }
-  }, [discounts, orders, timeRange]);
+  }, [discounts, orders]);
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
@@ -64,49 +64,21 @@ const ManageDiscountsPage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDropdownOpen]);
 
-  const calculateStats = (range) => {
-    const now = new Date();
-    let startDate, endDate;
-
-    switch (range) {
-      case "day":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        endDate = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate() + 1
-        );
-        break;
-      case "month":
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        break;
-      case "year":
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear() + 1, 0, 1);
-        break;
-      default:
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    }
-
+  const calculateStats = () => {
     // Tổng số mã giảm giá
     const totalDiscounts = discounts.length;
 
-    // Tính tổng tiền đã giảm và số lượng áp dụng trong khoảng thời gian
+    // Tính tổng tiền đã giảm và số lượng áp dụng
     let totalDiscountAmount = 0;
     let totalApplications = 0;
     let activeDiscounts = 0;
 
     orders.forEach((order) => {
-      const orderDate = new Date(order.createdAt || order.orderDate);
-      if (orderDate >= startDate && orderDate < endDate) {
-        if (order.discountCode || order.discountId) {
-          totalApplications += 1;
-          // Giả sử discountAmount được lưu trong order
-          if (order.discountAmount) {
-            totalDiscountAmount += order.discountAmount;
-          }
+      if (order.discountCode || order.discountId) {
+        totalApplications += 1;
+        // Giả sử discountAmount được lưu trong order
+        if (order.discountAmount) {
+          totalDiscountAmount += order.discountAmount;
         }
       }
     });
@@ -162,14 +134,29 @@ const ManageDiscountsPage = () => {
     dispatch(getDiscounts());
   };
 
+  const getDiscountStatus = (discount) => {
+    const now = new Date();
+    const start = discount.startDate ? new Date(discount.startDate) : null;
+    const end = discount.endDate ? new Date(discount.endDate) : null;
+
+    if (!discount.isActive) return "expired";
+    if (start && now < start) return "upcoming";
+    if (end && now > end) return "expired";
+    return "active";
+  };
+
   const filtered = discounts.filter((d) => {
     const q = (searchQuery || "").trim().toLowerCase();
-    return (
+    const matchSearch =
       d.code?.toLowerCase().includes(q) ||
       d.name?.toLowerCase().includes(q) ||
       d.title?.toLowerCase().includes(q) ||
-      d.description?.toLowerCase().includes(q)
-    );
+      d.description?.toLowerCase().includes(q);
+
+    if (!matchSearch) return false;
+
+    if (statusFilter === "all") return true;
+    return getDiscountStatus(d) === statusFilter;
   });
 
   const headerTextClass = `text-2xl font-bold transition-colors duration-300 ${
@@ -196,10 +183,11 @@ const ManageDiscountsPage = () => {
       ? "bg-blue-600 hover:bg-blue-700 text-white"
       : "bg-blue-500 hover:bg-blue-600 text-white"
   }`;
-  const timeRangeOptions = [
-    { value: "day", label: "Theo ngày" },
-    { value: "month", label: "Theo tháng" },
-    { value: "year", label: "Theo năm" },
+  const statusOptions = [
+    { value: "all", label: "Tất cả" },
+    { value: "active", label: "Đang hoạt động" },
+    { value: "upcoming", label: "Sắp diễn ra" },
+    { value: "expired", label: "Đã kết thúc" },
   ];
 
   return (
@@ -236,7 +224,7 @@ const ManageDiscountsPage = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Dropdown chọn khoảng thời gian */}
+          {/* Dropdown lọc theo trạng thái */}
           <div className="relative dropdown-container">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -246,9 +234,9 @@ const ManageDiscountsPage = () => {
                   : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
               }`}
             >
-              <Calendar size={18} />
+              <Tag size={18} />
               {
-                timeRangeOptions.find((option) => option.value === timeRange)
+                statusOptions.find((option) => option.value === statusFilter)
                   ?.label
               }
               <ChevronDown size={16} />
@@ -262,11 +250,11 @@ const ManageDiscountsPage = () => {
                     : "bg-white border-gray-200"
                 }`}
               >
-                {timeRangeOptions.map((option) => (
+                {statusOptions.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => {
-                      setTimeRange(option.value);
+                      setStatusFilter(option.value);
                       setIsDropdownOpen(false);
                     }}
                     className={`w-full text-left px-4 py-2 text-sm transition-colors duration-300 ${
@@ -274,7 +262,7 @@ const ManageDiscountsPage = () => {
                         ? "text-gray-100 hover:bg-gray-700"
                         : "text-gray-700 hover:bg-gray-50"
                     } ${
-                      timeRange === option.value
+                      statusFilter === option.value
                         ? themeMode === "dark"
                           ? "bg-gray-700"
                           : "bg-gray-100"
@@ -381,24 +369,50 @@ const ManageDiscountsPage = () => {
                       : d.discountAmount.toLocaleString()}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        d.isActive
-                          ? themeMode === "dark"
-                            ? "bg-green-900 text-green-300"
-                            : "bg-green-100 text-green-800"
-                          : themeMode === "dark"
-                          ? "bg-red-900 text-red-300"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full mr-2 ${
-                          d.isActive ? "bg-green-500" : "bg-red-500"
-                        }`}
-                      ></span>
-                      {d.isActive ? "Hoạt động" : "Vô hiệu"}
-                    </span>
+                    {(() => {
+                      const status = getDiscountStatus(d);
+                      const statusConfig = {
+                        active: {
+                          label: "Đang hoạt động",
+                          bgDark: "bg-green-900",
+                          textDark: "text-green-300",
+                          bgLight: "bg-green-100",
+                          textLight: "text-green-800",
+                          dot: "bg-green-500",
+                        },
+                        upcoming: {
+                          label: "Sắp diễn ra",
+                          bgDark: "bg-yellow-900",
+                          textDark: "text-yellow-300",
+                          bgLight: "bg-yellow-100",
+                          textLight: "text-yellow-800",
+                          dot: "bg-yellow-500",
+                        },
+                        expired: {
+                          label: "Đã kết thúc",
+                          bgDark: "bg-red-900",
+                          textDark: "text-red-300",
+                          bgLight: "bg-red-100",
+                          textLight: "text-red-800",
+                          dot: "bg-red-500",
+                        },
+                      };
+                      const config = statusConfig[status];
+                      return (
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            themeMode === "dark"
+                              ? `${config.bgDark} ${config.textDark}`
+                              : `${config.bgLight} ${config.textLight}`
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full mr-2 ${config.dot}`}
+                          ></span>
+                          {config.label}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     {d.startDate ? d.startDate.slice(0, 10) : "—"} —{" "}

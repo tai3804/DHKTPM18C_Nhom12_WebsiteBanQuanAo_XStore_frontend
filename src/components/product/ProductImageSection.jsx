@@ -99,6 +99,27 @@ export default function ProductImageSection({
             Các màu:
           </h4>
           <div className="flex gap-3 flex-wrap pb-2">
+            {/* Ảnh sản phẩm chính */}
+            <div
+              className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 cursor-pointer hover:border-blue-500 transition-colors ${
+                !selectedColor || selectedColor === ""
+                  ? "border-blue-500 ring-2 ring-blue-200"
+                  : "border-gray-200"
+              }`}
+              title="Ảnh sản phẩm"
+              onClick={() => onColorSelect && onColorSelect("")}
+            >
+              <img
+                src={getImageUrl(product.image)}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src =
+                    "https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=No+Img";
+                }}
+              />
+            </div>
+
             {uniqueColorImages.map((info, index) => (
               <div
                 key={`${info.colorName}-${index}`}

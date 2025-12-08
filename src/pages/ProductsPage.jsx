@@ -16,6 +16,7 @@ export default function ProductsPage() {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get("category");
+  const type = searchParams.get("type");
   const searchQuery = searchParams.get("search");
   const themeMode = useSelector(selectThemeMode);
 
@@ -26,7 +27,7 @@ export default function ProductsPage() {
   const { selectedStock } = useSelector((state) => state.stock);
 
   const [filters, setFilters] = useState({
-    type: category || "",
+    type: category || type || "",
     minPrice: "",
     maxPrice: "",
     sortBy: "",
@@ -61,12 +62,12 @@ export default function ProductsPage() {
     };
   }, [lastScrollY]);
 
-  // Update filters when URL category changes
+  // Update filters when URL category/type changes
   useEffect(() => {
-    if (category) {
-      setFilters((prev) => ({ ...prev, type: category }));
+    if (category || type) {
+      setFilters((prev) => ({ ...prev, type: category || type }));
     }
-  }, [category]);
+  }, [category, type]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -94,10 +95,19 @@ export default function ProductsPage() {
 
     // Filter by type/category
     if (filters.type) {
+      // Map short names to full category names
+      const categoryMap = {
+        nam: ["Áo Nam", "Quần Nam"],
+        nu: ["Áo Nữ", "Quần Nữ"],
+        "phu-kien": ["Giày Dép", "Phụ Kiện"],
+      };
+
+      const matchCategories = categoryMap[filters.type] || [filters.type];
+
       result = result.filter(
         (product) =>
-          product.type?.name === filters.type ||
-          product.productType?.name === filters.type
+          matchCategories.includes(product.type?.name) ||
+          matchCategories.includes(product.productType?.name)
       );
     }
 

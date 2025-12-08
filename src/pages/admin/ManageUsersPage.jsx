@@ -8,6 +8,8 @@ import {
   UserPlus,
   Calendar,
   ChevronDown,
+  Award,
+  Shield,
 } from "lucide-react";
 import {
   getUsers,
@@ -28,8 +30,10 @@ export default function ManageUsersPage() {
   const { user } = useSelector((state) => state.auth);
   const themeMode = useSelector(selectThemeMode);
 
-  const [timeRange, setTimeRange] = useState("month");
+  const [userTypeFilter, setUserTypeFilter] = useState("all");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState("month");
+  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
   const [stats, setStats] = useState({
     totalCustomers: 0,
     newCustomers: 0,
@@ -164,25 +168,31 @@ export default function ManageUsersPage() {
     }));
   };
 
-  // 🔍 Filter users dựa trên searchQuery
+  // 🔍 Filter users dựa trên searchQuery và userTypeFilter
   const filteredUsers = users?.filter((u) => {
     const query = searchQuery.toLowerCase();
-    return (
+    const matchSearch =
       u.account?.username?.toLowerCase().includes(query) ||
       u.email?.toLowerCase().includes(query) ||
       u.firstName?.toLowerCase().includes(query) ||
       u.lastName?.toLowerCase().includes(query) ||
-      u.phone?.toLowerCase().includes(query)
-    );
+      u.phone?.toLowerCase().includes(query);
+
+    if (!matchSearch) return false;
+
+    if (userTypeFilter === "all") return true;
+    return u.userType === userTypeFilter.toUpperCase();
   });
 
-  const timeRangeOptions = [
-    { value: "day", label: "Theo ngày" },
-    { value: "month", label: "Theo tháng" },
-    { value: "year", label: "Theo năm" },
+  const userTypeOptions = [
+    { value: "all", label: "Tất cả" },
+    { value: "copper", label: "Đồng" },
+    { value: "silver", label: "Bạc" },
+    { value: "gold", label: "Vàng" },
+    { value: "platinum", label: "Bạch kim" },
   ];
 
-  // Tính toán thống kê theo khoảng thời gian
+  // Tính toán thống kê
   const calculateStats = (range) => {
     const now = new Date();
     let startDate, endDate;
@@ -214,10 +224,7 @@ export default function ManageUsersPage() {
 
     // Tính khách hàng mới trong khoảng thời gian
     const newCustomers = users.filter((user) => {
-      // Sử dụng createdAt nếu có, nếu không có thì user đó được tạo trước khi có createdAt
-      if (!user.createdAt) {
-        return false; // Bỏ qua user không có createdAt (user cũ)
-      }
+      if (!user.createdAt) return false;
       const userCreated = new Date(user.createdAt);
       return userCreated >= startDate && userCreated < endDate;
     }).length;
@@ -240,11 +247,17 @@ export default function ManageUsersPage() {
       if (isDropdownOpen && !event.target.closest(".dropdown-container")) {
         setIsDropdownOpen(false);
       }
+      if (
+        isTimeDropdownOpen &&
+        !event.target.closest(".time-dropdown-container")
+      ) {
+        setIsTimeDropdownOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, isTimeDropdownOpen]);
 
   return (
     <div className="space-y-6 relative">
@@ -305,8 +318,64 @@ export default function ManageUsersPage() {
           </div>
         </div>
 
-        {/* Dropdown chọn khoảng thời gian */}
+        {/* Dropdowns */}
         <div className="flex items-center gap-4">
+          {/* Dropdown thời gian */}
+          <div className="relative time-dropdown-container">
+            <button
+              onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-300 ${
+                themeMode === "dark"
+                  ? "bg-gray-800 border-gray-700 text-gray-100 hover:bg-gray-700"
+                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Calendar size={18} />
+              {timeRange === "day" && "Theo ngày"}
+              {timeRange === "month" && "Theo tháng"}
+              {timeRange === "year" && "Theo năm"}
+              <ChevronDown size={16} />
+            </button>
+
+            {isTimeDropdownOpen && (
+              <div
+                className={`absolute right-0 mt-2 w-48 rounded-lg border shadow-lg z-10 transition-colors duration-300 ${
+                  themeMode === "dark"
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-white border-gray-200"
+                }`}
+              >
+                {[
+                  { value: "day", label: "Theo ngày" },
+                  { value: "month", label: "Theo tháng" },
+                  { value: "year", label: "Theo năm" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTimeRange(option.value);
+                      setIsTimeDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors duration-300 ${
+                      themeMode === "dark"
+                        ? "text-gray-100 hover:bg-gray-700"
+                        : "text-gray-700 hover:bg-gray-50"
+                    } ${
+                      timeRange === option.value
+                        ? themeMode === "dark"
+                          ? "bg-gray-700"
+                          : "bg-gray-100"
+                        : ""
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Dropdown lọc theo loại người dùng */}
           <div className="relative dropdown-container">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -316,10 +385,11 @@ export default function ManageUsersPage() {
                   : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
               }`}
             >
-              <Calendar size={18} />
+              <Award size={18} />
               {
-                timeRangeOptions.find((option) => option.value === timeRange)
-                  ?.label
+                userTypeOptions.find(
+                  (option) => option.value === userTypeFilter
+                )?.label
               }
               <ChevronDown size={16} />
             </button>
@@ -332,11 +402,11 @@ export default function ManageUsersPage() {
                     : "bg-white border-gray-200"
                 }`}
               >
-                {timeRangeOptions.map((option) => (
+                {userTypeOptions.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => {
-                      setTimeRange(option.value);
+                      setUserTypeFilter(option.value);
                       setIsDropdownOpen(false);
                     }}
                     className={`w-full text-left px-4 py-2 text-sm transition-colors duration-300 ${
@@ -344,7 +414,7 @@ export default function ManageUsersPage() {
                         ? "text-gray-100 hover:bg-gray-700"
                         : "text-gray-700 hover:bg-gray-50"
                     } ${
-                      timeRange === option.value
+                      userTypeFilter === option.value
                         ? themeMode === "dark"
                           ? "bg-gray-700"
                           : "bg-gray-100"
@@ -379,9 +449,13 @@ export default function ManageUsersPage() {
           icon={<Users size={20} />}
         />
         <StatCard
-          label={`Khách hàng mới ${timeRangeOptions
-            .find((option) => option.value === timeRange)
-            ?.label.toLowerCase()}`}
+          label={`Khách hàng mới ${
+            timeRange === "day"
+              ? "hôm nay"
+              : timeRange === "month"
+              ? "tháng này"
+              : "năm nay"
+          }`}
           value={stats.newCustomers}
           color="bg-green-500"
           icon={<UserPlus size={20} />}
@@ -452,7 +526,7 @@ export default function ManageUsersPage() {
                   themeMode === "dark" ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Loại người dùng
+                Bậc khách hàng
               </th>
               <th
                 className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${
@@ -534,20 +608,38 @@ export default function ManageUsersPage() {
                   >
                     {u.point || 0}
                   </td>
-                  <td
-                    className={`px-4 py-3 transition-colors duration-300 ${
-                      themeMode === "dark" ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {u.userType === "COPPER"
-                      ? "Đồng"
-                      : u.userType === "SILVER"
-                      ? "Bạc"
-                      : u.userType === "GOLD"
-                      ? "Vàng"
-                      : u.userType === "PLATINUM"
-                      ? "Bạch kim"
-                      : u.userType || "N/A"}
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const tierConfig = {
+                        COPPER: {
+                          label: "Đồng",
+                          gradient: "from-orange-600 to-amber-600",
+                        },
+                        SILVER: {
+                          label: "Bạc",
+                          gradient: "from-gray-400 to-gray-500",
+                        },
+                        GOLD: {
+                          label: "Vàng",
+                          gradient: "from-yellow-500 to-amber-500",
+                        },
+                        PLATINUM: {
+                          label: "Bạch kim",
+                          gradient: "from-cyan-400 to-purple-400",
+                        },
+                      };
+                      const config = tierConfig[u.userType] || {
+                        label: "N/A",
+                        gradient: "from-gray-500 to-gray-600",
+                      };
+                      return (
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-gradient-to-r ${config.gradient}`}
+                        >
+                          {config.label}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -626,6 +718,7 @@ export default function ManageUsersPage() {
 
 function StatCard({ label, value, color, icon }) {
   const themeMode = useSelector(selectThemeMode);
+
   return (
     <div
       className={`w-80 p-4 rounded-xl shadow-sm border transition-colors duration-300 flex flex-col items-start ${

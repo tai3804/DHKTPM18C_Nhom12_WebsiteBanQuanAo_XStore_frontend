@@ -1,5 +1,13 @@
 // API Configuration - Lấy từ biến môi trường .env
-export const API_BASE_URL = import.meta.env.VITE_API_URL;
+const envApiUrl = import.meta.env.VITE_API_URL;
+
+// Fallback to localhost if env variable is not set
+export const API_BASE_URL = envApiUrl;
+
+// Debug log
+console.log("🔍 Environment VITE_API_URL:", envApiUrl);
+console.log("🔍 Using API_BASE_URL:", API_BASE_URL);
+
 // export const API_BASE_URL = "https://x-store-6in2.onrender.com";
 
 // Helper function to build full API URL

@@ -352,43 +352,66 @@ export default function ManageProductsPage() {
 
                     {/* Biến thể */}
                     <td className="px-4 py-3">
-                      {allProductVariants[p.id] ? (
-                        <div className="text-sm">
-                          <div
-                            className={`font-medium ${
-                              themeMode === "dark"
-                                ? "text-gray-200"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {allProductVariants[p.id].colors?.length || 0} màu ×{" "}
-                            {allProductVariants[p.id].sizes?.length || 0} size
-                          </div>
-                          <div
-                            className={`text-xs ${
+                      {(() => {
+                        // Lấy product_infos từ product object
+                        const productInfos =
+                          p.product_infos || p.productInfos || [];
+
+                        if (productInfos.length > 0) {
+                          // Tính toán số màu và size unique
+                          const uniqueColors = new Set();
+                          const uniqueSizes = new Set();
+
+                          productInfos.forEach((info) => {
+                            if (info.colorName || info.color_name) {
+                              uniqueColors.add(
+                                info.colorName || info.color_name
+                              );
+                            }
+                            if (info.sizeName || info.size_name) {
+                              uniqueSizes.add(info.sizeName || info.size_name);
+                            }
+                          });
+
+                          const colorCount = uniqueColors.size;
+                          const sizeCount = uniqueSizes.size;
+
+                          return (
+                            <div className="text-sm">
+                              <div
+                                className={`font-medium ${
+                                  themeMode === "dark"
+                                    ? "text-gray-200"
+                                    : "text-gray-700"
+                                }`}
+                              >
+                                {colorCount} màu × {sizeCount} size
+                              </div>
+                              <div
+                                className={`text-xs ${
+                                  themeMode === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                Tổng: {colorCount * sizeCount} biến thể
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <span
+                            className={`text-sm ${
                               themeMode === "dark"
                                 ? "text-gray-400"
                                 : "text-gray-500"
                             }`}
                           >
-                            Tổng:{" "}
-                            {(allProductVariants[p.id].colors?.length || 0) *
-                              (allProductVariants[p.id].sizes?.length ||
-                                0)}{" "}
-                            biến thể
-                          </div>
-                        </div>
-                      ) : (
-                        <span
-                          className={`text-sm ${
-                            themeMode === "dark"
-                              ? "text-gray-400"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          N/A
-                        </span>
-                      )}
+                            Chưa có biến thể
+                          </span>
+                        );
+                      })()}
                     </td>
 
                     {/* Giá nhập */}
