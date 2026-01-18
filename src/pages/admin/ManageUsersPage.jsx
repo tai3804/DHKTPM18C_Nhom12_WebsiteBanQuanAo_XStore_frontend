@@ -21,7 +21,6 @@ import { selectThemeMode } from "../../slices/ThemeSlice";
 import { Link } from "react-router-dom";
 import AddUserForm from "../../components/admin/AddUserForm";
 import EditUserForm from "../../components/admin/EditUserForm";
-import FormInput from "../../components/admin/FormInput";
 import SearchBar from "../../components/admin/SearchBar";
 
 export default function ManageUsersPage() {
@@ -55,9 +54,7 @@ export default function ManageUsersPage() {
     userType: "COPPER",
   });
   const [editFormData, setEditFormData] = useState({
-    account: {
-      role: "CUSTOMER",
-    },
+    role: "CUSTOMER",
     point: 0,
     userType: "COPPER",
   });
@@ -110,9 +107,7 @@ export default function ManageUsersPage() {
   const handleEditUser = (user) => {
     setEditingUser(user);
     setEditFormData({
-      account: {
-        role: user.account?.role || "CUSTOMER",
-      },
+      role: user.account?.role || user.role || "CUSTOMER",
       point: user.point || 0,
       userType: user.userType || "COPPER",
     });
@@ -153,18 +148,6 @@ export default function ManageUsersPage() {
     setEditFormData((prev) => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  // ✅ Update các field trong account cho edit form
-  const handleEditAccountChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({
-      ...prev,
-      account: {
-        ...prev.account,
-        [name]: value,
-      },
     }));
   };
 
@@ -707,7 +690,6 @@ export default function ManageUsersPage() {
           user={editingUser}
           formData={editFormData}
           handleChange={handleEditChange}
-          handleAccountChange={handleEditAccountChange}
           handleUpdateUser={handleUpdateUser}
           setShowForm={setShowEditForm}
         />

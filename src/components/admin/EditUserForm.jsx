@@ -11,7 +11,6 @@ export default function EditUserForm({
   user,
   formData,
   handleChange,
-  handleAccountChange,
   handleUpdateUser,
   setShowForm,
 }) {
@@ -27,7 +26,7 @@ export default function EditUserForm({
   const handleSubmit = (e) => {
     e.preventDefault();
     // Validate required fields
-    if (!formData.account.role.trim()) {
+    if (!formData.role.trim()) {
       toast.error("Vui lòng chọn vai trò!");
       return;
     }
@@ -176,8 +175,8 @@ export default function EditUserForm({
                   <FormSelect
                     label="Vai trò"
                     name="role"
-                    value={formData.account.role}
-                    onChange={handleAccountChange}
+                    value={formData.role}
+                    onChange={handleChange}
                     required
                     className="cursor-pointer"
                     options={[

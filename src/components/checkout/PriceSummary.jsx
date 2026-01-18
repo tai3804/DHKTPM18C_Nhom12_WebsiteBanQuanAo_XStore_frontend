@@ -143,7 +143,6 @@ const PriceSummary = ({
           themeMode === "dark" ? "text-gray-200" : "text-gray-800"
         }`}
       >
-        <span className="text-2xl">🧮</span>
         Tổng kết đơn hàng
       </h3>
 
@@ -159,7 +158,6 @@ const PriceSummary = ({
               themeMode === "dark" ? "text-gray-300" : "text-gray-600"
             }`}
           >
-            <span className="text-lg mr-2">📦</span>
             Sản phẩm ({itemCount} món)
           </span>
           <span
@@ -243,7 +241,6 @@ const PriceSummary = ({
               themeMode === "dark" ? "text-gray-300" : "text-gray-700"
             }`}
           >
-            <span className="text-lg mr-2">🚚</span>
             Phí vận chuyển{" "}
             {shippingDiscountAmount > 0 &&
               `(đã giảm ${formatCurrency(shippingDiscountAmount)}đ)`}
@@ -271,7 +268,7 @@ const PriceSummary = ({
               themeMode === "dark" ? "text-gray-200" : "text-gray-800"
             }`}
           >
-            💰 Tổng cộng
+            Tổng cộng
           </span>
           <span
             className={`text-xl font-bold ${

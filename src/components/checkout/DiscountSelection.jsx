@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getDiscounts } from "../../slices/DiscountSlice";
 import { selectThemeMode } from "../../slices/ThemeSlice";
-import { Tag, X, Truck, DollarSign } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function DiscountSelection({
@@ -242,11 +241,10 @@ export default function DiscountSelection({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3
-          className={`text-lg font-bold flex items-center gap-2 ${
+          className={`text-lg font-bold ${
             themeMode === "dark" ? "text-gray-200" : "text-gray-800"
           }`}
         >
-          <Tag size={20} />
           Mã giảm giá
         </h3>
         {user && (
@@ -263,12 +261,6 @@ export default function DiscountSelection({
       {/* 1. Mã giảm giá sản phẩm - Chọn nhiều */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <DollarSign
-            size={18}
-            className={
-              themeMode === "dark" ? "text-green-400" : "text-green-600"
-            }
-          />
           <h4
             className={`font-semibold ${
               themeMode === "dark" ? "text-gray-200" : "text-gray-800"
@@ -304,9 +296,9 @@ export default function DiscountSelection({
                     e.stopPropagation();
                     handleTogglePriceDiscount(discount);
                   }}
-                  className="hover:opacity-70"
+                  className="text-xs underline"
                 >
-                  <X size={14} />
+                  Bỏ
                 </button>
               </div>
             ))}
@@ -328,7 +320,6 @@ export default function DiscountSelection({
                 themeMode === "dark" ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              <Tag size={36} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">Không có mã giảm giá sản phẩm</p>
             </div>
           )}
@@ -338,12 +329,6 @@ export default function DiscountSelection({
       {/* 2. Mã giảm phí vận chuyển - Chọn 1 */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Truck
-            size={18}
-            className={
-              themeMode === "dark" ? "text-orange-400" : "text-orange-600"
-            }
-          />
           <h4
             className={`font-semibold ${
               themeMode === "dark" ? "text-gray-200" : "text-gray-800"
@@ -371,7 +356,6 @@ export default function DiscountSelection({
                   : "bg-orange-50 text-orange-700 border border-orange-200"
               }`}
             >
-              <Truck size={14} />
               <span className="font-medium">
                 {selectedShippingDiscount.name}
               </span>
@@ -380,9 +364,9 @@ export default function DiscountSelection({
                   e.stopPropagation();
                   handleSelectShippingDiscount(selectedShippingDiscount);
                 }}
-                className="hover:opacity-70"
+                className="text-xs underline"
               >
-                <X size={14} />
+                Bỏ
               </button>
             </div>
           </div>
@@ -403,7 +387,6 @@ export default function DiscountSelection({
                 themeMode === "dark" ? "text-gray-400" : "text-gray-500"
               }`}
             >
-              <Truck size={36} className="mx-auto mb-2 opacity-50" />
               <p className="text-sm">Không có mã giảm phí vận chuyển</p>
             </div>
           )}

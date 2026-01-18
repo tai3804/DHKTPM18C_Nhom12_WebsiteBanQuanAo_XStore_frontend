@@ -30,7 +30,6 @@ const OrderNotes = ({ notes, onNotesChange }) => {
           themeMode === "dark" ? "text-gray-200" : "text-gray-800"
         }`}
       >
-        <span className="text-2xl">📝</span>
         Ghi chú đơn hàng
       </h3>
 

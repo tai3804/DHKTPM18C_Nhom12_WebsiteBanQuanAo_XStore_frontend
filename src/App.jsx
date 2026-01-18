@@ -57,6 +57,7 @@ import ManageRequestsPage from "./pages/admin/ManageRequestsPage";
 
 import TestVNPayPage from "./pages/TestVNPayPage";
 import PaymentReturnPage from "./pages/PaymentReturnPage";
+import { getProductTypes } from "./slices/ProductTypeSlice";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -80,14 +81,10 @@ export default function App() {
 
   useEffect(() => {
     const getDefaultItems = async () => {
-      console.log("App.jsx - Dispatching getProducts()");
       const result = await dispatch(getProducts());
-      console.log("App.jsx - getProducts result:", result);
 
-      console.log("App.jsx - Dispatching getStocks()");
       await dispatch(getStocks());
-
-      console.log("App.jsx - Dispatching getProductSales()");
+      await dispatch(getProductTypes());
       await dispatch(getProductSales());
 
       // Chỉ load cart và favourites nếu có user đã login

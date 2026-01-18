@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Tag } from "lucide-react";
 import ProductCard from "../product/ProductCard";
 import { selectThemeMode } from "../../slices/ThemeSlice";
 
@@ -36,23 +35,13 @@ export default function SaleProducts({ products = [] }) {
           themeMode === "dark" ? "bg-gray-800/60" : "bg-green-50/60"
         }`}
       >
-        <div className="text-center mb-12 bg-linear-to-r from-green-500 via-emerald-500 to-teal-500 py-8 rounded-2xl shadow-lg">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Tag className="h-8 w-8 text-white" />
-            <h2 className="text-3xl font-bold text-white">Sản Phẩm Sale 🏷️</h2>
-            <Tag className="h-8 w-8 text-white" />
-          </div>
-          <p className="text-white/90 max-w-2xl mx-auto mb-6">
-            Ưu đãi đặc biệt - Giảm giá khủng cho bạn
-          </p>
-          <Link
-            to="/sale"
-            className="inline-flex items-center gap-2 text-white hover:text-white/90 font-semibold hover:underline"
-          >
-            Xem tất cả sản phẩm Sale
-            <span>→</span>
-          </Link>
-        </div>
+        <Link
+          to="/sale"
+          className="w-full flex flex-col justify-center items-center gap-1 py-8 hover:underline"
+        >
+          <h2 className="text-2xl text-green-600 font-semibold">Sản phẩm Sale</h2>
+          <span className="text-base font-normal">Ưu đãi đặc biệt - Giảm giá khủng cho bạn</span>
+        </Link>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {saleProducts.map((product) => (

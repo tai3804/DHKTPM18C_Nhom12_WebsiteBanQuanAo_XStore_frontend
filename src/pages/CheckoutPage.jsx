@@ -413,7 +413,6 @@ export default function CheckoutPage() {
         </div>
 
         <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
-          <span className="text-4xl">💳</span>
           Thanh toán đơn hàng
         </h1>
 
@@ -487,7 +486,6 @@ export default function CheckoutPage() {
                   </>
                 ) : (
                   <>
-                    <span className="text-2xl">✅</span>
                     Hoàn tất đặt hàng (
                     {(finalTotal || 0).toLocaleString("vi-VN")}đ)
                   </>
